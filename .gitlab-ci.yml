@@ -50,7 +50,7 @@ sonar:
     entrypoint: [ "" ]
   script:
     - sonar-scanner -h
-    - sonar-scanner -D sonar.projectKey=career-coach-page-segmentation
+    - sonar-scanner -D sonar.projectKey=futureofwork_orbis_2_webservice_AX8sGwtTzgg17GV5qrGE
                     -D sonar.language=py
                     -D sonar.sources=. -D sonar.host.url=$SONAR_HOST 
                     -D sonar.login=$SONAR_KEY 
