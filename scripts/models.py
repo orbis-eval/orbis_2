@@ -5,7 +5,7 @@ from typing import (Optional,
 from pydantic import (BaseModel, 
                       Field)
 
-class Annotation(BaseModel):
+class AnnotationModel(BaseModel):
     key: str = Field(..., description='Key which uniquely assigns the element to the corresponding entry '
                                       'in the x28 ontology.')
     entity_type: str = Field(..., description='Annotation type.',
@@ -19,10 +19,10 @@ class Annotation(BaseModel):
 
 
 
-class Document(BaseModel):
+class DocumentModel(BaseModel):
     da_id: str = Field(..., description='Unique key for identifying document and annotartor within an iteration')
     annotator: str = Field(..., description='Service odr Person used for annotations')
-    data: Optional[List[Annotation]] 
+    data: Optional[List[AnnotationModel]] 
 
 
     class Config:
@@ -44,8 +44,8 @@ class Document(BaseModel):
 
                 }
 
-class Response(BaseModel):
-    status: str = Field(..., description='Status of response', enum=['Success', 'Failed'])
+class ResponseModel(BaseModel):
+    status_code: int = Field(..., description='Status of response', enum=[200, 201, 400, 401])
     message: str = Field(..., description='Error Message if request could not be processed')
     content: Dict[str, Dict]
 
@@ -53,7 +53,7 @@ class Response(BaseModel):
         schema_extra = {
                 "example":
                 {
-                    "status": "Success",
+                    "status_code": 200,
                     "message": "",
                     "content": {"da_id": "some_da_id"}
                     }
