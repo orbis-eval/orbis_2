@@ -1,0 +1,62 @@
+variables:
+  coverage_path: "./coverage.xml"
+  APPLICATION_NAME: orbis_2
+
+  DOCKER_IMAGE: registry.gitlab.semanticlab.net/careercoach/$CI_PROJECT_NAME
+  KUBE_NAMESPACE_FHGR: default
+  HELM_CHART_NAME_FHGR: chart
+  URL_FHGR: prod.semanticlab.net
+  VERSION: "1.0"
+
+stages:
+    - Pre Static Analysis
+    - Test
+    - Post Static Analysis
+    - Docker Build
+    - Kubernetes Deployment
+
+openapi:
+  image: "python:3.8"
+  stage: Pre Static Analysis
+  script:
+    - pip install -r requirements.txt
+  tags:
+    - docker
+
+pep8:
+  image: "python:3.8"
+  stage: Pre Static Analysis
+  script:
+    - echo "Pre Static Analysis"
+  tags:
+    - docker
+  when: manual
+
+pytest:
+  image: "python:3.8"
+  stage: Test
+  script:
+    - echo "Test"
+  tags:
+    - docker
+
+sonar:
+  stage: Post Static Analysis
+  dependencies:
+    - pytest
+  allow_failure: true
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [ "" ]
+  script:
+    - sonar-scanner -h
+    - sonar-scanner -D sonar.projectKey=career-coach-page-segmentation
+                    -D sonar.language=py
+                    -D sonar.sources=. -D sonar.host.url=$SONAR_HOST 
+                    -D sonar.login=$SONAR_KEY 
+                    -D sonar.python.coverage.reportPaths=$coverage_path
+                    -D sonar.sources='src/'
+    
+  tags:
+    - docker
+
