@@ -87,6 +87,9 @@ fhgr-deploy-production-release:
   script:
     - echo "Deploy to prodction cluster"
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
+     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
+     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
     - helm upgrade --install $APPLICATION_NAME
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
