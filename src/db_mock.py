@@ -23,6 +23,7 @@ DB_CONTENT = {'test_corpus': [{'document_1': DOCUMENT_1
 
 class DB:
     
+    @staticmethod
     def get_document_for_annotation():
         return DOCUMENT_ANNOTATION['da_id']
 
