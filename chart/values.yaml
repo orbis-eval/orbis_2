@@ -20,7 +20,7 @@ gitlab:
   app: default-app
 
 image:
-  repository: registry.gitlab.semanticlab.net/careercoach
+  repository: registry.gitlab.semanticlab.net/futureofwork
   pullPolicy: IfNotPresent
 
 imagePullSecrets: [name: regcred]
