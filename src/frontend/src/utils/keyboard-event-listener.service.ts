@@ -6,7 +6,6 @@ export class KeyboardEventListenerService {
             return;
         document.addEventListener('keydown', ($event) => {
             observer.next($event);
-            console.log($event);
         });
     });
 }

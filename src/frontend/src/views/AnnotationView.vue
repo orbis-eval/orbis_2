@@ -51,6 +51,7 @@ export default {
     this.annotationTypes = this.annotations
         .map(e => e.type)
         .filter((e, i, a) => a.indexOf(e) === i);
+    // this.annotationTypes = this.annotationTypes.concat(this.annotationTypes);
   }
 }
 </script>
