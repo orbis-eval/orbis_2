@@ -22,10 +22,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
       </div>
     </nav>
   </header>
-  <aside></aside>
-  <main>
-    <RouterView />
-  </main>
+  <RouterView />
 </template>
 
 <style>

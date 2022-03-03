@@ -1,5 +1,4 @@
 <script setup>
-import sampleData from '../assets/sample.json';
 import AnnotationChar from "./AnnotationChar.vue";
 </script>
 <template>
@@ -29,12 +28,27 @@ export default {
   data() {
     return {
       chars: [],
-      annotationText: '',
-      annotations: [],
-      annotationTypes: [],
     };
   },
+  props: {
+    annotationText: {
+      type: String,
+      default: ''
+    },
+    annotations: {
+      type: Array,
+      default: []
+    },
+    annotationTypes: {
+      type: Array,
+      default: []
+    },
+  },
   methods: {
+    /**
+     * ganze Annotation wählen bei klick auf einen Char
+     * @param annotation Annotation
+     */
     click(annotation) {
       // console.log('click', event);
       const selected = !annotation.selected;
@@ -43,9 +57,13 @@ export default {
           .forEach(e => e.selected = false);
       annotation.selected = selected;
     },
+    /**
+     * Keyborad Events abhandeln
+     * @param event Keyboard Event
+     */
     handleKeyboardEvents(event) {
       switch (event.code) {
-        // case 'Space':
+          // case 'Space':
         case 'Enter':
           this.approveAnnotation();
           this.selectNextAnnotation();
@@ -75,6 +93,9 @@ export default {
           break;
       }
     },
+    /**
+     * Annotation als «bestätigt» markieren
+     */
     approveAnnotation() {
       const selected = this.annotations.find(e => e.selected);
       if (!selected) {
@@ -84,6 +105,9 @@ export default {
         selected.status = enAnnotationStatus.approved;
       }
     },
+    /**
+     * Annotation als «gelöscht» markieren
+     */
     deleteAnnotation() {
       const selected = this.annotations.find(e => e.selected);
       if (!selected) {
@@ -91,6 +115,11 @@ export default {
       }
       selected.status = enAnnotationStatus.deleted;
     },
+    /**
+     * Annotation anpassen (erweitern/reduzieren)
+     * @param dir Richtung
+     * @param amount Anzahl (+1 / -1)
+     */
     editAnnotation(dir, amount = 1) {
       const selected = this.annotations.find(e => e.selected);
       if (!selected) {
@@ -119,11 +148,20 @@ export default {
         selected.end += amount;
       }
     },
+    /**
+     * Einem Char-Objekt eine Annotation (oder null) zuweisen (bei ändern/erweitern/reduzieren der Annotation)
+     * @param charIndex Index
+     * @param annotation Annotation
+     */
     setAnnotationOnChar(charIndex, annotation) {
       const char = this.chars.find(e => e.charIndex === charIndex);
       char.annotation = annotation;
       char.type = annotation ? this.annotationTypes.indexOf(annotation.type) : null;
     },
+    /**
+     * nächste Annotation auswählen
+     * @param back zurück zur vorherigen, statt zur nächsten
+     */
     selectNextAnnotation(back = false) {
       let index = 0;
       const activeAnnotations = this.annotations.filter(e => e.status != enAnnotationStatus.replaced);
@@ -141,6 +179,7 @@ export default {
       let newSelected = activeAnnotations[index];
       newSelected.selected = true;
 
+      // View anpassen, damit das selektierte Wort immer im mittleren Drittel ist
       let annotationContainerElement = document.getElementById('annotation_container');
       let newSelectedElement = annotationContainerElement
           .querySelector(`[data-charindex="${newSelected.start}"]`);
@@ -154,27 +193,16 @@ export default {
       }
     }
   },
+  /**
+   * Entry Point
+   * Wird ausgeführt, wenn die Seite geöffnet wird
+   * => Daten laden, mappen, etc.
+   */
   mounted() {
-    //todo: load data from server
-    // fetch('@/assets/sample.json')
-    //     // .then(response => response.json())
-    //     .then(data => {
-    //       console.log(data);
-    //     });
-    // this.annotationText = 'Hallo Welt';
+    // Tastatur Event Listener Abbonieren
     document.addEventListener('keydown', this.handleKeyboardEvents);
-    this.annotationText = sampleData.text;
-    this.annotations = []
-        .concat(sampleData.gold_standard_annotation.certificates)
-        .concat(sampleData.gold_standard_annotation.course_contents)
-        .concat(sampleData.gold_standard_annotation.target_groups)
-        .concat(sampleData.gold_standard_annotation.unknown)
-        .sort((a, b) => a.start > b.start ? 1 : -1);
-    this.annotations.forEach(e => e.status = enAnnotationStatus.pending);
-    this.annotationTypes = this.annotations
-        .map(e => e.type)
-        .filter((e, i, a) => a.indexOf(e) === i);
 
+    // Text in einzelne Zeichen (= Objekte) aufteilen
     this.chars = this.annotationText
         .split('')
         .map((e, i) => {
