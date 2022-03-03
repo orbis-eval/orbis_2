@@ -2,5 +2,13 @@
   "annotation": "Annotation",
   "docu_tab": "tab: go to the next annotation",
   "keyboardlegend-title": "Shortcuts",
-  "keyboardlegend-enter": "Enter: accept"
+  "keyboardlegend-enter": "accept",
+  "keyboardlegend-delete": "decline",
+  "keyboardlegend-backspace": "decline",
+  "keyboardlegend-arrow-left": "previous element",
+  "keyboardlegend-arrow-right": "next element",
+  "keyboardlegend-shift": "shorten at start",
+  "keyboardlegend-unshift": "prepend",
+  "keyboardlegend-pop": "shorten at the end",
+  "keyboardlegend-push": "append"
 }

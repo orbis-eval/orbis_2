@@ -12,11 +12,7 @@
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-backspace fa-stack-1x fa-inverse"></i>
-      </span>
-      <span v-locale="'keyboardlegend-backspace'"></span>
-    </li>
-    <li class="marked type_x">
-      <span class="fa-stack fa-1x">
+      </span>/<span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-delete-left fa-rotate-180 fa-stack-1x fa-inverse"></i>
       </span>
