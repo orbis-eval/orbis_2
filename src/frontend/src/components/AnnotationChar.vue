@@ -2,7 +2,7 @@
   <span
       v-html="getCharacter()"
       :class="[
-          (char.annotation ? `marked type_${char.type}` : ''),
+          (char.annotation ? `marked type_${char.annotation.typeIndex}` : ''),
           (char.annotation && char.annotation.selected ? 'selected' : ''),
           (char.annotation ? char.annotation.status : ''),
       ]"

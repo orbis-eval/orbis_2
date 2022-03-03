@@ -1,11 +1,12 @@
 <script setup>
 import sampleData from '../assets/sample.json';
 import Annotation from '../components/Annotation.vue'
+import AnnotationTypeList from '../components/AnnotationTypeList.vue'
 </script>
 
 <template>
   <aside>
-
+    <AnnotationTypeList :annotation-types="annotationTypes"></AnnotationTypeList>
   </aside>
   <main>
     <Annotation

@@ -29,7 +29,8 @@ export default {
   data() {
     return {
       chars: [],
-      keyboardObserver: KeyboardObserver
+      keyboardObserver: KeyboardObserver,
+      keyList: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p']
     };
   },
   props: {
@@ -76,22 +77,27 @@ export default {
           this.selectNextAnnotation();
           break;
         case 'ArrowRight':
-          if (event.shiftKey) {
-            this.editAnnotation('start', -1);
-          } else if (event.altKey) {
-            this.editAnnotation('end', 1);
-          } else {
-            this.selectNextAnnotation();
-          }
+          this.selectNextAnnotation();
           break;
         case 'ArrowLeft':
-          if (event.shiftKey) {
-            this.editAnnotation('start', 1);
-          } else if (event.altKey) {
-            this.editAnnotation('end', -1);
-          } else {
-            this.selectNextAnnotation(true);
-          }
+          this.selectNextAnnotation(true);
+          break;
+        case 'KeyA':
+          this.editAnnotation('start', 1);
+          break;
+        case 'KeyS':
+          this.editAnnotation('start', -1);
+          break;
+        case 'KeyD':
+          this.editAnnotation('end', -1);
+          break;
+        case 'KeyF':
+          this.editAnnotation('end', 1);
+          break;
+        case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5': case 'Digit6': case 'Digit7': case 'Digit8': case 'Digit9': case 'Digit0':
+        case 'Numpad1': case 'Numpad2': case 'Numpad3': case 'Numpad4': case 'Numpad5': case 'Numpad6': case 'Numpad7': case 'Numpad8': case 'Numpad9': case 'Numpad0':
+        case 'KeyQ': case 'KeyW': case 'KeyE': case 'KeyR': case 'KeyT': case 'KeyZ': case 'KeyU': case 'KeyI': case 'KeyO': case 'KeyP':
+          this.setAnnotationType(event.key);
           break;
       }
     },
@@ -127,14 +133,7 @@ export default {
       if (!selected) {
         return;
       }
-      if (selected.status !== enAnnotationStatus.edited) {
-        const newSelected = Object.assign({}, selected);
-        newSelected.status = enAnnotationStatus.replaced;
-        newSelected.selected = false;
-        selected.status = enAnnotationStatus.edited;
-        selected.selected = true;
-        this.annotations.splice(this.annotations.indexOf(selected), 0, newSelected);
-      }
+      this.replaceAnnotation(selected);
 
       if (dir === 'start') {
         this.setAnnotationOnChar(
@@ -159,6 +158,38 @@ export default {
       const char = this.chars.find(e => e.charIndex === charIndex);
       char.annotation = annotation;
       char.type = annotation ? this.annotationTypes.indexOf(annotation.type) : null;
+    },
+    /**
+     * ersetzt die bestehende selektierte Annotation
+     * @param selected selektierte Annotation
+     */
+    replaceAnnotation(selected) {
+      if (!selected) {
+        return;
+      }
+      if (selected.status !== enAnnotationStatus.edited) {
+        const newSelected = Object.assign({}, selected);
+        newSelected.status = enAnnotationStatus.replaced;
+        newSelected.selected = false;
+        selected.status = enAnnotationStatus.edited;
+        selected.selected = true;
+        this.annotations.splice(this.annotations.indexOf(selected), 0, newSelected);
+      }
+    },
+    /**
+     * setzt einen neuen AnnotationType und springt weiter
+     * @param key Tastaturtaste
+     */
+    setAnnotationType(key) {
+      const selected = this.annotations.find(e => e.selected);
+      if (!selected) {
+        return;
+      }
+      this.replaceAnnotation(selected);
+      selected.status = enAnnotationStatus.edited;
+      selected.typeIndex = this.keyList.indexOf(key);
+      selected.type = this.annotationTypes[selected.typeIndex];
+      this.selectNextAnnotation();
     },
     /**
      * nächste Annotation auswählen
@@ -210,6 +241,9 @@ export default {
         .split('')
         .map((e, i) => {
           const currentAnnotation = this.annotations.find(f => f.start <= i && f.end > i);
+          if (currentAnnotation) {
+            currentAnnotation.typeIndex = this.annotationTypes.indexOf(currentAnnotation.type);
+          }
           return {
             char: e,
             charIndex: i,
@@ -218,8 +252,6 @@ export default {
             type: currentAnnotation ? this.annotationTypes.indexOf(currentAnnotation.type) : null
           };
         });
-  },
-  created() {
   }
 }
 </script>

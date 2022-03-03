@@ -1,4 +1,6 @@
 {
   "annotation": "Annotation",
-  "docu_tab": "tab: go to the next annotation"
+  "docu_tab": "tab: go to the next annotation",
+  "keyboardlegend-title": "Shortcuts",
+  "keyboardlegend-enter": "Enter: accept"
 }
