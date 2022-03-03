@@ -23,11 +23,13 @@ import AnnotationChar from "./AnnotationChar.vue";
 <script>
 
 import {enAnnotationStatus} from "@/models/enAnnotationStatus";
+import {KeyboardObserver} from "@/utils/keyboard-event-listener.service";
 
 export default {
   data() {
     return {
       chars: [],
+      keyboardObserver: KeyboardObserver
     };
   },
   props: {
@@ -200,7 +202,8 @@ export default {
    */
   mounted() {
     // Tastatur Event Listener Abbonieren
-    document.addEventListener('keydown', this.handleKeyboardEvents);
+    //document.addEventListener('keydown', this.handleKeyboardEvents);
+    this.keyboardObserver.subscribe(this.handleKeyboardEvents);
 
     // Text in einzelne Zeichen (= Objekte) aufteilen
     this.chars = this.annotationText
@@ -216,5 +219,7 @@ export default {
           };
         });
   },
+  created() {
+  }
 }
 </script>
