@@ -1,8 +1,8 @@
 variables:
   coverage_path: "./coverage.xml"
-  APPLICATION_NAME: orbis_2
+  APPLICATION_NAME: orbis2
 
-  DOCKER_IMAGE: registry.gitlab.semanticlab.net/careercoach/$CI_PROJECT_NAME
+  DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
   KUBE_NAMESPACE_FHGR: default
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
@@ -22,6 +22,7 @@ openapi:
     - pip install -r requirements.txt
   tags:
     - docker
+  when: manual
 
 pep8:
   image: "python:3.8"
@@ -39,6 +40,7 @@ pytest:
     - echo "Test"
   tags:
     - docker
+  when: manual
 
 sonar:
   stage: Post Static Analysis
@@ -59,4 +61,67 @@ sonar:
     
   tags:
     - docker
+  when: manual
+
+
+docker:
+  stage: Docker Build
+  image:
+    name: docker:latest
+  script:
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME .
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:latest
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:$CI_VERSION
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:latest
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:$CI_VERSION
+  tags:
+  - mavendocker
+  when: manual
+
+fhgr-deploy-production-release:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  script:
+    - echo "Deploy to prodction cluster"
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
+     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
+     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
+    - helm upgrade --install $APPLICATION_NAME
+      --kubeconfig $KUBECONFIG 
+      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
+      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+      --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --namespace $KUBE_NAMESPACE_FHGR
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/
+    - kubectl rollout restart deployment $APPLICATION_NAME-template
+  environment:
+    name: production
+    url:  https://${APPLICATION_NAME}.${URL_FHGR}/rest/status
+    on_stop: fhgr-delete-production-release
+    kubernetes:
+      namespace: $KUBE_NAMESPACE_FHGR
+  tags:
+    - mavendocker
+  when: manual
+
+fhgr-delete-production-release:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo "removing production deployment $APPLICATION_NAME-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME
+  environment:
+    name: production
+    action: stop
+  only:
+    - master
+  tags:
+    - docker
+  when: manual
 
