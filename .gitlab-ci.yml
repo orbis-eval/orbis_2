@@ -103,7 +103,7 @@ fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   script:
-    - echo "Deploy to prodction cluster"
+    - echo "Deploy backend to production cluster"
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
@@ -114,7 +114,7 @@ fhgr-deploy-production-release:
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$BACKEND_DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE_FHGR
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/backend/
     - kubectl rollout restart deployment $APPLICATION_NAME-template
   environment:
     name: production
@@ -134,6 +134,50 @@ fhgr-delete-production-release:
   script:
     - echo "removing production deployment $APPLICATION_NAME-backend-template from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME-backend
+  environment:
+    name: production
+    action: stop
+  only:
+    - master
+  tags:
+    - docker
+  when: manual
+
+fhgr-deploy-production-release-frontend:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  script:
+    - echo "Deploy frontend to production cluster"
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
+     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
+     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
+    - helm upgrade --install $APPLICATION_NAME-frontend
+      --kubeconfig $KUBECONFIG 
+      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
+      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+      --set image.repository=$FRONTEND_DOCKER_IMAGE:$CI_VERSION
+      --namespace $KUBE_NAMESPACE_FHGR
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/frontend/
+    - kubectl rollout restart deployment $APPLICATION_NAME-template
+  environment:
+    name: production
+    url:  https://${APPLICATION_NAME}-frontend.${URL_FHGR}/rest/status
+    on_stop: fhgr-delete-production-release
+    kubernetes:
+      namespace: $KUBE_NAMESPACE_FHGR
+  tags:
+    - mavendocker
+  when: manual
+
+fhgr-delete-production-release-frontend:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo "removing production deployment $APPLICATION_NAME-frontend-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME-frontend
   environment:
     name: production
     action: stop
