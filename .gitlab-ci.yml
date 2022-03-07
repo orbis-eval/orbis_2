@@ -99,7 +99,7 @@ docker-frontend:
   - mavendocker
   when: manual
 
-fhgr-deploy-production-release-backend:
+fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   script:
@@ -118,7 +118,7 @@ fhgr-deploy-production-release-backend:
     - kubectl rollout restart deployment $APPLICATION_NAME-template
   environment:
     name: production
-    url:  https://${APPLICATION_NAME}.${URL_FHGR}/rest/status
+    url:  https://${APPLICATION_NAME}-backend.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
       namespace: $KUBE_NAMESPACE_FHGR
@@ -126,7 +126,7 @@ fhgr-deploy-production-release-backend:
     - mavendocker
   when: manual
 
-fhgr-delete-production-release-backend:
+fhgr-delete-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   variables:
