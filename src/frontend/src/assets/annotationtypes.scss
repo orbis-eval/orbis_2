@@ -1,0 +1,50 @@
+$colors: (30, 60, 90, 120, 150, 180, 210, 240, 270, 15, 45, 75, 105, 135, 165, 195, 225, 255);
+
+$i: 0;
+@each $color in $colors {
+  .marked.type_#{$i} {
+    --hue: #{$color};
+  }
+  $i: $i + 1;
+}
+
+.marked {
+  background-color: hsl(
+    var(--hue, 200),
+    var(--saturation, 50%),
+    calc(var(--lightness-offset, 0%) + var(--lightness, 80%))
+  );
+  color: #181818;
+  cursor: pointer;
+  margin-bottom: 2px;
+
+  &.approved {
+    --lightness-offset: -30%;
+    box-shadow: 1px 1px 0 var(--color-success);
+  }
+
+  &.edited {
+    --lightness-offset: -30%;
+    box-shadow: 1px 1px 0 var(--color-accent);
+  }
+
+  &.deleted {
+    --saturation: 0%;
+    --lightness: 80%;
+    box-shadow: 1px 1px 0 var(--color-error);
+
+    .dark-mode & {
+      --lightness: 40%;
+    }
+  }
+
+  &.hover {
+    --lightness-offset: -15%;
+  }
+  &.selected {
+    box-shadow: 2px 2px 0 var(--color-neutral);
+    --lightness-offset: -15%;
+  }
+}
+
+
