@@ -70,13 +70,13 @@ docker-backend:
     name: docker:latest
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - echo building image registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME
+    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build -t registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME .
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME:latest
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME:$CI_VERSION
-    - docker push registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME:latest
-    - docker push registry.gitlab.semanticlab.net/futureofwork/backend/$CI_PROJECT_NAME:$CI_VERSION
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend .
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:latest
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:$CI_VERSION
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:latest
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:$CI_VERSION
   tags:
   - mavendocker
   when: manual
@@ -87,13 +87,13 @@ docker-frontend:
     name: docker:latest
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - echo building image registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME
+    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build -t registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME /src/frontend
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME:latest
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME:$CI_VERSION
-    - docker push registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME:latest
-    - docker push registry.gitlab.semanticlab.net/futureofwork/frontend/$CI_PROJECT_NAME:$CI_VERSION
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend /src/frontend
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:latest
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:$CI_VERSION
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:latest
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:$CI_VERSION
   tags:
   - mavendocker
   when: manual
