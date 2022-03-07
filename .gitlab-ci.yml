@@ -70,7 +70,7 @@ docker-backend:
     name: docker:latest
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - IMAGE_NAME = "${CI_PIPELINE_ID}-backend"
+    - IMAGE_NAME="${CI_PIPELINE_ID}-backend"
     - echo building image registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     - docker build -t registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME .
@@ -88,10 +88,10 @@ docker-frontend:
     name: docker:latest
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - IMAGE_NAME = "${CI_PIPELINE_ID}-frontend"
+    - IMAGE_NAME="${CI_PIPELINE_ID}-frontend"
     - echo building image registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME .
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME /src/frontend
     - docker tag registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME:latest
     - docker tag registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME:$CI_VERSION
     - docker push registry.gitlab.semanticlab.net/futureofwork/$IMAGE_NAME:latest
