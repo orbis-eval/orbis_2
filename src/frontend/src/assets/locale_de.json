@@ -1,4 +1,14 @@
 {
   "annotation": "Annotation",
-  "docu_tab": "tab: zur nächsten Annotation springen"
+  "docu_tab": "tab: zur nächsten Annotation springen",
+  "keyboardlegend-title": "Tastaturbelegung",
+  "keyboardlegend-enter": "akzeptieren",
+  "keyboardlegend-delete": "ablehnen",
+  "keyboardlegend-backspace": "ablehnen",
+  "keyboardlegend-arrow-left": "vorheriges Element",
+  "keyboardlegend-arrow-right": "nächstes Element",
+  "keyboardlegend-shift": "vorne verkürzen",
+  "keyboardlegend-unshift": "vorne verlängern",
+  "keyboardlegend-pop": "hinten verkürzen",
+  "keyboardlegend-push": "hinten verlängern"
 }

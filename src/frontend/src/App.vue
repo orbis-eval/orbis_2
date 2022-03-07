@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {RouterLink, RouterView} from 'vue-router'
 import HelloWorld from '@/components/HelloWorld.vue'
-
 </script>
 
 <template>
@@ -22,10 +21,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
       </div>
     </nav>
   </header>
-  <aside></aside>
-  <main>
-    <RouterView />
-  </main>
+  <RouterView />
 </template>
 
 <style>
@@ -33,49 +29,6 @@ import HelloWorld from '@/components/HelloWorld.vue'
 </style>
 
 <style scoped>
-h1 {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 2rem;
-  font-size: 1.5em;
-}
-
-h1 a {
-  font-weight: 800;
-}
-
-header {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-}
-
-nav a {
-  margin: 0 1rem;
-}
-
-aside {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-main {
-  grid-column: 2;
-  grid-row: 2;
-  padding: 1rem;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
-  border-top: 1px solid rgba(127,127,127,0.1);
-  scroll-behavior: smooth;
-}
-
 #mode-toggler {
   display: inline-block;
   position: relative;

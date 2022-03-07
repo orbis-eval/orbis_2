@@ -2,7 +2,7 @@
   <span
       v-html="getCharacter()"
       :class="[
-          (char.annotation ? `marked type_${char.type}` : ''),
+          (char.annotation ? `marked type_${char.annotation.typeIndex}` : ''),
           (char.annotation && char.annotation.selected ? 'selected' : ''),
           (char.annotation ? char.annotation.status : ''),
       ]"
@@ -24,17 +24,21 @@
 <script>
 export default {
   name: "AnnotationChar",
+  /**
+   * Properties
+   */
   props: {
     char: {},
   },
+  /**
+   * Click-Event nach oben propagieren
+   */
   emits: ['clicker'],
-  data() {
-    return {
-    }
-  },
-  mounted() {
-  },
   methods: {
+    /**
+     * darzustellenden Char (bei Leerzeichen, Zeilenumbrüchen, etc.)
+     * @returns {string|*}
+     */
     getCharacter() {
       switch (this.char.char) {
         case ' ':
@@ -42,6 +46,9 @@ export default {
         default: return this.char.char;
       }
     },
+    /**
+     * Hover-Effekt für ganze Annotation (over)
+     */
     mouseOver() {
       if (!this.char.annotation) {
         return;
@@ -51,6 +58,9 @@ export default {
       document.querySelectorAll(`.marked[data-annotationindex="${this.char.annotationIndex}"]`)
           .forEach(e => e.classList.add('hover'));
     },
+    /**
+     * Hover-Effekt für ganze Annotation (out)
+     */
     mouseOut() {
       if (!this.char.annotation) {
         return;
