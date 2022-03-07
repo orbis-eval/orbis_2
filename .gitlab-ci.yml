@@ -2,7 +2,8 @@ variables:
   coverage_path: "./coverage.xml"
   APPLICATION_NAME: orbis2
 
-  DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
+  BACKEND_DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend
+  FRONTEND_DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend
   KUBE_NAMESPACE_FHGR: default
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
@@ -98,7 +99,7 @@ docker-frontend:
   - mavendocker
   when: manual
 
-fhgr-deploy-production-release:
+fhgr-deploy-production-release-backend:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   script:
@@ -107,11 +108,11 @@ fhgr-deploy-production-release:
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
      --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
-    - helm upgrade --install $APPLICATION_NAME
+    - helm upgrade --install $APPLICATION_NAME-backend
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
-      --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --set image.repository=$BACKEND_DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE_FHGR
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/
     - kubectl rollout restart deployment $APPLICATION_NAME-template
@@ -125,14 +126,14 @@ fhgr-deploy-production-release:
     - mavendocker
   when: manual
 
-fhgr-delete-production-release:
+fhgr-delete-production-release-backend:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   variables:
     GIT_STRATEGY: none
   script:
-    - echo "removing production deployment $APPLICATION_NAME-template from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME
+    - echo "removing production deployment $APPLICATION_NAME-backend-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME-backend
   environment:
     name: production
     action: stop
