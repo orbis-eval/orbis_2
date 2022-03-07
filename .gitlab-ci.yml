@@ -2,7 +2,8 @@ variables:
   coverage_path: "./coverage.xml"
   APPLICATION_NAME: orbis2
 
-  DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
+  BACKEND_DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend
+  FRONTEND_DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend
   KUBE_NAMESPACE_FHGR: default
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
@@ -64,19 +65,36 @@ sonar:
   when: manual
 
 
-docker:
+docker-backend:
   stage: Docker Build
   image:
     name: docker:latest
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
+    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME .
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:latest
-    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:$CI_VERSION
-    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:latest
-    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME:$CI_VERSION
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend .
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:latest
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:$CI_VERSION
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:latest
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/backend:$CI_VERSION
+  tags:
+  - mavendocker
+  when: manual
+
+docker-frontend:
+  stage: Docker Build
+  image:
+    name: docker:latest
+  script:
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - echo building image registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker build -t registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend src/frontend/
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:latest
+    - docker tag registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:$CI_VERSION
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:latest
+    - docker push registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME/frontend:$CI_VERSION
   tags:
   - mavendocker
   when: manual
@@ -85,22 +103,22 @@ fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
   script:
-    - echo "Deploy to prodction cluster"
+    - echo "Deploy backend to production cluster"
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
      --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
-    - helm upgrade --install $APPLICATION_NAME
+    - helm upgrade --install $APPLICATION_NAME-backend
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
-      --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --set image.repository=$BACKEND_DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE_FHGR
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/backend/
     - kubectl rollout restart deployment $APPLICATION_NAME-template
   environment:
     name: production
-    url:  https://${APPLICATION_NAME}.${URL_FHGR}/rest/status
+    url:  https://${APPLICATION_NAME}-backend.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
       namespace: $KUBE_NAMESPACE_FHGR
@@ -114,8 +132,52 @@ fhgr-delete-production-release:
   variables:
     GIT_STRATEGY: none
   script:
-    - echo "removing production deployment $APPLICATION_NAME-template from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME
+    - echo "removing production deployment $APPLICATION_NAME-backend-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME-backend
+  environment:
+    name: production
+    action: stop
+  only:
+    - master
+  tags:
+    - docker
+  when: manual
+
+fhgr-deploy-production-release-frontend:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  script:
+    - echo "Deploy frontend to production cluster"
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
+     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
+     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
+    - helm upgrade --install $APPLICATION_NAME-frontend
+      --kubeconfig $KUBECONFIG 
+      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
+      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+      --set image.repository=$FRONTEND_DOCKER_IMAGE:$CI_VERSION
+      --namespace $KUBE_NAMESPACE_FHGR
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/frontend/
+    - kubectl rollout restart deployment $APPLICATION_NAME-template
+  environment:
+    name: production
+    url:  https://${APPLICATION_NAME}-frontend.${URL_FHGR}/rest/status
+    on_stop: fhgr-delete-production-release
+    kubernetes:
+      namespace: $KUBE_NAMESPACE_FHGR
+  tags:
+    - mavendocker
+  when: manual
+
+fhgr-delete-production-release-frontend:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo "removing production deployment $APPLICATION_NAME-frontend-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME-frontend
   environment:
     name: production
     action: stop
