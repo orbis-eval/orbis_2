@@ -8,6 +8,6 @@ RUN ls -la
 
 RUN npm install
 
-EXPOSE 3000
+EXPOSE 63011
 
 ENTRYPOINT ["npm", "run", "dev"]
