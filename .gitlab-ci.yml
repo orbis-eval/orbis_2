@@ -104,6 +104,7 @@ fhgr-deploy-production-release:
   stage: Kubernetes Deployment
   script:
     - echo "Deploy backend to production cluster"
+    - echo $CI_REGISTRY
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
