@@ -53,7 +53,6 @@ export default {
      * @param annotation Annotation
      */
     click(annotation) {
-      // console.log('click', event);
       if (!annotation) {
         return;
       }
@@ -68,7 +67,6 @@ export default {
      * @param event Keyboard Event
      */
     handleKeyboardEvents(event) {
-      console.log(event.code);
       switch (event.code) {
           // case 'Space':
         case 'Enter':
@@ -92,10 +90,10 @@ export default {
         case 'KeyS':
           this.editAnnotation('start', -1);
           break;
-        case 'KeyY':
+        case 'KeyX':
           this.editAnnotation('end', -1);
           break;
-        case 'KeyX':
+        case 'KeyC':
           this.editAnnotation('end', 1);
           break;
         case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5': case 'Digit6': case 'Digit7': case 'Digit8': case 'Digit9': case 'Digit0':
@@ -133,7 +131,6 @@ export default {
      * @param amount Anzahl (+1 / -1)
      */
     editAnnotation(dir, amount = 1) {
-      console.log('edit', dir, amount);
       const selected = this.annotations.find(e => e.selected);
       if (!selected) {
         return;
@@ -163,6 +160,7 @@ export default {
       const char = this.chars.find(e => e.charIndex === charIndex);
       char.annotation = annotation;
       char.type = annotation ? this.annotationTypes.indexOf(annotation.type) : null;
+      char.annotationIndex = annotation ? this.annotations.indexOf(annotation) : null;
     },
     /**
      * ersetzt die bestehende selektierte Annotation
@@ -202,7 +200,7 @@ export default {
      */
     selectNextAnnotation(back = false) {
       let index = 0;
-      const activeAnnotations = this.annotations.filter(e => e.status != enAnnotationStatus.replaced);
+      const activeAnnotations = this.annotations.filter(e => e.status !== enAnnotationStatus.replaced);
       const selected = activeAnnotations.find(e => e.selected);
       if (selected) {
         index = activeAnnotations.indexOf(selected) + (back ? -1 : 1);
