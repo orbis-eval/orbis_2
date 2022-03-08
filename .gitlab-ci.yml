@@ -115,6 +115,9 @@ fhgr-delete-production-release:
     GIT_STRATEGY: none
   script:
     - echo "removing production deployment $APPLICATION_NAME-template from cluster..."
+    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
+     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
+     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME
   environment:
     name: production
