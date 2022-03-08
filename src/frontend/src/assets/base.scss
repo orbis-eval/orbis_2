@@ -112,7 +112,7 @@ a {
 #app {
   display: grid;
   height: calc(100vh - 2rem);
-  grid-template-columns: 20rem 1fr;
+  grid-template-columns: 24rem 1fr;
   grid-template-rows: auto 1fr;
   background: var(--color-background-soft);
   border-radius: 1.5rem;
@@ -148,6 +148,7 @@ nav a {
 aside {
   grid-column: 1;
   grid-row: 2;
+  overflow: auto;
 }
 
 main {

@@ -46,17 +46,17 @@
       </span>
       <span v-locale="'keyboardlegend-shift'"></span>
     </li>
-    <li class="marked type_x" @click="simulateKey('KeyD')">
+    <li class="marked type_x" @click="simulateKey('KeyY')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
-        <i class="fa-solid fa-d fa-stack-1x fa-inverse"></i>
+        <i class="fa-solid fa-y fa-stack-1x fa-inverse"></i>
       </span>
       <span v-locale="'keyboardlegend-pop'"></span>
     </li>
-    <li class="marked type_x" @click="simulateKey('KeyF')">
+    <li class="marked type_x" @click="simulateKey('KeyX')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
-        <i class="fa-solid fa-f fa-stack-1x fa-inverse"></i>
+        <i class="fa-solid fa-x fa-stack-1x fa-inverse"></i>
       </span>
       <span v-locale="'keyboardlegend-push'"></span>
     </li>
