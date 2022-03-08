@@ -116,7 +116,7 @@ fhgr-deploy-production-release:
       --set image.repository=$BACKEND_DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE_FHGR
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/backend/
-    - kubectl rollout restart deployment $APPLICATION_NAME-template
+    - kubectl rollout restart deployment $APPLICATION_NAME-backend-template
   environment:
     name: production
     url:  https://${APPLICATION_NAME}-backend.${URL_FHGR}/rest/status
@@ -160,7 +160,7 @@ fhgr-deploy-production-release-frontend:
       --set image.repository=$FRONTEND_DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE_FHGR
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/frontend/
-    - kubectl rollout restart deployment $APPLICATION_NAME-template
+    - kubectl rollout restart deployment $APPLICATION_NAME-frontend-template
   environment:
     name: production
     url:  https://${APPLICATION_NAME}-frontend.${URL_FHGR}/rest/status
