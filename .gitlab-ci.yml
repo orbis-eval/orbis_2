@@ -119,8 +119,6 @@ fhgr-delete-production-release:
   environment:
     name: production
     action: stop
-  only:
-    - master
   tags:
     - docker
   when: manual
