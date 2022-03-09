@@ -144,16 +144,6 @@ fhgr-delete-production-release:
     - docker
   when: manual
 
-fhgr-deploy-production-release-debug:
-  image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment
-  script:
-  - helm rollback $APPLICATION_NAME-frontend 1 --namespace $KUBE_NAMESPACE_FHGR
-  - helm history $APPLICATION_NAME-frontend --namespace $KUBE_NAMESPACE_FHGR
-  tags:
-    - mavendocker
-  when: manual
-
 fhgr-deploy-production-release-frontend:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment
