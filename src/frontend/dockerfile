@@ -3,8 +3,7 @@ FROM node:slim
 RUN mkdir /src
 
 COPY . /src
-WORKDIR ./src
-RUN ls -la
+WORKDIR src
 
 RUN npm install
 
