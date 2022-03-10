@@ -5,6 +5,7 @@ from typing import (Optional,
 from pydantic import (BaseModel, 
                       Field)
 
+
 class AnnotationModel(BaseModel):
     key: str = Field(..., description='Key which uniquely assigns the element to the corresponding entry '
                                       'in the x28 ontology.')
@@ -18,12 +19,10 @@ class AnnotationModel(BaseModel):
     end: int = Field(..., description='Start position of the annotated element in the text representation of the html.')
 
 
-
-class DocumentModel(BaseModel):
+class DocumentGetModel(BaseModel):
     da_id: str = Field(..., description='Unique key for identifying document and annotartor within an iteration')
     annotator: str = Field(..., description='Service odr Person used for annotations')
-    data: Optional[List[AnnotationModel]] 
-
+    data: Optional[List[AnnotationModel]]
 
     class Config:
         schema_extra = {
@@ -41,8 +40,47 @@ class DocumentModel(BaseModel):
                             }
                         ]}
                     }
-
                 }
+
+
+class DocumentPostModel(BaseModel):
+    id: int = Field(..., description='Original ID of the Document')
+    text: str = Field(..., description='Text of the document')
+    gold_standard_annotation: Optional[Dict[str, List[AnnotationModel]]]
+    annotations: Optional[Dict[str, List[AnnotationModel]]]
+
+    class Config:
+        schema_extra = {
+                "example":
+                {
+                    "id": "197643",
+                    "text": "Im a named entity",
+                    "gold_standard_annotation": {"work_activity": [
+                        {
+                            "key": "#somekey",
+                            "entity_type": "topic",
+                            "surface_form": "named entity",
+                            "start": 5,
+                            "end": 17
+                            }
+                        ]},
+                    "annotations": {"work_activity": [
+                        {
+                            "key": "#somekey",
+                            "entity_type": "topic",
+                            "surface_form": "named entity",
+                            "start": 5,
+                            "end": 17
+                        }
+                    ]}
+                    }
+                }
+
+
+class CorpusModel(BaseModel):
+    name: str = Field(..., description='Name of the corpus.')
+    description: Optional[str] = Field(..., description='Description of the corpus.')
+
 
 class ResponseModel(BaseModel):
     status_code: int = Field(..., description='Status of response', enum=[200, 201, 400, 401])
