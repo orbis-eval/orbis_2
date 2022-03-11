@@ -101,14 +101,13 @@ def add_doccument(document: DocumentPostModel):
 @app.post('/createCorpus', response_model=ResponseModel)
 def create_corpus(corpus: CorpusModel):
     corpus = corpus.dict()
-    corpus_id = db.create_corpus(corpus_name=corpus.get('name', ''),
-                                 description=corpus.get('description', ''))
-    if corpus_id:
+    if corpus_id := db.create_corpus(**corpus):
         response = Response(status_code=200,
                             content={'corpus_id': corpus_id},
                             message=f'Corpus {corpus.get("name", "")} created.')
     else:
-        response = Response(status_code=400)
+        response = Response(status_code=400,
+                            message='Corpus not created.')
     return response.as_json()
 
 

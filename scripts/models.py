@@ -88,26 +88,20 @@ class DataExchangeModel(BaseModel):
 
 
 class DocumentPostModel(BaseModel):
-    id: int = Field(..., description='Original ID of the Document')
+    origin_id: int = Field(..., description='Original ID of the Document')
+    corpus_name: str = Field(..., description='Name of the corpus where the documents belongs to')
     text: str = Field(..., description='Text of the document')
-    gold_standard_annotation: Optional[Dict[str, List[AnnotationModel]]]
+    annotator: str = Field(..., description='Name of the annotator')
     annotations: Optional[Dict[str, List[AnnotationModel]]]
 
     class Config:
         schema_extra = {
                 "example":
                 {
-                    "id": "197643",
+                    "origin_id": "197643",
+                    "corpus_name": "reuters",
                     "text": "Im a named entity",
-                    "gold_standard_annotation": {"work_activity": [
-                        {
-                            "key": "#somekey",
-                            "entity_type": "topic",
-                            "surface_form": "named entity",
-                            "start": 5,
-                            "end": 17
-                            }
-                        ]},
+                    "annotator": 'gold',
                     "annotations": {"work_activity": [
                         {
                             "key": "#somekey",
