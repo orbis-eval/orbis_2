@@ -1,9 +1,8 @@
 import json
-import pytest
 from pathlib import Path
 from src.db import DB
 
-TEST_DATA_PATH = Path(__file__).parents[1] / 'testdata'
+TEST_DATA_PATH = Path(__file__).parents[2] / 'testdata'
 
 
 def load_test_file(fn='test_document.json'):

@@ -6,9 +6,9 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parents[1]
 sys.path.append(str(PROJECT_ROOT.absolute()))
 
-from src.db_mock import TEST_DB
 from src.db import DB
-from scripts.models import (DocumentGetModel,
+from src.annotator_queue import AnnotatorQueue
+from scripts.models import (DataExchangeModel,
                             DocumentPostModel,
                             ResponseModel,
                             CorpusModel)
@@ -18,93 +18,87 @@ from src.models.response import Response
 app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
 db = DB()
-
-annotator_queue = {}
+annotator_queue = AnnotatorQueue()
 
 
 @app.put('/addDocumentToAnnotationQueue/{da_id}', response_model=ResponseModel)
 def add_document_to_annotation_queue(da_id: int):
-    d_id, annotator, iteration_id = tuple(da_id.split('-'))
-    annotator_queue.setdefault(annotator, []).append(da_id)
-    response = Response(status_code=200)
-    return response.as_json()
-
-
-@app.get('/getNextDocumentForAnnotator')
-def get_next_document_for_annotator(corpus_name=None, annotator=None):
-    if not corpus_name or not annotator:
-        response = Response(status_code=400,
-                            message=f'No corpus name or annotator provided. Please check request parameters.')
-    if queue := annotator_queue.get(annotator, []):
+    if document_annotation_for_queue := db.get_document_annotation_for_queue(da_id):
+        annotator_queue.add_document_annotation(document_annotation_for_queue)
         response = Response(status_code=200,
-                            content={'da_id': queue.pop(-1)})
+                            message=f'{da_id} added to queue.')
     else:
         response = Response(status_code=400,
-                            message=f'No document found in annotator_queue for annotator {annotator}') 
+                            message=f'{da_id} not added to queue.')
     return response.as_json()
 
 
-@app.get('/getDocumentForAnnotator')
-def get_document_for_annotator(corpus_name=None, annotator=None):
-    if not corpus_name or not annotator:
-        response = Response(status_code=400, 
-                            message=f'No corpus name or annotator provided. Please check request parameters.')
-    if response_da_id := get_next_document_for_annotator(corpus_name, annotator):
+@app.get('/getDocumentForAnnotation', response_model=ResponseModel)
+def get_document_for_annotation(corpus_name=None, annotator=None):
+    if da_id := annotator_queue.get_id_for_annotation(corpus_name, annotator):
         response_content = get_document_content(da_id)
         response_annotations = get_document_annotations(da_id)
         if response_content and response_annotations:
             response = Response(status_code=200, 
-                                content={'da_id': response_da_id['content'],
+                                content={'da_id': da_id,
                                          'content': response_content['content'],
                                          'annotations': response_annotations['content']})
         else:
             response = Response(status_code=400, 
-                                message=response_content.message)
+                                message='Empty annotator queue for request.')
     else:
         response = Response(status_code=400, 
-                            message=response_da_id.message)
+                            message='Empty annotator queue for request.')
     return response.as_json()
 
 
-@app.get('/getDocumentContent')
+@app.get('/getDocumentContent', response_model=ResponseModel)
 def get_document_content(da_id=None):
     if not da_id:
         response = Response(status_code=400, 
                             message='Missing da_id in request.')
-    else:
+    elif text := db.get_document_content(da_id):
         response = Response(status_code=200, 
-                            content={'text': TEST_DB.get_document_content()})
+                            content={'text': text})
+    else:
+        response = Response(status_code=400,
+                            message=f'{da_id} not found in DB.')
     return response.as_json()
 
 
-@app.get('/getDocumentAnnotations')
+@app.get('/getDocumentAnnotations', response_model=ResponseModel)
 def get_document_annotations(da_id=None):
     if not da_id:
         response = Response(status_code=400, 
                             message='Missing da_id in request.')
-    else:
+    elif annotations := db.get_document_annotations(da_id):
         response = Response(status_code=200, 
-                            content={'annotations': TEST_DB.get_document_annotations()})
+                            content={'annotations': annotations})
+    else:
+        response = Response(status_code=400,
+                            message=f'{da_id} not found in DB.')
     return response.as_json()
 
 
-@app.post('/saveDocumentAnnotations')
-def save_document_annotations(document: DocumentGetModel):
-    if TEST_DB.save_document():
-        response = Response(status_code=200)
+@app.post('/saveDocumentAnnotations', response_model=ResponseModel)
+def save_document_annotations(data: DataExchangeModel):
+    data = data.dict()
+    if da_id := db.save_document_annotations(**data):
+        response = Response(status_code=200,
+                            content={'da_id': da_id})
     else:
         response = Response(status_code=400, 
-                            message=f'Document {document} not saved in db')
+                            message=f'Document Annotation not saved in db')
     return response.as_json()
 
 
-@app.post('/addDocument')
+@app.post('/addDocument', response_model=ResponseModel)
 def add_doccument(document: DocumentPostModel):
     document = document.dict()
     print(document['id'])
 
 
-@app.post('/createCorpus')
+@app.post('/createCorpus', response_model=ResponseModel)
 def create_corpus(corpus: CorpusModel):
     corpus = corpus.dict()
     corpus_id = db.create_corpus(corpus_name=corpus.get('name', ''),

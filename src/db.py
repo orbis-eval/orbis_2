@@ -3,6 +3,7 @@ import datetime
 import pymongo
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
+from bson.objectid import ObjectId
 
 
 class DB:
@@ -24,10 +25,10 @@ class DB:
         except DuplicateKeyError:
             print('Record already exists.')
             return None
-        print(f'Inserted record with id {result.inserted_id}')
+        print(f'Inserted record into {table_name} with id {result.inserted_id}')
         return str(result.inserted_id)
 
-    def __get_record(self, table_name, record_filter):
+    def _get_record(self, table_name, record_filter):
         return self.__db[table_name].find_one(record_filter)
 
     def __get_record_id(self, table_name, record_filter):
@@ -36,11 +37,12 @@ class DB:
     def __get_records(self, table_name, record_filter):
         return list(self.__db[table_name].find(record_filter))
 
-    def _add_document_annotation(self, d_id, annotator, iteration_id=0, precessor='NEW'):
+    def _add_document_annotation(self, d_id, annotator, iteration_id=1, precessor='NEW'):
+        print(d_id, annotator)
         document_annotation_record = {'d_id': d_id,
                                       'annotator': annotator,
                                       'iteration_id': iteration_id,
-                                      'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
+                                      'datetime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                       'precessor': precessor}
         document_annotation_id = self.__insert('document_annotation', document_annotation_record)
         return document_annotation_id
@@ -51,6 +53,10 @@ class DB:
                              'annotations': record}
         annotation_id = self.__insert('annotation', annotation_record)
         return annotation_id
+
+    def _get_d_id_from_da_id(self, da_id):
+        record_filter = {'_id': ObjectId(da_id)}
+        return self._get_record('document_annotation', record_filter).get('d_id')
 
     def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
@@ -74,20 +80,38 @@ class DB:
 
         return d_id, da_id, annotation_id
 
-    def get_document_content(self, d_id):
-        record_filter = {'d_id': d_id}
-        if result := self.__get_record('document', record_filter):
+    def get_document_content(self, da_id):
+        d_id = self._get_d_id_from_da_id(da_id)
+        record_filter = {'_id': ObjectId(d_id)}
+        if result := self._get_record('document', record_filter):
             return result.get('content', '')
+
+    def get_document_annotation_for_queue(self, da_id):
+        da_record_filter = {'_id': da_id}
+        da_result = self._get_record('document_annotation', da_record_filter)
+        d_record_filter = {'_id': da_result.get('d_id')}
+        d_result = self._get_record('document', d_record_filter)
+
+        result = {'da_id': da_id,
+                  'corpus_name': d_result.get('corpus_name'),
+                  'annotator': da_result.get('annotator'),
+                  'iteration_id': da_result.get('iteration_id'),
+                  'status': 'new',
+                  'lastUpdate': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+        return result
 
     def get_document_annotations(self, da_id):
         record_filter = {'da_id': da_id}
-        if result := self.__get_record('annotation', record_filter):
+        if result := self._get_record('annotation', record_filter):
             return result.get('annotations', '')
 
-    def save_document_annotations(self, annotations, annotator, iteration_id, da_id):
-        document_filter = {'da_id': da_id}
-        d_id = self.__get_record('document', document_filter)
-        new_da_id = self._add_document_annotation(d_id, annotator, iteration_id, da_id)
-        annotation_id = self._add_annotations(da_id, d_id, annotations)
-        return new_da_id, annotation_id
+    def save_document_annotations(self, da_id, meta, data):
+        d_id = self._get_d_id_from_da_id(da_id)
+
+        new_da_id = self._add_document_annotation(d_id=d_id,
+                                                  annotator=data["annotator"],
+                                                  iteration_id=meta.get('iteration', None),
+                                                  precessor=da_id)
+        annotation_id = self._add_annotations(new_da_id, d_id, data.get("annotations", []))
+        return new_da_id
 
