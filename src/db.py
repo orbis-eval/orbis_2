@@ -66,19 +66,19 @@ class DB:
             corpus_id = self.__get_record_id('corpus', corpus_filter)
         return corpus_id
 
-    def add_document(self, origin_id, corpus_name, text, annotator, annotations):
-        document_record = {'id': origin_id,
+    def add_document(self, source_id, corpus_name, text, annotator, data):
+        document_record = {'id': source_id,
                            'corpus_name': corpus_name,
                            'content': text}
         if not (d_id := self.__insert('document', document_record)):
-            document_filter = {'id': origin_id,
+            document_filter = {'id': source_id,
                                'corpus_name': corpus_name}
             d_id = self.__get_record_id('document', document_filter)
-            print(f'Document with id {origin_id} already in corpus {corpus_name}')
+            print(f'Document with id {source_id} already in corpus {corpus_name}')
             #TODO return the most recent da_id and annotation_id
             return d_id, None, None
         da_id = self._add_document_annotation(d_id, annotator)
-        annotation_id = self._add_annotations(da_id, d_id, annotations)
+        annotation_id = self._add_annotations(da_id, d_id, data)
 
         return d_id, da_id, annotation_id
 

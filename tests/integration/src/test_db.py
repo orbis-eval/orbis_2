@@ -38,7 +38,7 @@ def test_get_document_content():
 
 def test_get_document_annotations():
     document = load_test_file('test_document.json')
-    document_annotations_expected = document['annotations']
+    document_annotations_expected = document['data']
     db = get_db_instance()
 
     d_insert_id, da_insert_id, annotation_insert_id = db.add_document(**document)

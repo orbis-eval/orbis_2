@@ -1,69 +1,23 @@
 {
-  "origin_id": "21657915",
+  "source_id": "21657915",
   "corpus_name": "test_corpus",
   "text": "M\u00f6chten Sie sich einer neuen Herausforderung stellen und Ihr kompetentes Fachwissen in einer neuen Arbeitsumgebung einbringen?\n<br>Dann freuen wir uns auf Ihre Bewerbung!\n<br>Wir suchen f\u00fcr unseren Kunden per sofort oder nach Vereinbarung eine/n motivierte/n\n<h2>Technische/n Sachbearbeiter/in D/E 100% zur Unterst\u00fctzung eines jungen, dynamischen Teams</h2>\n<p><b>Ihre Herausforderung</b></p>\n<ul>\n <li>Abwickeln von Auftr\u00e4gen</li>\n <li>Beratung von Kunden in technischen Fragen</li>\n <li>Erfassen und Bearbeiten von Bestellungen</li>\n <li>Erstellen von Offerten</li>\n <li>Pflege der Stammdaten</li>\n <li>Erstellen von Lieferscheinen, Rechnungen und Exportdokumenten</li>\n <li>Materialbewirtschaftung und -einkauf</li>\n <li>Diverse administrative T\u00e4tigkeiten</li>\n</ul>\n<p><b>Ihre Kompetenz</b></p>\n<ul>\n <li>Technische Grundausbildung mit kaufm\u00e4nnischer Weiterbildung oder vergleichbar</li>\n <li>Mehrj\u00e4hrige Berufserfahrung als Technischer Kaufmann/-frau</li>\n <li>Gute Computer-Kenntnisse (MS Office)</li>\n <li>Zuverl\u00e4ssige, organisierte Arbeitsweise</li>\n <li>Kommunikationstalent</li>\n <li>Ausgezeichnete Deutsch- und sehr gute Englischkenntnisse</li>\n</ul>\n<p><b>Ihre Perspektiven</b></p>\n<ul>\n <li>Sch\u00f6n gestaltete B\u00fcror\u00e4ume</li>\n <li>Junges, motiviertes Team</li>\n <li>Attraktive Anstellungsbedingungen</li>\n</ul>\n<p><b>Ihr Kontakt</b></p>Frau Julia Dreher, Adecco Certified Recruiter, beantwortet Ihre Fragen gerne unter der Nummer +41 58 233 2223 oder per eMail.\n<br>\n<br>Bitte bewerben Sie sich direkt online, oder per eMail. Beziehen Sie sich dabei bitte auf die Referenznummer 047-JUDR-181201-123-DE.\n<br>\n<br>",
   "annotator": "test_ner",
-  "annotations": {
-    "work_activity": [
+  "data": {
+    "d_id": "some_document_id",
+    "annotator": "some_annotator",
+    "annotations": [
       {
-        "surface_form": "Diverse administrative T\u00e4tigkeiten",
-        "start": 724,
-        "end": 758,
-        "type": "topic"
-      },
-      {
-        "surface_form": "MS Office",
-        "start": 992,
-        "end": 1001,
-        "type": "topic"
-      },
-      {
-        "surface_form": "gute Englischkenntnisse",
-        "start": 1127,
-        "end": 1150,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Gute Computer-Kenntnisse",
-        "start": 966,
-        "end": 990,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Bearbeiten von Bestellungen",
-        "start": 502,
-        "end": 529,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Erstellen von Offerten",
-        "start": 540,
-        "end": 562,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Beratung von Kunden",
-        "start": 437,
-        "end": 456,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Beratung von Kunden ",
-        "start": 437,
-        "end": 457,
-        "type": "topic"
-      },
-      {
-        "surface_form": "Gute Computer-Kenntnisse (MS Office)",
-        "start": 966,
-        "end": 1002,
-        "type": "topic"
-      },
-      {
-        "surface_form": "(MS Office)",
-        "start": 991,
-        "end": 1002,
-        "type": "topic"
+        "key": "#somekey",
+        "type": "topic",
+        "surface_form": "Hello world",
+        "start": 21,
+        "end": 32,
+        "scope": "some_scope",
+        "meta": {
+          "some": "other",
+          "key": "values"
+        }
       }
     ]
   }
