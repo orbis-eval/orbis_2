@@ -115,7 +115,7 @@ if (storageSetting === 'dark') {
 export default {
   data() {
     return {
-      currentLang: localStorage.getItem('locale').toUpperCase()
+      currentLang: (localStorage.getItem('locale') || 'de').toUpperCase()
     };
   },
   methods: {
