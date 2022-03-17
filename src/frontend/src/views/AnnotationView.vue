@@ -37,7 +37,10 @@ export default {
   mounted() {
     //todo: load data from server
     fetch('/getDocumentForAnnotation')
-        // .then(response => response.json())
+        .then(response => {
+          console.log(response);
+          return response.json();
+        })
         .then(data => {
           console.log(data);
         });
