@@ -31,7 +31,33 @@ export default {
   },
   methods: {
     click(event) {
-      console.log(event, this.annotations);
+      if (event === 'send') {
+        let request = {
+          d_id: 'abc',
+          meta: {},
+          annotations: this.annotations
+              .filter(e => [enAnnotationStatus.new, enAnnotationStatus.edited, enAnnotationStatus.approved].indexOf(e.status) >= 0)
+              .map(e => {
+                e.surface_form = this.annotationText.substring(e.start, e.end);
+                e.scope = 'entity';
+                e.meta = {};
+                return e;
+              })
+        };
+        console.log(event, request);
+        fetch('/saveDocumentAnnotations', {
+          method: 'POST',
+          headers: ["Content-Type", "application/json"],
+          body: JSON.stringify(request)
+        })
+            .then(response => {
+              console.log(response);
+              return response.json();
+            })
+            .then(data => {
+              console.log(data);
+            });
+      }
     }
   },
   mounted() {
