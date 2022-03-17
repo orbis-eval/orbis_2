@@ -12,12 +12,18 @@ import HelloWorld from '@/components/HelloWorld.vue'
       </div>
 
       <div class="center">
-        <span>
-        </span>
+        <span></span>
       </div>
 
       <div class="right">
-        <span id="mode-toggler" @click="toggle()"></span>
+        <div id="language-switcher">
+          <span>Sprache: {{currentLang}}</span>
+          <div id="language-switcher-selection">
+            <div @click="selectLanguage('de')">DE</div>
+            <div @click="selectLanguage('en')">EN</div>
+          </div>
+        </div>
+        <div id="mode-toggler" @click="toggle()"></div>
       </div>
     </nav>
   </header>
@@ -29,6 +35,37 @@ import HelloWorld from '@/components/HelloWorld.vue'
 </style>
 
 <style scoped>
+#language-switcher {
+  position: relative;
+  padding: .4em 1em;
+  margin: 0 1em;
+  background: var(--color-text);
+  color: var(--color-background-mute);
+  border: 2px solid var(--color-border);
+  border-radius: 2em;
+}
+#language-switcher-selection {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 1em;
+  background: var(--color-text);
+  color: var(--color-background-mute);
+  border: 2px solid var(--color-border);
+  border-radius: .2em;
+  z-index: 9999;
+}
+#language-switcher:hover #language-switcher-selection {
+  display: block;
+}
+#language-switcher-selection div {
+  cursor: pointer;
+  padding: .4em 1em;
+}
+#language-switcher-selection div:hover {
+  background: var(--color-background-soft);
+  color: var(--color-text);
+}
 #mode-toggler {
   display: inline-block;
   position: relative;
@@ -65,6 +102,8 @@ import HelloWorld from '@/components/HelloWorld.vue'
 </style>
 
 <script lang="ts">
+import {KeyboardObserver} from '@/utils/keyboard-event-listener.service';
+
 const appElement = document.body;
 const storageSetting = localStorage.getItem('screen-mode');
 if (storageSetting === 'dark') {
@@ -74,7 +113,16 @@ if (storageSetting === 'dark') {
 }
 
 export default {
+  data() {
+    return {
+      currentLang: localStorage.getItem('locale').toUpperCase()
+    };
+  },
   methods: {
+    selectLanguage(lang: string) {
+      localStorage.setItem('locale', lang);
+      window.location.reload();
+    },
     toggle() {
       if (appElement?.classList.contains('light-mode')) {
         appElement?.classList.remove('light-mode');
