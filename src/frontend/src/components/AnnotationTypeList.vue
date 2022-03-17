@@ -73,6 +73,8 @@
       </span>
       {{ type }}
     </li>
+    <li class="">&nbsp;</li>
+    <li class="marked type_x" @click="$emit('clicker', 'send')">absenden</li>
   </ul>
 </template>
 
@@ -90,6 +92,10 @@ export default {
       default: []
     }
   },
+  /**
+   * Click-Event nach oben propagieren
+   */
+  emits: ['clicker'],
   methods: {
     /**
      * Simuliert einen Tastenanschlag, um eine Aktion auszuführen

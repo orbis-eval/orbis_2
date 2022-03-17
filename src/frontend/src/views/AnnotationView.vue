@@ -6,7 +6,7 @@ import AnnotationTypeList from '../components/AnnotationTypeList.vue'
 
 <template>
   <aside>
-    <AnnotationTypeList :annotation-types="annotationTypes"></AnnotationTypeList>
+    <AnnotationTypeList :annotation-types="annotationTypes" @clicker="click($event)"></AnnotationTypeList>
   </aside>
   <main>
     <Annotation
@@ -29,13 +29,18 @@ export default {
       annotationTypes: [],
     }
   },
+  methods: {
+    click(event) {
+      console.log(event, this.annotations);
+    }
+  },
   mounted() {
     //todo: load data from server
-    // fetch('@/assets/sample.json')
-    //     // .then(response => response.json())
-    //     .then(data => {
-    //       console.log(data);
-    //     });
+    fetch('/getDocumentForAnnotation')
+        // .then(response => response.json())
+        .then(data => {
+          console.log(data);
+        });
     // this.annotationText = 'Hallo Welt';
     this.sourceDocument = sampleData;
     this.annotationText = sampleData.text;
