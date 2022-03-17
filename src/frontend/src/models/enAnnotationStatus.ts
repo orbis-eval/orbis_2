@@ -3,5 +3,7 @@ export enum enAnnotationStatus {
     approved = 'approved',
     edited = 'edited',
     replaced = 'replaced',
-    deleted = 'deleted'
+    deleted = 'deleted',
+    new = 'new',
+    provisory = 'provisory'
 }
