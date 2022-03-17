@@ -2,6 +2,9 @@ from fastapi import FastAPI
 import uvicorn
 import sys
 from pathlib import Path
+from starlette.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 PROJECT_ROOT = Path(__file__).parents[1]
 sys.path.append(str(PROJECT_ROOT.absolute()))
@@ -17,8 +20,19 @@ from src.models.response import Response
 
 app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+
 db = DB()
 annotator_queue = AnnotatorQueue()
+
+
+@app.get('/', response_class=FileResponse)
+def home():
+    return FileResponse('index.html')
+
+@app.get('/annotation')
+def annotation():
+    return RedirectResponse("/")
 
 
 @app.put('/addDocumentToAnnotationQueue/{da_id}', response_model=ResponseModel)

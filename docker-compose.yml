@@ -1,0 +1,21 @@
+version: "3.3"
+services:
+  orbis2:
+    image: orbis2:latest
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "63010:63010"
+    network_mode: host
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    env_file:
+      - .env
+    network_mode: host
+    ports:
+      - "27017:27017"

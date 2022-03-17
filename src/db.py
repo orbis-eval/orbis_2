@@ -5,23 +5,18 @@ import pymongo
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
+from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_DEFAULT_HOST = 'localhost'
-MONGO_DEFAULT_PORT = 27017
+MONGO_DEFAULT_URL = "mongodb://localhost:27017/?retryWrites=true&w=majority"
 
 
 class DB:
 
-    def __init__(self, host=None, port=None, db_name='orbis'):
-        if host and port:
-            self.__client = MongoClient(host=host, port=port)
+    def __init__(self, mongo_url=None, db_name='orbis'):
+        if mongo_url := (mongo_url if mongo_url else os.environ.get('MONGO_URL')):
+            self.__client = AsyncIOMotorClient(mongo_url)
         else:
-            host = os.environ.get('MONGO_HOST')
-            port = os.environ.get('MONGO_PORT')
-            if host and port:
-                self.__client = MongoClient(host=host, port=port)
-            else:
-                self.__client = MongoClient(host=MONGO_DEFAULT_HOST, port=MONGO_DEFAULT_PORT)
+            self.__client = AsyncIOMotorClient(MONGO_DEFAULT_URL)
         self.__db_name = db_name
         self.__db = self.__client[db_name]
         self.__db['corpus'].create_index('corpus_name', unique=True)
@@ -31,9 +26,9 @@ class DB:
     def _delete(self):
         self.__client.drop_database(self.__db_name)
 
-    def __insert(self, table_name, record):
+    async def __insert(self, table_name, record):
         try:
-            result = self.__db[table_name].insert_one(record)
+            result = await self.__db[table_name].insert_one(record).result()
         except DuplicateKeyError:
             print('Record already exists.')
             return None

@@ -7,9 +7,6 @@ COPY ./scripts /src/scripts
 COPY requirements.txt ./
 WORKDIR .
 
-ENV MONGO_HOST='localhost'
-ENV MONGO_PORT='27017'
-
 RUN pip3 install -r requirements.txt
 
 EXPOSE 63010
