@@ -1,15 +1,27 @@
 import datetime
+import os
 
 import pymongo
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
 
+MONGO_DEFAULT_HOST = 'localhost'
+MONGO_DEFAULT_PORT = 27017
+
 
 class DB:
 
-    def __init__(self, host='localhost', port=27017, db_name='orbis'):
-        self.__client = MongoClient(host=host, port=port)
+    def __init__(self, host=None, port=None, db_name='orbis'):
+        if host and port:
+            self.__client = MongoClient(host=host, port=port)
+        else:
+            host = os.environ.get('MONGO_HOST')
+            port = os.environ.get('MONGO_PORT')
+            if host and port:
+                self.__client = MongoClient(host=host, port=port)
+            else:
+                self.__client = MongoClient(host=MONGO_DEFAULT_HOST, port=MONGO_DEFAULT_PORT)
         self.__db_name = db_name
         self.__db = self.__client[db_name]
         self.__db['corpus'].create_index('corpus_name', unique=True)
@@ -31,14 +43,13 @@ class DB:
     def _get_record(self, table_name, record_filter):
         return self.__db[table_name].find_one(record_filter)
 
-    def __get_record_id(self, table_name, record_filter):
-        return str(self.__db[table_name].find_one(record_filter).get('_id'))
+    def __get_record_attr(self, table_name, record_filter, attr):
+        return str(self.__db[table_name].find_one(record_filter).get(attr))
 
     def __get_records(self, table_name, record_filter):
         return list(self.__db[table_name].find(record_filter))
 
     def _add_document_annotation(self, d_id, annotator, iteration_id=1, precessor='NEW'):
-        print(d_id, annotator)
         document_annotation_record = {'d_id': d_id,
                                       'annotator': annotator,
                                       'iteration_id': iteration_id,
@@ -63,7 +74,7 @@ class DB:
                   'description': description}
         if not (corpus_id := self.__insert('corpus', record)):
             corpus_filter = {'corpus_name': corpus_name}
-            corpus_id = self.__get_record_id('corpus', corpus_filter)
+            corpus_id = self.__get_record_attr('corpus', corpus_filter, '_id')
         return corpus_id
 
     def add_document(self, source_id, corpus_name, text, annotator, data):
@@ -71,14 +82,16 @@ class DB:
                            'corpus_name': corpus_name,
                            'content': text}
         if not (d_id := self.__insert('document', document_record)):
+            print(f'Document with id {source_id} already in corpus {corpus_name}')
             document_filter = {'id': source_id,
                                'corpus_name': corpus_name}
-            d_id = self.__get_record_id('document', document_filter)
-            print(f'Document with id {source_id} already in corpus {corpus_name}')
-            #TODO return the most recent da_id and annotation_id
-            return d_id, None, None
-        da_id = self._add_document_annotation(d_id, annotator)
-        annotation_id = self._add_annotations(da_id, d_id, data)
+            d_id = self.__get_record_attr('document', document_filter, '_id')
+            annotation_filter = {'d_id': d_id}
+            da_id = self.__get_record_attr('annotation', annotation_filter, 'da_id')
+            annotation_id = self.__get_record_attr('annotation', annotation_filter, '_id')
+        else:
+            da_id = self._add_document_annotation(d_id, annotator)
+            annotation_id = self._add_annotations(da_id, d_id, data)
 
         return d_id, da_id, annotation_id
 

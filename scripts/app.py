@@ -93,9 +93,20 @@ def save_document_annotations(data: DataExchangeModel):
 
 
 @app.post('/addDocument', response_model=ResponseModel)
-def add_doccument(document: DocumentPostModel):
+def add_document(document: DocumentPostModel):
     document = document.dict()
-    print(document['id'])
+    d_id, da_id, annotation_id = db.add_document(**document)
+    if d_id and da_id and annotation_id:
+        response = Response(status_code=200,
+                            content={'d_id': d_id,
+                                     'da_id': da_id,
+                                     'annotation_id': annotation_id},
+                            message=f'Document {document.get("source_id", "")} added '
+                                    f'to corpus {document.get("corpus_name")}created.')
+    else:
+        response = Response(status_code=400,
+                            message='Document not added.')
+    return response.as_json()
 
 
 @app.post('/createCorpus', response_model=ResponseModel)

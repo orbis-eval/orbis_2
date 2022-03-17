@@ -41,7 +41,5 @@ def test_add_document_already_exsisting():
 
     delete_db(db)
     assert d_insert_id == duplicate_d_insert_id
-    assert da_insert_id != duplicate_da_insert_id
-    assert duplicate_da_insert_id is None
-    assert annotation_insert_id != duplicate_annotation_insert_id
-    assert duplicate_annotation_insert_id is None
+    assert da_insert_id == duplicate_da_insert_id
+    assert annotation_insert_id == duplicate_annotation_insert_id
