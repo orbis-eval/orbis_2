@@ -13,7 +13,10 @@ MONGO_DEFAULT_URL = "mongodb://localhost:27017/?retryWrites=true&w=majority"
 class DB:
 
     def __init__(self, mongo_url=None, db_name='orbis'):
-        if mongo_url := (mongo_url if mongo_url else os.environ.get('MONGO_URL')):
+        if mongo_url:
+            self.__client = AsyncIOMotorClient(mongo_url)
+        elif os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
+            mongo_url = f"mongodb://{os.environ.get('MONGO_HOST')}:{os.environ.get('MONGO_PORT')}/?retryWrites=true&w=majority"
             self.__client = AsyncIOMotorClient(mongo_url)
         else:
             self.__client = AsyncIOMotorClient(MONGO_DEFAULT_URL)

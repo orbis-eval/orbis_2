@@ -1,0 +1,105 @@
+# 
+# author: sandro.hoerler@fhgr.ch
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "autodeployment.fullname" . }}
+  labels:
+    {{- include "autodeployment.labels" . | nindent 4 }}
+  annotations:
+    app.gitlab.com/env: {{ .Values.gitlab.env }} #$CI_ENVIRONMENT_SLUG
+    app.gitlab.com/app: {{ .Values.gitlab.app }} #$CI_PROJECT_PATH_SLUG
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "autodeployment.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "autodeployment.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "autodeployment.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      restartPolicy: {{ .Values.deployment.restartPolicy }}  
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: mongo-persistence
+              mountPath: /data/db
+            - name: etc-weblyzard
+              mountPath: /etc/weblyzard/
+            - name: logs-weblyzard
+              mountPath: /var/log/weblyzard/
+            - name: serialized-recognize
+              mountPath: /recognize/serialized
+            - name: entityfilter-recognize
+              mountPath: /recognize/entityfilter.json
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          #livenessProbe:
+          #  initialDelaySeconds: 60
+          #  periodSeconds: 30
+          #  timeoutSeconds: 10
+          #  failureThreshold: 30
+          #  httpGet:
+          #    path: {{ .Values.probePath }}
+          #    port: http
+          #readinessProbe:
+          #  initialDelaySeconds: 60
+          #  periodSeconds: 30
+          #  timeoutSeconds: 10
+          #  failureThreshold: 30
+          #  httpGet:
+          #    path: {{ .Values.probePath }}
+          #    port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name : mongo-persistence
+        nfs:
+          server: {{ .Values.nfsServer }}
+          path: {{ .Values.dbPersistencePath }}
+      - name: etc-weblyzard
+        nfs:
+          server: {{ .Values.nfsServer }}
+          path: /archive/kube-volume/weblyzard/etc/
+      - name: logs-weblyzard
+        nfs:
+          server: {{ .Values.nfsServer }}
+          path: /archive/kube-volume/var/log/weblyzard/
+      - name: serialized-recognize
+        nfs:
+          server: {{ .Values.nfsServer }}
+          path: /archive/kube-volume/weblyzard/recognize/serialized
+      - name: entityfilter-recognize
+        nfs:
+          server: {{ .Values.nfsServer }}
+          path: /archive/kube-volume/weblyzard/recognize/entityfilter.json
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+

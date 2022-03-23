@@ -1,11 +1,28 @@
 FROM python:3.8-slim-buster
 
-RUN mkdir /src
+ENV MONGO_HOST=orbis2_db.prod.semanticlab.net
+ENV MONGO_PORT=63011
 
-COPY ./src /src
-COPY ./scripts /src/scripts
-COPY requirements.txt ./
-WORKDIR .
+RUN apt-get update
+RUN apt-get install curl -y
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash
+RUN apt-get install nodejs -y
+RUN node -v
+RUN npm -v
+
+RUN mkdir -p /app /src
+
+COPY ./src /app/src
+COPY ./scripts /app/src/scripts
+COPY requirements.txt /app/
+RUN ls -la
+WORKDIR /app/src/frontend
+RUN npm install
+RUN npm run build
+
+WORKDIR /app
+RUN pwd
+RUN mv ./src/frontend/dist/* .
 
 RUN pip3 install -r requirements.txt
 
