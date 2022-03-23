@@ -86,7 +86,7 @@ fhgr-deploy-production-release:
   stage: Kubernetes Deployment
   script:
     - echo "Deploy to prodction cluster"
-    - APPLICATION_NAME_APP=${APPLICATION_NAME}_app
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
@@ -115,7 +115,7 @@ fhgr-delete-production-release:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_APP=${APPLICATION_NAME}_app
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - echo "removing production deployment $APPLICATION_NAME_APP-template from cluster..."
     - helm --kubeconfig $KUBECONFIG delete {$APPLICATION_NAME_APP}_app
   environment:
@@ -132,7 +132,7 @@ fhgr-deploy-production-release-db:
   stage: Kubernetes Deployment
   script:
     - echo "Deploy db to prodction cluster"
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}_db
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
      --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
@@ -160,7 +160,7 @@ fhgr-delete-production-release-db:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}_db
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - echo "removing db production deployment $APPLICATION_NAME_DB-template from cluster..."
     - helm --kubeconfig $KUBECONFIG delete {$APPLICATION_NAME_DB}
   environment:
