@@ -1,10 +1,12 @@
+import json
+
 from fastapi import FastAPI
 import uvicorn
 import sys
 from pathlib import Path
 from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 PROJECT_ROOT = Path(__file__).parents[1]
 sys.path.append(str(PROJECT_ROOT.absolute()))
@@ -18,11 +20,14 @@ from scripts.models import (DataExchangeModel,
 from src.models.response import Response
 
 
+db = DB()
+
 app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
+app.add_event_handler('startup', db.open)
+app.add_event_handler('shutdown', db.close)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
-db = DB()
 annotator_queue = AnnotatorQueue()
 
 
@@ -30,14 +35,15 @@ annotator_queue = AnnotatorQueue()
 def home():
     return FileResponse('index.html')
 
+
 @app.get('/annotation')
 def annotation():
     return RedirectResponse("/")
 
 
 @app.put('/addDocumentToAnnotationQueue/{da_id}', response_model=ResponseModel)
-def add_document_to_annotation_queue(da_id: int):
-    if document_annotation_for_queue := db.get_document_annotation_for_queue(da_id):
+async def add_document_to_annotation_queue(da_id: str):
+    if document_annotation_for_queue := await db.get_document_annotation_for_queue(da_id):
         annotator_queue.add_document_annotation(document_annotation_for_queue)
         response = Response(status_code=200,
                             message=f'{da_id} added to queue.')
@@ -67,11 +73,11 @@ def get_document_for_annotation(corpus_name=None, annotator=None):
 
 
 @app.get('/getDocumentContent', response_model=ResponseModel)
-def get_document_content(da_id=None):
+async def get_document_content(da_id=None):
     if not da_id:
         response = Response(status_code=400, 
                             message='Missing da_id in request.')
-    elif text := db.get_document_content(da_id):
+    elif text := await db.get_document_content(da_id):
         response = Response(status_code=200, 
                             content={'text': text})
     else:
@@ -81,11 +87,11 @@ def get_document_content(da_id=None):
 
 
 @app.get('/getDocumentAnnotations', response_model=ResponseModel)
-def get_document_annotations(da_id=None):
+async def get_document_annotations(da_id=None):
     if not da_id:
         response = Response(status_code=400, 
                             message='Missing da_id in request.')
-    elif annotations := db.get_document_annotations(da_id):
+    elif annotations := await db.get_document_annotations(da_id):
         response = Response(status_code=200, 
                             content={'annotations': annotations})
     else:
@@ -95,9 +101,9 @@ def get_document_annotations(da_id=None):
 
 
 @app.post('/saveDocumentAnnotations', response_model=ResponseModel)
-def save_document_annotations(data: DataExchangeModel):
+async def save_document_annotations(data: DataExchangeModel):
     data = data.dict()
-    if da_id := db.save_document_annotations(**data):
+    if da_id := await db.save_document_annotations(**data):
         response = Response(status_code=200,
                             content={'da_id': da_id})
     else:
@@ -107,26 +113,27 @@ def save_document_annotations(data: DataExchangeModel):
 
 
 @app.post('/addDocument', response_model=ResponseModel)
-def add_document(document: DocumentPostModel):
+async def add_document(document: DocumentPostModel):
     document = document.dict()
-    d_id, da_id, annotation_id = db.add_document(**document)
-    if d_id and da_id and annotation_id:
+    d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
+    if document_exists:
+        response = Response(status_code=400,
+                            content={'d_id': d_id},
+                            message='Document not added, as it already exists.')
+    else:
         response = Response(status_code=200,
                             content={'d_id': d_id,
                                      'da_id': da_id,
                                      'annotation_id': annotation_id},
                             message=f'Document {document.get("source_id", "")} added '
                                     f'to corpus {document.get("corpus_name")}created.')
-    else:
-        response = Response(status_code=400,
-                            message='Document not added.')
     return response.as_json()
 
 
 @app.post('/createCorpus', response_model=ResponseModel)
-def create_corpus(corpus: CorpusModel):
+async def create_corpus(corpus: CorpusModel):
     corpus = corpus.dict()
-    if corpus_id := db.create_corpus(**corpus):
+    if corpus_id := await db.create_corpus(**corpus):
         response = Response(status_code=200,
                             content={'corpus_id': corpus_id},
                             message=f'Corpus {corpus.get("name", "")} created.')

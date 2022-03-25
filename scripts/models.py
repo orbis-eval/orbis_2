@@ -90,7 +90,7 @@ class DataExchangeModel(BaseModel):
 
 class DocumentPostModel(BaseModel):
     corpus_name: str = Field(..., description='Name of the corpus where the documents belongs to')
-    source_id: int = Field(..., description='Original ID of the Document')
+    source_id: str = Field(..., description='Original ID of the Document')
     text: str = Field(..., description='Text of the document')
     annotator: str = Field(..., description='Name of the annotator')
     data: AnnotationBlobModel
@@ -138,7 +138,7 @@ class CorpusModel(BaseModel):
 class ResponseModel(BaseModel):
     status_code: int = Field(..., description='Status of response', enum=[200, 201, 400, 401])
     message: str = Field(..., description='Error Message if request could not be processed')
-    content: Dict[str, Dict]
+    content: Dict
 
     class Config:
         schema_extra = {
