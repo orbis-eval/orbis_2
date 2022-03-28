@@ -17,13 +17,17 @@ class DB:
         self.__db_name = db_name
 
     async def open(self):
+        # check for database params:
         if self.__mongo_url:
             self.__client = AsyncIOMotorClient(self.__mongo_url)
         elif os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
             mongo_url = f"mongodb://{os.environ.get('MONGO_HOST')}:{os.environ.get('MONGO_PORT')}/?retryWrites=true&w=majority"
-            self.__client = AsyncIOMotorClient(mongo_url)
         else:
-            self.__client = AsyncIOMotorClient(MONGO_DEFAULT_URL)
+            mongo_url = MONGO_DEFAULT_URL
+            
+        # init database:
+        self.__client = AsyncIOMotorClient(mongo_url)
+        print(f'using url "{mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
         self.__db['corpus'].create_index('corpus_name', unique=True)
         self.__db['document'].create_index([('id', pymongo.ASCENDING),
