@@ -36,6 +36,9 @@ class DB:
         self.__client.drop_database(self.__db_name)
 
     async def __insert(self, table_name, record):
+        '''
+        Inserts new record to table. Returns None in case of DuplicateKeyError
+        '''
         try:
             response = await self.__db[table_name].insert_one(record)
             print(f'Inserted record into {table_name} with id {response.inserted_id}')
@@ -68,6 +71,11 @@ class DB:
         return document_annotation_id
 
     async def _add_annotations(self, da_id, d_id, record):
+        # check if d_id is equal, replace d_id in record with param.
+        if record.get("d_id") != d_id:
+            print(f'conflicting d_id detected: {d_id}, overwriting..')
+            record["d_id"] = d_id
+
         annotation_record = {'da_id': ObjectId(da_id),
                              'd_id': ObjectId(d_id),
                              'annotations': record}
@@ -90,7 +98,13 @@ class DB:
         document_record = {'id': source_id,
                            'corpus_name': corpus_name,
                            'content': text}
-        if not (d_id := await self.__insert('document', document_record)):
+
+        # checks if document already existed: None if already existed, d_id if insert was successful.
+        if (d_id := await self.__insert('document', document_record)):
+            da_id = await self._add_document_annotation(d_id, annotator)
+            annotation_id = await self._add_annotations(da_id, d_id, data)
+
+        else:
             print(f'Document with id {source_id} already in corpus {corpus_name}')
             document_filter = {'id': source_id,
                                'corpus_name': corpus_name}
@@ -99,9 +113,6 @@ class DB:
             da_id = await self.__get_record_id('annotation', annotation_filter, 'da_id')
             annotation_id = await self.__get_record_id('annotation', annotation_filter, '_id')
             document_exists = True
-        else:
-            da_id = await self._add_document_annotation(d_id, annotator)
-            annotation_id = await self._add_annotations(da_id, d_id, data)
 
         return d_id, da_id, annotation_id, document_exists
 
