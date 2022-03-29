@@ -2,6 +2,8 @@ from fastapi import FastAPI
 import uvicorn
 import sys
 from pathlib import Path
+
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -27,6 +29,18 @@ app.add_event_handler('shutdown', db.close)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 annotator_queue = AnnotatorQueue()
+
+origins = [
+    "http://localhost"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get('/', response_class=FileResponse)
