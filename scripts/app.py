@@ -31,7 +31,9 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 annotator_queue = AnnotatorQueue()
 
 origins = [
-    "http://localhost"
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost4200",
 ]
 
 app.add_middleware(
