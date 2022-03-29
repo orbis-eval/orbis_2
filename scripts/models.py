@@ -1,8 +1,8 @@
-from typing import (Optional, 
-                    List, 
+from typing import (Optional,
+                    List,
                     Dict)
 
-from pydantic import (BaseModel, 
+from pydantic import (BaseModel,
                       Field)
 
 
@@ -66,7 +66,7 @@ class DataExchangeModel(BaseModel):
 
     class Config:
         schema_extra = {
-                "example":
+            "example":
                 {
                     "da_id": "some_da_id",
                     "annotator": "some_annotator",
@@ -83,9 +83,9 @@ class DataExchangeModel(BaseModel):
                                  "scope": "some_scope",
                                  "meta": {"some": "other",
                                           "key": "values"}
-                                 }]}
-                    }
+                             }]}
                 }
+        }
 
 
 class DocumentPostModel(BaseModel):
@@ -97,7 +97,7 @@ class DocumentPostModel(BaseModel):
 
     class Config:
         schema_extra = {
-                "example":
+            "example":
                 {
                     "corpus_name": "reuters",
                     "source_id": "197643",
@@ -116,9 +116,9 @@ class DocumentPostModel(BaseModel):
                                  "scope": "some_scope",
                                  "meta": {"some": "other",
                                           "key": "values"}
-                                 }]}
-                    }
+                             }]}
                 }
+        }
 
 
 class CorpusModel(BaseModel):
@@ -138,14 +138,14 @@ class CorpusModel(BaseModel):
 class ResponseModel(BaseModel):
     status_code: int = Field(..., description='Status of response', enum=[200, 201, 400, 401])
     message: str = Field(..., description='Error Message if request could not be processed')
-    content: Dict
+    content: Optional[Dict]
 
     class Config:
         schema_extra = {
-                "example":
+            "example":
                 {
                     "status_code": 200,
                     "message": "",
-                    "content": {"da_id": "some_da_id"}
-                    }
+                    "content": {"some_key": "some_value"}
                 }
+        }

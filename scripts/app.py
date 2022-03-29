@@ -1,12 +1,10 @@
-import json
-
 from fastapi import FastAPI
 import uvicorn
 import sys
 from pathlib import Path
 from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse
 
 PROJECT_ROOT = Path(__file__).parents[1]
 sys.path.append(str(PROJECT_ROOT.absolute()))
@@ -36,7 +34,7 @@ def home():
     return FileResponse('index.html')
 
 
-@app.get('/annotation')
+@app.get('/annotation', response_class=RedirectResponse)
 def annotation():
     return RedirectResponse("/")
 
@@ -54,10 +52,10 @@ async def add_document_to_annotation_queue(da_id: str):
 
 
 @app.get('/getDocumentForAnnotation', response_model=ResponseModel)
-def get_document_for_annotation(corpus_name=None, annotator=None):
+async def get_document_for_annotation(corpus_name=None, annotator=None):
     if da_id := annotator_queue.get_id_for_annotation(corpus_name, annotator):
-        response_content = get_document_content(da_id)
-        response_annotations = get_document_annotations(da_id)
+        response_content = await get_document_content(da_id)
+        response_annotations = await get_document_annotations(da_id)
         if response_content and response_annotations:
             response = Response(status_code=200, 
                                 content={'da_id': da_id,
