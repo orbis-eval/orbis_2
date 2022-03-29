@@ -59,8 +59,8 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
         if response_content and response_annotations:
             response = Response(status_code=200, 
                                 content={'da_id': da_id,
-                                         'content': response_content['content'],
-                                         'annotations': response_annotations['content']})
+                                         'text': response_content['content']['text'],
+                                         'annotations': response_annotations['content']['annotations']})
         else:
             response = Response(status_code=400, 
                                 message='Empty annotator queue for request.')
