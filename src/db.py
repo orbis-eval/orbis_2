@@ -151,8 +151,9 @@ class DB:
         return result
 
     async def get_document_annotations(self, da_id):
-        record_filter = {'da_id': da_id}
-        return (await self._get_record('annotation', record_filter)).get('annotations', '')
+        record_filter = {'da_id': ObjectId(da_id)}
+        if annotations := await self._get_record('annotation', record_filter):
+            return annotations.get('annotations', '')
 
     async def save_document_annotations(self, da_id, annotator, data):
         d_id = await self._get_d_id_from_da_id(da_id)
