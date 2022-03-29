@@ -1,6 +1,7 @@
 FROM python:3.8-slim-buster
 
-ENV MONGO_HOST=orbis2_db.prod.semanticlab.net
+# TODO: configure host and port via helm values?
+ENV MONGO_HOST=orbis2-db-template 
 ENV MONGO_PORT=63011
 
 RUN apt-get update
