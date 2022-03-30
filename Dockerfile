@@ -1,6 +1,7 @@
 FROM python:3.8-slim-buster
 
 # TODO: configure host and port via helm values?
+# Uncomment ENV variables for to run services local
 ENV MONGO_HOST=orbis2-db-template 
 ENV MONGO_PORT=63011
 
