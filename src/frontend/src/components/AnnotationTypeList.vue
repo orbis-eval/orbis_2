@@ -63,7 +63,7 @@
 
     <li class="">&nbsp;</li>
     <li v-for="(type, index) of annotationTypes"
-        class="marked approved"
+        class="marked types"
         :class="['type_' + type.index]"
         @click="simulateKey(type.key, getKeyCode(keyList[index]))"
     >
@@ -128,6 +128,10 @@ li.marked {
   user-select: none;
   user-focus: none;
   box-shadow: none;
+}
+
+li.types {
+  color: #181818;
 }
 
 .type_x {

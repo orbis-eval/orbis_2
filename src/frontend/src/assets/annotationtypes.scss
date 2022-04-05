@@ -1,14 +1,33 @@
 $colors: (30, 60, 90, 120, 150, 180, 210, 240, 270, 15, 45, 75, 105, 135, 165, 195, 225, 255);
+$hexcolors: (
+#f60, #cf0, #0f0, #0fc,
+#06f, #60f, #f0c, #f30,
+#ff0, #3f0, #0f9, #09f,
+#30f, #f0f, #f03, #fc0,
+#6f0, #0f6, #0cf, #00f,
+#c0f, #f06, #f90, #9f0,
+#0f3, #0ff, #03f, #90f,
+#f09, #f00);
+
+
+:root {
+  $i: 0;
+  @each $color in $hexcolors {
+    --type-color-#{$i}: #{$color};
+    $i: $i + 1;
+  }
+}
 
 $i: 0;
 @each $color in $colors {
-  .marked.type_#{$i} {
+  .type_#{$i} {
+    background-color: var(--type-color-#{$i});
     --hue: #{$color};
   }
   $i: $i + 1;
 }
 
-.marked {
+.markes {
   background-color: hsl(
     var(--hue, 200),
     var(--saturation, 50%),
@@ -19,7 +38,7 @@ $i: 0;
   margin-bottom: 2px;
 
   &.approved, &.new {
-    --lightness-offset: -30%;
+    --lightness-offset: 0%;
     box-shadow: 1px 1px 0 var(--color-success);
   }
 
