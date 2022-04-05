@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import {RouterLink, RouterView} from 'vue-router'
-import HelloWorld from '@/components/HelloWorld.vue'
 </script>
 
 <template>
@@ -16,8 +14,17 @@ import HelloWorld from '@/components/HelloWorld.vue'
       </div>
 
       <div class="right">
+        <div id="document" :title="documentid" @click="resetDocumentId()">
+          <i class="fa fa-file"></i>
+          <span v-if="documentid">{{documentid}}</span>
+          <span v-if="!documentid" v-text="'documentid'"></span>
+        </div>
+        <div id="annotator" :title="annotatorid" @click="resetAnnotatorId()">
+          <i class="fas fa-user"></i>
+          <span>{{annotatorid}}</span>
+        </div>
         <div id="language-switcher">
-          <span>Sprache: {{currentLang}}</span>
+          <span><i v-locale="'language'"></i>: {{currentLang}}</span>
           <div id="language-switcher-selection">
             <div @click="selectLanguage('de')">DE</div>
             <div @click="selectLanguage('en')">EN</div>
@@ -35,14 +42,25 @@ import HelloWorld from '@/components/HelloWorld.vue'
 </style>
 
 <style scoped>
-#language-switcher {
+#language-switcher, #annotator, #document {
   position: relative;
+  display: flex;
+  align-content: center;
   padding: .4em 1em;
-  margin: 0 1em;
+  margin: 0 .5em;
   background: var(--color-text);
   color: var(--color-background-mute);
   border: 2px solid var(--color-border);
   border-radius: 2em;
+  cursor: pointer;
+}
+#language-switcher span, #annotator span, #document span {
+  display: block;
+  padding-left: .5em;
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 #language-switcher-selection {
   display: none;
@@ -71,7 +89,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
   position: relative;
   width: calc(3.3em + 4px);
   height: calc(1.8em + 4px);
-  margin-right: 2rem;
+  margin: 0 2rem 0 .5em;
   background: var(--color-text);
   border: 2px solid var(--color-border);
   border-radius: 1.2em;
@@ -102,7 +120,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
 </style>
 
 <script lang="ts">
-import {KeyboardObserver} from '@/utils/keyboard-event-listener.service';
+import {SettingsService} from '@/services/Settings.service';
 
 const appElement = document.body;
 const storageSetting = localStorage.getItem('screen-mode');
@@ -115,7 +133,9 @@ if (storageSetting === 'dark') {
 export default {
   data() {
     return {
-      currentLang: (localStorage.getItem('locale') || 'de').toUpperCase()
+      currentLang: (localStorage.getItem('locale') || 'de').toUpperCase(),
+      annotatorid: SettingsService.AnnotatorId,
+      documentid: SettingsService.DocumentId
     };
   },
   methods: {
@@ -132,7 +152,19 @@ export default {
         appElement?.classList.remove('dark-mode');
       }
       localStorage.setItem('screen-mode', appElement?.classList.contains('light-mode') ? 'light' : 'dark');
+    },
+    resetAnnotatorId() {
+      SettingsService.ResetAnnotatorId();
+      this.annotatorid = SettingsService.AnnotatorId;
+    },
+    resetDocumentId() {
+      SettingsService.ResetDocumentId();
+      this.documentid = SettingsService.DocumentId;
     }
+  },
+  mounted() {
+    this.annotatorid = SettingsService.AnnotatorId;
+    this.documentid = SettingsService.DocumentId;
   }
 }
 </script>

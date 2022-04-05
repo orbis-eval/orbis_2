@@ -1,6 +1,9 @@
 {
   "annotation": "Annotation",
   "docu_tab": "tab: zur nächsten Annotation springen",
+  "language": "Sprache",
+  "annotatorid": "AnnotatorId",
+  "documentid": "DocumentId",
   "keyboardlegend-title": "Tastaturbelegung",
   "keyboardlegend-enter": "akzeptieren",
   "keyboardlegend-delete": "löschen",

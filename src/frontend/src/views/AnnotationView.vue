@@ -1,5 +1,4 @@
 <script setup>
-import sampleData from '../assets/sample.json';
 import Annotation from '../components/Annotation.vue'
 import AnnotationTypeList from '../components/AnnotationTypeList.vue'
 </script>
@@ -38,10 +37,10 @@ export default {
           data: {
             d_id: 'abc',
             meta: {},
-            annotations: this.annotations
+            annotations: AnnotationService.Annotations
                 .filter(e => [enAnnotationStatus.NEW, enAnnotationStatus.EDITED, enAnnotationStatus.APPROVED].indexOf(e.status) >= 0)
                 .map(e => {
-                  e.surface_form = this.annotationText.substring(e.start, e.end);
+                  e.surface_form = AnnotationService.Document.substring(e.start, e.end);
                   e.scope = 'entity';
                   e.meta = {};
                   return e;
@@ -49,18 +48,18 @@ export default {
           }
         };
         console.log(event, request);
-        fetch('/saveDocumentAnnotations', {
-          method: 'POST',
-          headers: ["Content-Type", "application/json"],
-          body: JSON.stringify(request)
-        })
-            .then(response => {
-              console.log(response);
-              return response.json();
-            })
-            .then(data => {
-              console.log(data);
-            });
+        // fetch('/saveDocumentAnnotations', {
+        //   method: 'POST',
+        //   headers: ["Content-Type", "application/json"],
+        //   body: JSON.stringify(request)
+        // })
+        //     .then(response => {
+        //       console.log(response);
+        //       return response.json();
+        //     })
+        //     .then(data => {
+        //       console.log(data);
+        //     });
       }
     }
   },

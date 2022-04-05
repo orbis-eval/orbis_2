@@ -1,6 +1,9 @@
 {
   "annotation": "Annotation",
   "docu_tab": "tab: go to the next annotation",
+  "language": "language",
+  "annotatorid": "AnnotatorId",
+  "documentid": "DocumentId",
   "keyboardlegend-title": "Shortcuts",
   "keyboardlegend-enter": "accept",
   "keyboardlegend-delete": "decline",
@@ -10,5 +13,13 @@
   "keyboardlegend-shift": "shorten at start",
   "keyboardlegend-unshift": "prepend",
   "keyboardlegend-pop": "shorten at the end",
-  "keyboardlegend-push": "append"
+  "keyboardlegend-push": "append",
+  "mouselegend-title": "Mouseevents",
+  "mouselegend-click": "click: select annotation",
+  "mouselegend-drag": "mark: select string",
+  "mouselegend-dblclick": "double click: select entire word",
+  "mouselegend-dblclickshift": "double click & shift key: select word sequence",
+  "documentlegend-title": "File",
+  "documentlegend-save": "save",
+  "documentlegend-savenext": "save & continue"
 }
