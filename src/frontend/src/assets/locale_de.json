@@ -10,5 +10,13 @@
   "keyboardlegend-shift": "vorne verkürzen",
   "keyboardlegend-unshift": "vorne verlängern",
   "keyboardlegend-pop": "hinten verkürzen",
-  "keyboardlegend-push": "hinten verlängern"
+  "keyboardlegend-push": "hinten verlängern",
+  "mouselegend-title": "Mausbefehle",
+  "mouselegend-click": "Klick: Annotation auswählen",
+  "mouselegend-drag": "Markieren: Zeichenkette auswählen",
+  "mouselegend-dblclick": "Doppelklick: ganzes Wort auswählen",
+  "mouselegend-dblclickshift": "Doppelklick & Shift-Taste: Wortreihe auswählen",
+  "documentlegend-title": "Datei",
+  "documentlegend-save": "speichern",
+  "documentlegend-savenext": "speichern & weiter"
 }
