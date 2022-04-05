@@ -4,6 +4,7 @@
   "language": "Sprache",
   "annotatorid": "AnnotatorId",
   "documentid": "DocumentId",
+  "bugreport": "Bug Report",
   "keyboardlegend-title": "Tastaturbelegung",
   "keyboardlegend-enter": "akzeptieren",
   "keyboardlegend-delete": "löschen",

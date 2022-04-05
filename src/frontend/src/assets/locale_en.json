@@ -4,6 +4,7 @@
   "language": "language",
   "annotatorid": "AnnotatorId",
   "documentid": "DocumentId",
+  "bugreport": "bug report",
   "keyboardlegend-title": "Shortcuts",
   "keyboardlegend-enter": "accept",
   "keyboardlegend-delete": "decline",

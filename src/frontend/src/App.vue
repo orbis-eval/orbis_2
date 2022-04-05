@@ -14,6 +14,10 @@
       </div>
 
       <div class="right">
+        <a id="bugreport" :href="`mailto:abc@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aaid:%20${annotatorid}%0D%0Apid:%20${previousdocumentid}%0D%0Adid:%20${documentid}%0D%0A-----`">
+          <i class="fa fa-bug"></i>
+          <span>Bug Report</span>
+        </a>
         <div id="document" :title="documentid" @click="resetDocumentId()">
           <i class="fa fa-file"></i>
           <span v-if="documentid">{{documentid}}</span>
@@ -42,10 +46,10 @@
 </style>
 
 <style scoped>
-#language-switcher, #annotator, #document {
+#language-switcher, #annotator, #document, #bugreport {
   position: relative;
   display: flex;
-  align-content: center;
+  align-items: center;
   padding: .4em 1em;
   margin: 0 .5em;
   background: var(--color-text);
@@ -54,7 +58,7 @@
   border-radius: 2em;
   cursor: pointer;
 }
-#language-switcher span, #annotator span, #document span {
+#language-switcher span, #annotator span, #document span, #bugreport span {
   display: block;
   padding-left: .5em;
   max-width: 10em;
@@ -135,7 +139,8 @@ export default {
     return {
       currentLang: (localStorage.getItem('locale') || 'de').toUpperCase(),
       annotatorid: SettingsService.AnnotatorId,
-      documentid: SettingsService.DocumentId
+      documentid: SettingsService.DocumentId,
+      previousdocumentid: SettingsService.PreviousDocumentId
     };
   },
   methods: {
@@ -159,11 +164,13 @@ export default {
     },
     resetDocumentId() {
       SettingsService.ResetDocumentId();
+      this.previousdocumentid = SettingsService.PreviousDocumentId;
       this.documentid = SettingsService.DocumentId;
     }
   },
   mounted() {
     this.annotatorid = SettingsService.AnnotatorId;
+    this.previousdocumentid = SettingsService.PreviousDocumentId;
     this.documentid = SettingsService.DocumentId;
   }
 }

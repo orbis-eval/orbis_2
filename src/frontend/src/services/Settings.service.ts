@@ -1,10 +1,15 @@
 
 export class SettingsService {
     private static _annotatorid: string;
+    private static _previousdocumentid: string;
     private static _documentid: string;
 
     public static get AnnotatorId() {
         return this._annotatorid;
+    }
+
+    public static get PreviousDocumentId(): string {
+        return this._previousdocumentid;
     }
 
     public static get DocumentId(): string {
@@ -16,12 +21,18 @@ export class SettingsService {
             localStorage.setItem('annotatorid', this._annotatorid);
         }
         if (this._documentid) {
+            const previousdocumentid = localStorage.getItem('documentid');
+            if (this._documentid !== previousdocumentid) {
+                this._previousdocumentid = previousdocumentid;
+                localStorage.setItem('prevdid', this._previousdocumentid);
+            }
             localStorage.setItem('documentid', this._documentid);
         }
     }
 
     public static LoadDataFromStorage() {
         this._annotatorid = localStorage.getItem('annotatorid');
+        this._previousdocumentid = localStorage.getItem('prevdid');
         this._documentid = localStorage.getItem('documentid');
     }
 
