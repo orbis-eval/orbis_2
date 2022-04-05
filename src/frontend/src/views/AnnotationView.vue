@@ -69,7 +69,7 @@ export default {
     this.annotationTypes = AnnotationService.AnnotationTypes;
     if (!AnnotationService.Document) {
       AnnotationService.GetDocumentForAnnotation().then(data => {
-        console.log(data);
+        // console.log(data);
         this.annotations = AnnotationService.Annotations;
         this.annotationTypes = AnnotationService.AnnotationTypes;
       });
