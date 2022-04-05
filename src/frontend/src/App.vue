@@ -14,14 +14,13 @@
       </div>
 
       <div class="right">
-        <a id="bugreport" :href="`mailto:abc@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aaid:%20${annotatorid}%0D%0Apid:%20${previousdocumentid}%0D%0Adid:%20${documentid}%0D%0A-----`">
+        <a id="bugreport" :href="`mailto:orbis@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aaid:%20${annotatorid}%0D%0Apid:%20${previousdocumentid}%0D%0Adid:%20${documentid}%0D%0A-----`">
           <i class="fa fa-bug"></i>
           <span>Bug Report</span>
         </a>
         <div id="document" :title="documentid" @click="resetDocumentId()">
           <i class="fa fa-file"></i>
-          <span v-if="documentid">{{documentid}}</span>
-          <span v-if="!documentid" v-text="'documentid'"></span>
+          <span>{{documentid}}</span>
         </div>
         <div id="annotator" :title="annotatorid" @click="resetAnnotatorId()">
           <i class="fas fa-user"></i>

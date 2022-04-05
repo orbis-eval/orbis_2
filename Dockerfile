@@ -3,6 +3,7 @@ FROM python:3.8-slim-buster
 # TODO: configure host and port via helm values?
 ENV MONGO_HOST=localhost
 ENV MONGO_PORT=27017
+# Uncomment ENV variables for to run services local
 
 RUN apt-get update
 RUN apt-get install curl -y
