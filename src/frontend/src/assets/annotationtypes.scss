@@ -41,10 +41,6 @@ $i: 0;
   &.hover {
     --lightness-offset: -15%;
   }
-  &.selected {
-    box-shadow: 2px 2px 0 var(--color-neutral);
-    --lightness-offset: -15%;
-  }
   &.type_undefined {
     --lightness: 100%;
     --lightness-offset: 0%;
@@ -52,3 +48,6 @@ $i: 0;
 }
 
 
+.selected {
+  background-color: rgba(122,122,122,.25);
+}

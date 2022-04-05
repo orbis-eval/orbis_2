@@ -64,14 +64,14 @@
     <li class="">&nbsp;</li>
     <li v-for="(type, index) of annotationTypes"
         class="marked approved"
-        :class="['type_' + index]"
-        @click="simulateKey(keyList[index], getKeyCode(keyList[index]))"
+        :class="['type_' + type.index]"
+        @click="simulateKey(type.key, getKeyCode(keyList[index]))"
     >
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-stack-1x" :class="[ 'fa-' + keyList[index] ]"></i>
       </span>
-      {{ type }}
+      {{ type.caption }}
     </li>
     <li class="">&nbsp;</li>
     <li class="marked type_x" @click="$emit('clicker', 'send')">absenden</li>
