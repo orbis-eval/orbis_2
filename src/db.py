@@ -141,9 +141,11 @@ class DB:
 
         # There should always be exactly one element in the database since _id is unique
         da_result = (await da_result.to_list(length=1))[0]
+        # Linked collections is a key with value of a list of one element
+        d_result = da_result.get('linked_collections')[0]
 
         result = {'da_id': da_id,
-                  'corpus_name': da_result.get('corpus_name'),
+                  'corpus_name': d_result.get('corpus_name'),
                   'annotator': da_result.get('annotator'),
                   'iteration_id': da_result.get('iteration_id'),
                   'status': 'new',
