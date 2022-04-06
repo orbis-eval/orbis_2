@@ -30,18 +30,6 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 annotator_queue = AnnotatorQueue()
 
-origins = [
-    "*"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 @app.get('/', response_class=FileResponse)
 def home():

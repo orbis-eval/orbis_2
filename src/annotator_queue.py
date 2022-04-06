@@ -8,7 +8,6 @@ class AnnotatorQueue:
         self.__queue = []
 
         if document_annotations:
-            print(document_annotations)
             for da in document_annotations:
                 self.add_document_annotation(da)
 
@@ -23,17 +22,27 @@ class AnnotatorQueue:
         if not self.__queue:
             return {}
         if not corpus_name and not annotator:
-            return self.__queue[0].get('da_id')
+            da_id = self.__queue[0].get('da_id')
+            self.__remove_document_annotation(da_id)
+            return da_id
         elif corpus_name and annotator:
-            filtered_list = list(filter(lambda q: q['corpus_name'] == corpus_name and
-                                                  q['annotator'] == annotator, self.__queue))
+            filtered_list = list(filter(lambda q:
+                                        q['corpus_name'] == corpus_name and
+                                        q['annotator'] == annotator,
+                                        self.__queue))
             if filtered_list:
-                return filtered_list[0].get('da_id')
+                da_id = filtered_list[0].get('da_id')
+                self.__remove_document_annotation(da_id)
+                return da_id
         else:
-            filtered_list = list(filter(lambda q: q['corpus_name'] == corpus_name or
-                                                  q['annotator'] == annotator, self.__queue))
+            filtered_list = list(filter(lambda q:
+                                        q['corpus_name'] == corpus_name or
+                                        q['annotator'] == annotator,
+                                        self.__queue))
             if filtered_list:
-                return filtered_list[0].get('da_id')
+                da_id = filtered_list[0].get('da_id')
+                self.__remove_document_annotation(da_id)
+                return da_id
         return {}
 
     def get_document_annotation_status(self, da_id):
@@ -48,10 +57,8 @@ class AnnotatorQueue:
             return True
         return False
 
-    def remove_document_annotation(self, da_id):
+    def __remove_document_annotation(self, da_id):
         if da_id in self.__da_ids:
             document_annotation = list(filter(lambda q: q['da_id'] == da_id, self.__queue))[0]
             self.__queue.remove(document_annotation)
             self.__da_ids.remove(da_id)
-            return True
-        return False

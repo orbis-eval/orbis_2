@@ -13,7 +13,7 @@ MONGO_DEFAULT_URL = "mongodb://localhost:27017/?retryWrites=true&w=majority"
 class DB:
 
     def __init__(self, mongo_url=None, db_name='orbis'):
-        self.__mongo_url=mongo_url
+        self.__mongo_url = mongo_url
         self.__db_name = db_name
 
     async def open(self):
