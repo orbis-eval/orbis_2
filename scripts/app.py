@@ -3,7 +3,6 @@ import uvicorn
 import sys
 from pathlib import Path
 
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -28,7 +27,9 @@ app.add_event_handler('startup', db.open)
 app.add_event_handler('shutdown', db.close)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
-annotator_queue = AnnotatorQueue()
+annotator_queue = AnnotatorQueue(db)
+
+app.add_event_handler('startup', annotator_queue.load_queue_from_db)
 
 
 @app.get('/', response_class=FileResponse)
@@ -43,11 +44,12 @@ def annotation():
 
 @app.put('/addDocumentToAnnotationQueue/{da_id}', response_model=ResponseModel)
 async def add_document_to_annotation_queue(da_id: str):
+    response = None
     if document_annotation_for_queue := await db.get_document_annotation_for_queue(da_id):
-        annotator_queue.add_document_annotation(document_annotation_for_queue)
-        response = Response(status_code=200,
-                            message=f'{da_id} added to queue.')
-    else:
+        if success := await annotator_queue.add_document_annotation(document_annotation_for_queue):
+            response = Response(status_code=200,
+                                message=f'{da_id} added to queue.')
+    if not response:
         response = Response(status_code=400,
                             message=f'{da_id} not added to queue.')
     return response.as_json()
@@ -55,7 +57,7 @@ async def add_document_to_annotation_queue(da_id: str):
 
 @app.get('/getDocumentForAnnotation', response_model=ResponseModel)
 async def get_document_for_annotation(corpus_name=None, annotator=None):
-    if da_id := annotator_queue.get_id_for_annotation(corpus_name, annotator):
+    if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
         response_content = await get_document_content(da_id)
         response_annotations = await get_document_annotations(da_id)
         if response_content and response_annotations:
@@ -65,7 +67,7 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
                                          'annotations': response_annotations['content']['annotations']})
         else:
             response = Response(status_code=400, 
-                                message='Empty annotator queue for request.')
+                                message='DB operation failed.')
     else:
         response = Response(status_code=400, 
                             message='Empty annotator queue for request.')

@@ -2,7 +2,6 @@ import datetime
 import os
 
 import pymongo
-from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from bson.objectid import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -39,7 +38,7 @@ class DB:
     async def _delete(self):
         self.__client.drop_database(self.__db_name)
 
-    async def __insert(self, table_name, record):
+    async def __insert_record(self, table_name, record):
         '''
         Inserts new record to table. Returns None in case of DuplicateKeyError
         '''
@@ -50,6 +49,18 @@ class DB:
         except DuplicateKeyError:
             print('Record already exists.')
             return None
+
+    async def __delete_record(self, table_name, record_filter):
+        try:
+            response = await self.__db[table_name].delete_one(record_filter)
+
+            if response.deleted_count == 1:
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(e)
+            return False
 
     async def _get_record(self, table_name, record_filter):
         return await self.__db[table_name].find_one(record_filter)
@@ -63,7 +74,9 @@ class DB:
         return str(result)
 
     async def __get_records(self, table_name, record_filter):
-        return list(await self.__db[table_name].find(record_filter))
+        if result := await self.__db[table_name].find(record_filter).to_list(1000000):
+            return result
+        return []
 
     async def _add_document_annotation(self, d_id, annotator, iteration_id=1, precessor='NEW'):
         document_annotation_record = {'d_id': ObjectId(d_id),
@@ -71,7 +84,7 @@ class DB:
                                       'iteration_id': iteration_id,
                                       'datetime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                       'precessor': precessor}
-        document_annotation_id = await self.__insert('document_annotation', document_annotation_record)
+        document_annotation_id = await self.__insert_record('document_annotation', document_annotation_record)
         return document_annotation_id
 
     async def _add_annotations(self, da_id, d_id, record):
@@ -83,7 +96,7 @@ class DB:
         annotation_record = {'da_id': ObjectId(da_id),
                              'd_id': ObjectId(d_id),
                              'annotations': record}
-        return await self.__insert('annotation', annotation_record)
+        return await self.__insert_record('annotation', annotation_record)
 
     async def _get_d_id_from_da_id(self, da_id):
         record_filter = {'_id': ObjectId(da_id)}
@@ -92,7 +105,7 @@ class DB:
     async def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
                   'description': description}
-        if not (corpus_id := await self.__insert('corpus', record)):
+        if not (corpus_id := await self.__insert_record('corpus', record)):
             corpus_filter = {'corpus_name': corpus_name}
             corpus_id = await self.__get_record_attr('corpus', corpus_filter, '_id')
         return corpus_id
@@ -104,7 +117,7 @@ class DB:
                            'content': text}
 
         # checks if document already existed: None if already existed, d_id if insert was successful.
-        if (d_id := await self.__insert('document', document_record)):
+        if (d_id := await self.__insert_record('document', document_record)):
             da_id = await self._add_document_annotation(d_id, annotator)
             annotation_id = await self._add_annotations(da_id, d_id, data)
 
@@ -119,6 +132,29 @@ class DB:
             document_exists = True
 
         return d_id, da_id, annotation_id, document_exists
+
+    async def add_annotator_queue_entry(self, entry):
+        if (result := await self.__insert_record('annotator_queue', entry)):
+            print(f'{entry.get("da_id")} added to annotator queue.')
+            return True
+        else:
+            print(f'{entry.get("da_id")} not added to annotator queue.')
+            return False
+
+    async def remove_annotator_queue_entry(self, da_id):
+        record_filter = {'da_id': da_id}
+        if (success := await self.__delete_record('annotator_queue', record_filter)):
+            print(f'{da_id} removed from annotator queue')
+            return True
+        else:
+            print(f'{da_id} not removed from annotator queue.')
+            return False
+
+    async def get_annotator_queue_entries(self):
+        if entries := await self.__get_records('annotator_queue', {}):
+            da_ids = {entry.get('da_id') for entry in entries}
+            return entries, da_ids
+        return [], set()
 
     async def get_document_content(self, da_id):
         d_id = await self._get_d_id_from_da_id(da_id)
