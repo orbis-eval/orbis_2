@@ -20,10 +20,13 @@ class DB:
         if self.__mongo_url:
             self.__client = AsyncIOMotorClient(self.__mongo_url)
         elif os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
-            mongo_url = f"mongodb://{os.environ.get('MONGO_HOST')}:{os.environ.get('MONGO_PORT')}/?retryWrites=true&w=majority"
+            mongo_url = f"mongodb://" \
+                        f"{os.environ.get('MONGO_HOST')}:" \
+                        f"{os.environ.get('MONGO_PORT')}/" \
+                        f"?retryWrites=true&w=majority"
         else:
             mongo_url = MONGO_DEFAULT_URL
-            
+
         # init database:
         self.__client = AsyncIOMotorClient(mongo_url)
         print(f'using url "{mongo_url}" for database')
@@ -202,4 +205,3 @@ class DB:
                                                         precessor=da_id)
         annotation_id = self._add_annotations(new_da_id, d_id, data.get("annotations", []))
         return new_da_id
-

@@ -13,7 +13,7 @@ class Response:
             self.__content = {}
         else:
             self.__content = content
-        
+
     @property
     def status_code(self):
         return self.__status_code

@@ -24,6 +24,7 @@ pep8:
     - tox -e pep8
   tags:
     - docker
+  allow_failure: true
 
 
 pytest:
