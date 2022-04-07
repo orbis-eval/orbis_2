@@ -31,7 +31,6 @@ pytest:
   image: "python:3.8"
   stage: Test
   script:
-    - python3 setup.py install
     - pip3 install coverage
     - pip3 install pytest
     - python3 -m coverage run -m pytest tests/
