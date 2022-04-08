@@ -3,6 +3,7 @@
   "docu_tab": "tab: go to the next annotation",
   "language": "language",
   "annotatorid": "AnnotatorId",
+  "corpusname": "Corpus Name",
   "documentid": "DocumentId",
   "bugreport": "bug report",
   "keyboardlegend-title": "Shortcuts",

@@ -3,6 +3,7 @@ export class SettingsService {
     private static _annotatorid: string;
     private static _previousdocumentid: string;
     private static _documentid: string;
+    private static _corpusname: string;
 
     public static get AnnotatorId() {
         return this._annotatorid;
@@ -16,9 +17,16 @@ export class SettingsService {
         return this._documentid;
     }
 
+    public static get CorpusName(): string {
+        return this._corpusname;
+    }
+
     private static saveDataIntoSotrage() {
         if (this._annotatorid) {
             localStorage.setItem('annotatorid', this._annotatorid);
+        }
+        if (this._corpusname) {
+            localStorage.setItem('corpusname', this._corpusname);
         }
         if (this._documentid) {
             const previousdocumentid = localStorage.getItem('documentid');
@@ -32,6 +40,7 @@ export class SettingsService {
 
     public static LoadDataFromStorage() {
         this._annotatorid = localStorage.getItem('annotatorid');
+        this._corpusname = localStorage.getItem('corpusname');
         this._previousdocumentid = localStorage.getItem('prevdid');
         this._documentid = localStorage.getItem('documentid');
     }
@@ -41,6 +50,9 @@ export class SettingsService {
         if (urlParams.has('annotatorid')) {
             this._annotatorid = urlParams.get('annotatorid');
         }
+        if (urlParams.has('corpusname')) {
+            this._corpusname = urlParams.get('corpusname');
+        }
         if (urlParams.has('documentid')) {
             this._documentid = urlParams.get('documentid');
         }
@@ -49,7 +61,7 @@ export class SettingsService {
 
     public static GetDataFromUser() {
         this._annotatorid = prompt('Bitte geben Sie Ihre AnnotatorID ein.');
-        this._documentid = prompt('Bitte geben Sie die DokumentID ein.');
+        this._corpusname = prompt('Bitte geben Sie den Korpusnamen ein.');
         this.saveDataIntoSotrage();
     }
 
@@ -61,8 +73,23 @@ export class SettingsService {
         }
     }
 
+    public static ResetCorpusName() {
+        const corpusname = prompt('Bitte geben Sie den Korpusnamen ein.', this._corpusname || '');
+        if (!!corpusname && corpusname !== this._corpusname) {
+            this._corpusname = corpusname;
+            this.saveDataIntoSotrage();
+        }
+    }
+
     public static ResetDocumentId() {
         const documentid = prompt('Bitte geben Sie die DokumentID ein.', this._documentid || '');
+        if (!!documentid && documentid !== this._documentid) {
+            this._documentid = documentid;
+            this.saveDataIntoSotrage();
+        }
+    }
+
+    public static SetDocumentId(documentid: string) {
         if (!!documentid && documentid !== this._documentid) {
             this._documentid = documentid;
             this.saveDataIntoSotrage();

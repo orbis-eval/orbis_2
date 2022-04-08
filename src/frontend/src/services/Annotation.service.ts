@@ -1,9 +1,13 @@
-import sampleData from '../assets/sample.json';
+import sampleData from '../assets/sample3.json';
 import {Annotation, enAnnotationStatus} from '@/models/annotation';
 import {AnnotationType} from '@/models/annotation-type';
+import {SettingsService} from '@/services/Settings.service';
+import * as console from 'console';
 
 export class AnnotationService {
     static Document = '';
+    static DocumentId = '';
+    static DocumentMeta = {};
     static Annotations: Annotation[] = [];
     static AnnotationTypes: AnnotationType[] = [];
     static TypeKeyList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'];
@@ -20,15 +24,79 @@ export class AnnotationService {
 
     static GetDocumentForAnnotation() {
         //return this.LoadSingleSample();
-        return this.LoadSampleData();
+        // return this.LoadSampleData();
+        //return this.LoadSampleData3();
 
-        return fetch('/getDocumentForAnnotation')
+        return fetch(`/getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.AnnotatorId}`)
             .then(response => {
-              console.log(response);
               return response.json();
             })
             .then(data => {
-              console.log(data);
+                AnnotationService.Document = data.content.text;
+                AnnotationService.DocumentId = data.content.annotations.d_id;
+                AnnotationService.DocumentMeta = data.content.annotations.meta;
+                AnnotationService.Annotations = data.content.annotations.annotations
+                    .map(e => new Annotation(e))
+                    .sort((a: Annotation, b: Annotation) => a.start > b.start ? 1 : -1);
+                AnnotationService.Annotations.forEach((e, i) => {
+                    e.status = enAnnotationStatus.PENDING;
+                    e.index = i;
+                });
+
+                // Annotationstypen extrahieren
+                AnnotationService.AnnotationTypes = AnnotationService.Annotations
+                    .map(e => e.type)
+                    .filter((e, i, a) => a.indexOf(e) === i)
+                    .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
+
+                SettingsService.SetDocumentId(data.content.da_id);
+
+                return AnnotationService.Annotations;
+            });
+    }
+
+    static SaveDocumentAnnotations(next = false) {
+        const pendingAnnotations = this.Annotations
+            .filter(e => {
+                return [enAnnotationStatus.PENDING].indexOf(e.status) >= 0
+            });
+        if (pendingAnnotations.length > 0) {
+            if (!confirm(`Es gibt noch ${pendingAnnotations.length} unbearbeitete Annotationen. Diese gehen beim speichern verloren.`)) {
+                return new Promise((resolve) => { resolve(AnnotationService.Document); });
+            }
+        }
+        const requestBody = {
+            "da_id": SettingsService.DocumentId,
+            "annotator": SettingsService.AnnotatorId,
+            "data": {
+                "d_id": this.DocumentId,
+                "meta": this.DocumentMeta,
+                "annotations": this.Annotations
+                    .filter(e => {
+                        return [enAnnotationStatus.APPROVED, enAnnotationStatus.NEW, enAnnotationStatus.EDITED].indexOf(e.status) >= 0
+                    })
+                    .map(e => ({
+                    "key": e.key,
+                    "type": e.type,
+                    "surface_form": this.Document.substring(e.start, e.end),
+                    "start": e.start,
+                    "end": e.end,
+                    "scope": e.scope,
+                    "meta": e.meta
+                }))
+            }
+        };
+
+        return fetch('/saveDocumentAnnotations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => {
+                return next ? this.GetDocumentForAnnotation() : response.json();
+            })
+            .catch(error => {
+                console.error(error);
             });
     }
 
@@ -73,6 +141,29 @@ export class AnnotationService {
             .map(e => e.type)
             .filter((e, i, a) => a.indexOf(e) === i)
             .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
+
+        return new Promise((resolve) => { resolve(AnnotationService.Document); });
+    }
+
+    static LoadSampleData3() {
+        AnnotationService.Document = sampleData.content.text;
+        AnnotationService.DocumentId = sampleData.content.annotations.d_id;
+        AnnotationService.DocumentMeta = sampleData.content.annotations.meta;
+        AnnotationService.Annotations = sampleData.content.annotations.annotations
+            .map(e => new Annotation(e))
+            .sort((a, b) => a.start > b.start ? 1 : -1);
+        AnnotationService.Annotations.forEach((e, i) => {
+            e.status = enAnnotationStatus.PENDING;
+            e.index = i;
+        });
+
+        // Annotationstypen extrahieren
+        AnnotationService.AnnotationTypes = AnnotationService.Annotations
+            .map(e => e.type)
+            .filter((e, i, a) => a.indexOf(e) === i)
+            .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
+
+        SettingsService.SetDocumentId(sampleData.content.da_id);
 
         return new Promise((resolve) => { resolve(AnnotationService.Document); });
     }

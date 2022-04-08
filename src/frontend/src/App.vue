@@ -14,13 +14,13 @@
       </div>
 
       <div class="right">
-        <a id="bugreport" :href="`mailto:orbis@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aaid:%20${annotatorid}%0D%0Apid:%20${previousdocumentid}%0D%0Adid:%20${documentid}%0D%0A-----`">
+        <a id="bugreport" :href="`mailto:orbis@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aaid:%20${annotatorid}%0D%0Apid:%20${previousdocumentid}%0D%0Adid:%20${documentid}%0D%0Acn:%20${corpusname}%0D%0A-----`">
           <i class="fa fa-bug"></i>
           <span>Bug Report</span>
         </a>
-        <div id="document" :title="documentid" @click="resetDocumentId()">
+        <div id="document" :title="corpusname" @click="resetCorpusName()">
           <i class="fa fa-file"></i>
-          <span>{{documentid}}</span>
+          <span>{{corpusname}}</span>
         </div>
         <div id="annotator" :title="annotatorid" @click="resetAnnotatorId()">
           <i class="fas fa-user"></i>
@@ -138,6 +138,7 @@ export default {
     return {
       currentLang: (localStorage.getItem('locale') || 'de').toUpperCase(),
       annotatorid: SettingsService.AnnotatorId,
+      corpusname: SettingsService.CorpusName,
       documentid: SettingsService.DocumentId,
       previousdocumentid: SettingsService.PreviousDocumentId
     };
@@ -161,14 +162,16 @@ export default {
       SettingsService.ResetAnnotatorId();
       this.annotatorid = SettingsService.AnnotatorId;
     },
-    resetDocumentId() {
-      SettingsService.ResetDocumentId();
+    resetCorpusName() {
+      SettingsService.ResetCorpusName();
+      this.corpusname = SettingsService.CorpusName;
       this.previousdocumentid = SettingsService.PreviousDocumentId;
       this.documentid = SettingsService.DocumentId;
     }
   },
   mounted() {
     this.annotatorid = SettingsService.AnnotatorId;
+    this.corpusname = SettingsService.CorpusName;
     this.previousdocumentid = SettingsService.PreviousDocumentId;
     this.documentid = SettingsService.DocumentId;
   }

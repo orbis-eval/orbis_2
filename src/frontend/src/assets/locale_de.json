@@ -3,6 +3,7 @@
   "docu_tab": "tab: zur nächsten Annotation springen",
   "language": "Sprache",
   "annotatorid": "AnnotatorId",
+  "corpusname": "Korpusname",
   "documentid": "DocumentId",
   "bugreport": "Bug Report",
   "keyboardlegend-title": "Tastaturbelegung",

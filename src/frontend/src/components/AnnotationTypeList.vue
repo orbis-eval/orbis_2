@@ -1,3 +1,7 @@
+<script setup>
+import {AnnotationService} from "../services/Annotation.service";
+</script>
+
 <template>
   <h2 v-locale="'keyboardlegend-title'"></h2>
   <ul>
@@ -87,8 +91,8 @@
 
   <h2 v-locale="'documentlegend-title'"></h2>
   <ul>
-    <li class="marked type_x click" @click="$emit('clicker', 'send')" v-locale="'documentlegend-save'"></li>
-    <li class="marked type_x click" @click="$emit('clicker', 'send')" v-locale="'documentlegend-savenext'"></li>
+    <li class="marked type_x click" @click="save()"><span v-locale="'documentlegend-save'"></span></li>
+    <li class="marked type_x click" @click="save(true)" v-locale="'documentlegend-savenext'"></li>
   </ul>
 </template>
 
@@ -126,6 +130,9 @@ export default {
      */
     getKeyCode(key) {
       return key <= 9 ? 'Digit' + key : 'Key' + key.toUpperCase()
+    },
+    save(next = false) {
+      AnnotationService.SaveDocumentAnnotations(next);
     }
   }
 }
