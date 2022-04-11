@@ -5,6 +5,7 @@
   "annotator": "test_ner",
   "data": {
     "d_id": "some_document_id",
+    "meta": {},
     "annotator": "some_annotator",
     "annotations": [
       {
