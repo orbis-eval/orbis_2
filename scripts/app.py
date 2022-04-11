@@ -1,3 +1,5 @@
+from math import comb
+
 from fastapi import FastAPI
 import uvicorn
 import sys
@@ -57,9 +59,14 @@ async def add_document_to_annotation_queue(da_id: str):
 
 @app.get('/getDocumentForAnnotation', response_model=ResponseModel)
 async def get_document_for_annotation(corpus_name=None, annotator=None):
+    print(f'get_document_for_annotation with corpus "{corpus_name}" and annotator "{annotator}"')
+
     if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
+        print(f'check for document content')
         response_content = await get_document_content(da_id)
+        print(f'check for document annotation')
         response_annotations = await get_document_annotations(da_id)
+
         if response_content and response_annotations:
             response = Response(status_code=200,
                                 content={'da_id': da_id,
