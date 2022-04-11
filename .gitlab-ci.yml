@@ -31,10 +31,9 @@ pytest:
   image: "python:3.8"
   stage: Test
   script:
-    - pip3 install coverage
-    - pip3 install pytest
-    - python3 -m coverage run -m pytest tests/unit
-    - coverage xml
+    - pip install tox
+    - pip install tox-pip-version
+    - tox -e coverage
   tags:
     - docker
   artifacts:
@@ -45,10 +44,9 @@ pytest-integration:
   image: "python:3.8"
   stage: Test
   script:
-    - pip3 install coverage
-    - pip3 install pytest
-    - python3 -m coverage run -m pytest tests/integration
-    - coverage xml
+    - pip install tox
+    - pip install tox-pip-version
+    - tox -e coverage
   tags:
     - docker
   when: manual
