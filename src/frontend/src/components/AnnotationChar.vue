@@ -2,12 +2,12 @@
   <span
       v-html="getCharacter()"
       :class="[
-          (char.annotation ? `marked type_${char.annotation.typeIndex}` : ''),
+          (char.type ? `marked type_${char.type.index}` : ''),
           (char.annotation && char.annotation.selected ? 'selected' : ''),
           (char.annotation ? char.annotation.status : ''),
       ]"
-      :data-charindex="char.charIndex"
-      :data-annotationindex="char.annotationIndex"
+      :data-charindex="char.index"
+      :data-annotationindex="char.annotation?.index"
       @mouseover="mouseOver()"
       @mouseout="mouseOut()"
       @click="$emit('clicker', char.annotation)"

@@ -61,26 +61,28 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
         response_content = await get_document_content(da_id)
         response_annotations = await get_document_annotations(da_id)
         if response_content and response_annotations:
-            response = Response(status_code=200, 
+            response = Response(status_code=200,
                                 content={'da_id': da_id,
                                          'text': response_content['content']['text'],
                                          'annotations': response_annotations['content']['annotations']})
         else:
-            response = Response(status_code=400, 
-                                message='DB operation failed.')
+            response = Response(status_code=400,
+                                message='Empty annotator queue for request.',
+                                content={'corpus_name': corpus_name, 'annotator': annotator})
     else:
-        response = Response(status_code=400, 
-                            message='Empty annotator queue for request.')
+        response = Response(status_code=400,
+                            message='Empty annotator queue for request.',
+                            content={'corpus_name': corpus_name, 'annotator': annotator})
     return response.as_json()
 
 
 @app.get('/getDocumentContent', response_model=ResponseModel)
 async def get_document_content(da_id=None):
     if not da_id:
-        response = Response(status_code=400, 
+        response = Response(status_code=400,
                             message='Missing da_id in request.')
     elif text := await db.get_document_content(da_id):
-        response = Response(status_code=200, 
+        response = Response(status_code=200,
                             content={'text': text})
     else:
         response = Response(status_code=400,
@@ -91,10 +93,10 @@ async def get_document_content(da_id=None):
 @app.get('/getDocumentAnnotations', response_model=ResponseModel)
 async def get_document_annotations(da_id=None):
     if not da_id:
-        response = Response(status_code=400, 
+        response = Response(status_code=400,
                             message='Missing da_id in request.')
     elif annotations := await db.get_document_annotations(da_id):
-        response = Response(status_code=200, 
+        response = Response(status_code=200,
                             content={'annotations': annotations})
     else:
         response = Response(status_code=400,
@@ -109,7 +111,7 @@ async def save_document_annotations(data: DataExchangeModel):
         response = Response(status_code=200,
                             content={'da_id': da_id})
     else:
-        response = Response(status_code=400, 
+        response = Response(status_code=400,
                             message=f'Document Annotation not saved in db')
     return response.as_json()
 
