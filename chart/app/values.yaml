@@ -78,6 +78,9 @@ resources:
      memory: 4096Mi
   #   cpu: 100m
 
+env:
+  mongo_host: "orbis2-db-template"
+  mongo_port: "63011"
 
 nodeSelector: {}
 

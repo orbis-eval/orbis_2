@@ -44,14 +44,15 @@ spec:
               mountPath: /etc/weblyzard/
             - name: logs-weblyzard
               mountPath: /var/log/weblyzard/
-            - name: serialized-recognize
-              mountPath: /recognize/serialized
-            - name: entityfilter-recognize
-              mountPath: /recognize/entityfilter.json
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
+          env:
+            - name: "MONGO_HOST"
+              value: "{{- .Values.env.mongo_host}}"
+            - name: "MONGO_PORT"
+              value: "{{- .Values.env.mongo_port}}"
           #livenessProbe:
           #  initialDelaySeconds: 60
           #  periodSeconds: 30
@@ -79,14 +80,6 @@ spec:
         nfs:
           server: {{ .Values.nfsServer }}
           path: /archive/kube-volume/var/log/weblyzard/
-      - name: serialized-recognize
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/weblyzard/recognize/serialized
-      - name: entityfilter-recognize
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/weblyzard/recognize/entityfilter.json
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
