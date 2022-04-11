@@ -39,6 +39,8 @@ pytest:
   artifacts:
     paths:
       - $coverage_path
+  allow_failure: true
+
 
 pytest-integration:
   image: "python:3.8"
