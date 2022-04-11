@@ -1,0 +1,51 @@
+{
+  "status_code": 200,
+  "message": "",
+  "content": {
+    "da_id": "62431c68357944dc3bc0b06d",
+    "text": "  Unser Beruf und unsere Leidenschaft «HR-Management» .Global Personal ist ein eigenständiges Unternehmen der Interiman Group SA mit über 100 Mitarbeitenden, die an 21 Standorten in der Deutschschweiz ein komplettes Programm von Dienstleistungen im Bereich Human Resources anbieten.  \n\n  Für meinen Auftraggeber, ein bekanntes und erfolgreiches Unternehmen aus der Elektrotechnik, suche ich einen Abteilungsleiter Elektroinstallation.\n\n            * Verantwortung für personelle, fachliche und betriebswirtschaftliche Führung\n          * Akquisition neuer Kunden und Projekte\n          * Controlling, Marktbeobachtung sowie Prozessoptimierung\n          * Unterstützung und Förderung Ihrer Projektleiter\n          * Unterstützung der Geschäftsleitung beim weiteren Ausbau der Marktposition\n                  * Ausbildung als Elektroinstallateur o.ä.\n          * Weiterbildung als Dipl. Elektroinstallateur o.ä. mit Fachkundigkeit\n          * Fundierte Führungserfahrung z.B. als Abteilungsleiter, Projektleiter o.ä.\n          * Leader Mentalität\n          * Gutes Netzwerk und Markkenntnisse in der Region Frauenfeld - Weinfelden - St. Gallen\n        Mein Auftraggeber bietet          * Selbständigkeit und Handlungsspielraum\n          * Moderne und verkehrsgünstige Arbeitsplätze\n          * Gut aufgestellte Abteilung mit einem eingespielten Team und gefülltem Auftragsbuch\n          * Sicherer Arbeitsplatz in einer innovativen, erfolgreichen und renommierten Firma\n          Den Geschäftsführer in dieser Unternehmung kenne ich sehr gut. Soll ich Sie ihm vorschlagen?\n\n    Dann freue ich mich auf Ihre Bewerbungsunterlagen und darauf Ihnen in einem weiteren Schritt mehr Details zu dieser spannenden Tätigkeit zu erzählen.\n\n    Sehr gern können Sie mich auch vorgängig unter 044 360 23 00 anrufen.\n\n    Für eine erste Einschätzung würde auch Ihr LinkedIn oder Xing Profil genügen.\n\n    Absolute Diskretion und Vertraulichkeit ist selbstverständlich\n\n    Andreas Gloger - Spezialisiert auf die Vermittlung von Elektro Fach- und Führungspersonen",
+    "annotations": {
+      "d_id": "62431c68357944dc3bc0b06c",
+      "meta": {
+        "creationDate": "2022-03-25 15:45",
+        "First annotator": "Andreas Murk",
+        "iterationNumber": 5
+      },
+      "annotations": [
+        {
+          "key": "somekey",
+          "type": "topic",
+          "surface_form": "softskill",
+          "start": 25,
+          "end": 37,
+          "scope": "fow",
+          "meta": {
+            "some": "value"
+          }
+        },
+        {
+          "key": "somekey",
+          "type": "topic",
+          "surface_form": "softskill",
+          "start": 25,
+          "end": 37,
+          "scope": "fow",
+          "meta": {
+            "some": "value"
+          }
+        },
+        {
+          "key": "somekey",
+          "type": "topic",
+          "surface_form": "softskill",
+          "start": 25,
+          "end": 37,
+          "scope": "fow",
+          "meta": {
+            "some": "value"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -67,10 +67,12 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
                                          'annotations': response_annotations['content']['annotations']})
         else:
             response = Response(status_code=400,
-                                message='DB operation failed.')
+                                message='Empty annotator queue for request.',
+                                content={'corpus_name': corpus_name, 'annotator': annotator})
     else:
         response = Response(status_code=400,
-                            message='Empty annotator queue for request.')
+                            message='Empty annotator queue for request.',
+                            content={'corpus_name': corpus_name, 'annotator': annotator})
     return response.as_json()
 
 
@@ -110,7 +112,7 @@ async def save_document_annotations(data: DataExchangeModel):
                             content={'da_id': da_id})
     else:
         response = Response(status_code=400,
-                            message='Document Annotation not saved in db')
+                            message=f'Document Annotation not saved in db')
     return response.as_json()
 
 

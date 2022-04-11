@@ -1,4 +1,9 @@
 {
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false
+  },
   "files": [],
   "references": [
     {
