@@ -112,7 +112,7 @@ async def save_document_annotations(data: DataExchangeModel):
                             content={'da_id': da_id})
     else:
         response = Response(status_code=400,
-                            message=f'Document Annotation not saved in db')
+                            message=f'Document Annotation not saved in db for da: {da_id}')
     return response.as_json()
 
 
