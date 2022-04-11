@@ -33,13 +33,25 @@ pytest:
   script:
     - pip3 install coverage
     - pip3 install pytest
-    - python3 -m coverage run -m pytest tests/
+    - python3 -m coverage run -m pytest tests/unit
     - coverage xml
   tags:
     - docker
   artifacts:
     paths:
       - $coverage_path
+
+pytest-integration:
+  image: "python:3.8"
+  stage: Test
+  script:
+    - pip3 install coverage
+    - pip3 install pytest
+    - python3 -m coverage run -m pytest tests/integration
+    - coverage xml
+  tags:
+    - docker
+  when: manual
 
 
 sonar:
