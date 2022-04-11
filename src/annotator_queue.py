@@ -31,14 +31,17 @@ class AnnotatorQueue:
 
         if not self.__queue:
             return {}
-        if not corpus_name and not annotator:
-            da_id = self.__queue[0].get('da_id')
-        elif corpus_name and annotator:
-            if filtered_list := self.__filter_queue(corpus_name, annotator, 'and'):
-                da_id = filtered_list[0].get('da_id')
-        else:
-            if filtered_list := self.__filter_queue(corpus_name, annotator, 'or'):
-                da_id = filtered_list[0].get('da_id')
+        da_id = self.__queue[0].get('da_id')
+
+        # TODO: eval lambda expression throws errors, deactivated temporarily:
+        # if not corpus_name and not annotator:
+        #     da_id = self.__queue[0].get('da_id')
+        # elif corpus_name and annotator:
+        #     if filtered_list := self.__filter_queue(corpus_name, annotator, 'and'):
+        #         da_id = filtered_list[0].get('da_id')
+        # else:
+        #     if filtered_list := self.__filter_queue(corpus_name, annotator, 'or'):
+        #         da_id = filtered_list[0].get('da_id')
 
         if da_id:
             if success := await self.__remove_document_annotation(da_id):
