@@ -34,6 +34,7 @@ export class AnnotationService {
     }
 
     static GetDocumentForAnnotation() {
+        // this.changes();
         //return this.LoadSingleSample();
         // return this.LoadSampleData();
         // return this.LoadSampleData3();
