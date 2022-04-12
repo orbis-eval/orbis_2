@@ -127,10 +127,10 @@ import {SettingsService} from '@/services/Settings.service';
 
 const appElement = document.body;
 const storageSetting = localStorage.getItem('screen-mode');
-if (storageSetting === 'dark') {
-  appElement?.classList.add('dark-mode');
-} else {
+if (storageSetting === 'light') {
   appElement?.classList.add('light-mode');
+} else {
+  appElement?.classList.add('dark-mode');
 }
 
 export default {
