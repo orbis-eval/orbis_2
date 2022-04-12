@@ -307,6 +307,7 @@ export default {
       if ([enAnnotationStatus.PROVISORY, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(selected.status) >= 0) {
         this.setClassOnChars(selected);
       }
+      this.setTimeStamp(selected);
       if (selectNextAnnotation) {
         this.selectNextAnnotation();
       }
@@ -462,6 +463,8 @@ export default {
       }
 
       selected.type = type.caption;
+      this.setTimeStamp(selected);
+
       this.setBordersForSelectedElements();
       if (selectNextAnnotation) {
         this.selectNextAnnotation();
@@ -517,6 +520,16 @@ export default {
       while (/[a-z0-9äöüàéèÇ(]/i.test(input[start - 1]) && start > 0) { start--; }
       while (/[a-z0-9äöüàéèÇ)]/i.test(input[end]) && end <= input.length) { end++; }
       return { text: input.slice(start, end), start, end };
+    },
+    /**
+     * Setzt einen Zeitstempel
+     * @param annotation Annotation
+     */
+    setTimeStamp(annotation) {
+      if (!annotation.meta) {
+        annotation.meta = {};
+      }
+      annotation.meta.approved = new Date();
     },
     /**
      * Mouse-Selektion behandeln
