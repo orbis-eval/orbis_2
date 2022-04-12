@@ -6,7 +6,7 @@
   <header>
     <nav>
       <div class="left">
-        <RouterLink to="/annotation" v-locale="'annotation'"></RouterLink>
+        <span></span>
       </div>
 
       <div class="center">
@@ -14,7 +14,7 @@
       </div>
 
       <div class="right">
-        <a id="bugreport" :href="`mailto:orbis@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aannotator:%20${annotator}%0D%0Aprev_da_id:%20${previousdocumentid}%0D%0Ada_id:%20${documentid}%0D%0Acorpus_name:%20${corpusname}%0D%0A-----`">
+        <a id="bugreport" :href="`mailto:philipp.kuntschik@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aannotator:%20${annotator}%0D%0Aprev_da_id:%20${previousdocumentid}%0D%0Ada_id:%20${documentid}%0D%0Acorpus_name:%20${corpusname}%0D%0A-----`">
           <i class="fa fa-bug"></i>
           <span>Bug Report</span>
         </a>
