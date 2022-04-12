@@ -93,6 +93,35 @@ export default {
   },
   methods: {
     /**
+     * Initailisierungsmethode
+     * @constructor
+     */
+    InitAnnotationVue() {
+      if (this.annotations === AnnotationService.Annotations) {
+        return;
+      }
+      this.annotations = AnnotationService.Annotations;
+      // Text in einzelne Zeichen (= Objekte) aufteilen
+      console.log('build chars');
+      this.chars = AnnotationService.Document
+          .split('')
+          .map((e, i) => {
+            const char = new AnnotationCharObject({ char: e, index: i });
+            char.annotations = this.annotations
+                .filter(e => [enAnnotationStatus.REPLACED].indexOf(e.status) === -1 && e.start <= i && e.end > i);
+            if (char.annotations) {
+              char.type = AnnotationService.AnnotationTypes.find(f => f.caption === char.annotation?.type);
+            }
+            return char;
+          });
+      setTimeout(() => {
+        this.annotations
+            .filter(e => [enAnnotationStatus.REPLACED, enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY].indexOf(e.status) === -1)
+            .forEach(e => this.setClassOnChars(e));
+        this.selectNextAnnotation(true);
+      });
+      },
+    /**
      * gibt den Style für die Unterstreichungen zurück
      * @param annotations
      * @returns {string|string}
@@ -550,24 +579,9 @@ export default {
     // MouseEvent Abbonieren
     document.getElementById('annotation_container').onmouseup = this.mouseUpHandling;
 
-    this.annotations = AnnotationService.Annotations;
-    // Text in einzelne Zeichen (= Objekte) aufteilen
-    console.log('build chars');
-    this.chars = AnnotationService.Document
-        .split('')
-        .map((e, i) => {
-          const char = new AnnotationCharObject({ char: e, index: i });
-          char.annotations = this.annotations
-              .filter(e => [enAnnotationStatus.REPLACED].indexOf(e.status) === -1 && e.start <= i && e.end > i);
-          if (char.annotations) {
-            char.type = AnnotationService.AnnotationTypes.find(f => f.caption === char.annotation?.type);
-          }
-          return char;
-        });
-    setTimeout(() => {
-      this.annotations
-          .filter(e => [enAnnotationStatus.REPLACED, enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY].indexOf(e.status) === -1)
-          .forEach(e => this.setClassOnChars(e));
+    this.InitAnnotationVue();
+    AnnotationService.Changes.subscribe(() => {
+      this.InitAnnotationVue();
     });
   }
 }
