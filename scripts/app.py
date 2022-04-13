@@ -41,7 +41,7 @@ def home():
 
 @app.get('/annotation', response_class=RedirectResponse)
 def annotation():
-    return RedirectResponse("/")
+    return app.url_path_for('home')
 
 
 @app.put('/addDocumentToAnnotationQueue/{da_id}', response_model=ResponseModel)
