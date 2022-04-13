@@ -2,7 +2,7 @@
   "annotation": "Annotation",
   "docu_tab": "tab: zur nächsten Annotation springen",
   "language": "Sprache",
-  "annotatorid": "AnnotatorId",
+  "annotator": "Annotator",
   "corpusname": "Korpusname",
   "documentid": "DocumentId",
   "bugreport": "Bug Report",

@@ -2,7 +2,7 @@ import sampleData from '../assets/sample3.json';
 import {Annotation, enAnnotationStatus} from '@/models/annotation';
 import {AnnotationType} from '@/models/annotation-type';
 import {SettingsService} from '@/services/Settings.service';
-import * as console from 'console';
+import {Subject} from 'rxjs';
 
 export class AnnotationService {
     static Document = '';
@@ -11,6 +11,7 @@ export class AnnotationService {
     static Annotations: Annotation[] = [];
     static AnnotationTypes: AnnotationType[] = [];
     static TypeKeyList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'];
+    public static Changes = new Subject();
 
     static GetTypeByKey(key: string): AnnotationType|null {
         return this.AnnotationTypes.find(e => e.key == key) || null;
@@ -22,16 +23,31 @@ export class AnnotationService {
         return annotation ? this.GetTypeByCaption(annotation.type) : null;
     }
 
+    private static changes() {
+        this.Changes.next({
+            Document: this.Document,
+            DocumentId: this.DocumentId,
+            DocumentMeta: this.DocumentMeta,
+            Annotations: this.Annotations,
+            AnnotationTypes: this.AnnotationTypes
+        });
+    }
+
     static GetDocumentForAnnotation() {
+        // this.changes();
         //return this.LoadSingleSample();
         // return this.LoadSampleData();
-        //return this.LoadSampleData3();
+        // return this.LoadSampleData3();
 
         return fetch(`/getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.AnnotatorId}`)
             .then(response => {
               return response.json();
             })
             .then(data => {
+                if (data.status_code !== 200) {
+                    alert(data.message);
+                    return;
+                }
                 AnnotationService.Document = data.content.text;
                 AnnotationService.DocumentId = data.content.annotations.d_id;
                 AnnotationService.DocumentMeta = data.content.annotations.meta;
@@ -49,7 +65,9 @@ export class AnnotationService {
                     .filter((e, i, a) => a.indexOf(e) === i)
                     .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
 
+                SettingsService.SetCorpusName(data.content.corpus_name);
                 SettingsService.SetDocumentId(data.content.da_id);
+                this.changes();
 
                 return AnnotationService.Annotations;
             });
@@ -93,7 +111,9 @@ export class AnnotationService {
             body: JSON.stringify(requestBody)
         })
             .then(response => {
-                return next ? this.GetDocumentForAnnotation() : response.json();
+                return next ? this.GetDocumentForAnnotation().then(data => {
+                    return data;
+                }) : response.json();
             })
             .catch(error => {
                 console.error(error);

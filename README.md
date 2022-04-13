@@ -14,7 +14,12 @@ The goal of this component is to provide a webservice of the current orbis-eval 
    ```
 2. `docker build .`
 3. `docker tag <container> orbis2:latest`
+
+or (2. & 3. together) `docker build -t orbis2:latest .`
+
 4. `docker-compose up`
+
+or (2. - 4. together) `docker build -t orbis2:latest . && docker-compose up` 
 
 # use curl
 

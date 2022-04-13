@@ -16,7 +16,7 @@ if (localStorage && localStorage.getItem('locale')) {
 
 SettingsService.LoadDataFromStorage();
 SettingsService.LoadDataFromQueryString();
-if (!SettingsService.AnnotatorId) {
+if (!SettingsService.Annotator) {
     SettingsService.GetDataFromUser();
 }
 
