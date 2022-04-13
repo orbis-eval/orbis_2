@@ -2,7 +2,7 @@ variables:
   coverage_path: "./coverage.xml"
   APPLICATION_NAME: orbis2
 
-  DOCKER_IMAGE: registry.gitlab.semanticlab.net/futureofwork/$CI_PROJECT_NAME
+  DOCKER_IMAGE: registry.gitlab.semanticlab.net/fhgr/future-of-work/$CI_PROJECT_NAME
   KUBE_NAMESPACE_FHGR: default
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
