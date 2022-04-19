@@ -2,7 +2,7 @@
 import AnnotationChar from "./AnnotationChar.vue";
 </script>
 <template>
-  <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)">
+  <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)" :key="documentId">
     <template v-for="char in chars">
       <span :class="[char.char === '\n' ? 'spacer' : '']"
             :data-charindex="char.index"
@@ -84,6 +84,7 @@ import {enAnnotationStatus} from "@/models/annotation";
 export default {
   data() {
     return {
+      documentId: '',
       chars: [],
       annotations: [],
       newAnnotation: null,
@@ -100,6 +101,7 @@ export default {
       if (this.annotations === AnnotationService.Annotations) {
         return;
       }
+      this.documentId = AnnotationService.DocumentId;
       this.annotations = AnnotationService.Annotations;
       // Text in einzelne Zeichen (= Objekte) aufteilen
       console.log('build chars');
@@ -160,7 +162,12 @@ export default {
      */
     setClassOnChars(annotation, cssclass = annotation.status) {
       for (let i = annotation.start; i < annotation.end; i++) {
-        document.querySelector(`[data-charindex="${i}"]`).className = cssclass;
+        const el  =document.querySelector(`[data-charindex="${i}"]`);
+        const spacer = el.classList.contains('spacer');
+        el.className = cssclass;
+        if (spacer) {
+          el.classList.add('spacer');
+        }
       }
     },
     /**
@@ -541,17 +548,19 @@ export default {
       let start = Math.min(...[
         selection.anchorNode?.parentNode?.dataset?.charindex,
         selection.baseNode?.parentNode?.dataset?.charindex,
-        selection.extentNode?.parentNode?.dataset?.charindex,
-        selection.focusNode?.parentNode?.dataset?.charindex,
+        selection.anchorNode?.dataset?.charindex,
+        selection.baseNode?.dataset?.charindex,
       ].filter(e => !!e).map(e => parseInt(e)));
       let end = Math.max(...[
-        selection.anchorNode?.parentNode?.dataset?.charindex,
-        selection.baseNode?.parentNode?.dataset?.charindex,
         selection.extentNode?.parentNode?.dataset?.charindex,
         selection.focusNode?.parentNode?.dataset?.charindex,
+        selection.extentNode?.dataset?.charindex,
+        selection.focusNode?.dataset?.charindex,
       ].filter(e => !!e).map(e => parseInt(e)));
+
       if (start === end || start === Infinity) {
         this.closeContextMenuForNewAnnotation();
+        this.clearMouseSelection();
         return;
       }
       this.unselectAllAnnotationElements();
@@ -562,12 +571,20 @@ export default {
 
       end++;
       while (this.chars[start].char === ' ') { start++; }
-      while (this.chars[end].char === ' ') { end--; }
+      while (this.chars[end - 1].char === ' ') { end--; }
       for(let i = start; i < end; i++) {
         document.querySelector(`[data-charindex="${i}"`).classList.add('selected');
       }
 
-      this.newAnnotation = { surface_form: AnnotationService.Document.substr(start, end), start: start, end: end, status: enAnnotationStatus.PROVISORY, index: Math.max(...this.annotations.map(a => a.index)) + 1, selected: true, created: true };
+      this.newAnnotation = {
+        surface_form: AnnotationService.Document.substring(start, end),
+        start: start,
+        end: end,
+        status: enAnnotationStatus.PROVISORY,
+        index: Math.max(...this.annotations.map(a => a.index)) + 1,
+        selected: true,
+        created: true
+      };
 
       this.clearMouseSelection();
     },
@@ -604,7 +621,7 @@ export default {
     KeyboardObserver.subscribe(this.handleKeyboardEvents);
 
     // MouseEvent Abbonieren
-    document.getElementById('annotation_container').onmouseup = this.mouseUpHandling;
+    document.onmouseup = this.mouseUpHandling;
 
     this.InitAnnotationVue();
     AnnotationService.Changes.subscribe(() => {
