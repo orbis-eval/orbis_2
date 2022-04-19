@@ -2,7 +2,7 @@
 import AnnotationChar from "./AnnotationChar.vue";
 </script>
 <template>
-  <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)">
+  <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)" :key="documentId">
     <template v-for="char in chars">
       <span :class="[char.char === '\n' ? 'spacer' : '']"
             :data-charindex="char.index"
@@ -84,6 +84,7 @@ import {enAnnotationStatus} from "@/models/annotation";
 export default {
   data() {
     return {
+      documentId: '',
       chars: [],
       annotations: [],
       newAnnotation: null,
@@ -100,6 +101,7 @@ export default {
       if (this.annotations === AnnotationService.Annotations) {
         return;
       }
+      this.documentId = AnnotationService.DocumentId;
       this.annotations = AnnotationService.Annotations;
       // Text in einzelne Zeichen (= Objekte) aufteilen
       console.log('build chars');
