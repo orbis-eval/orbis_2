@@ -162,7 +162,12 @@ export default {
      */
     setClassOnChars(annotation, cssclass = annotation.status) {
       for (let i = annotation.start; i < annotation.end; i++) {
-        document.querySelector(`[data-charindex="${i}"]`).className = cssclass;
+        const el  =document.querySelector(`[data-charindex="${i}"]`);
+        const spacer = el.classList.contains('spacer');
+        el.className = cssclass;
+        if (spacer) {
+          el.classList.add('spacer');
+        }
       }
     },
     /**
@@ -552,6 +557,7 @@ export default {
         selection.extentNode?.dataset?.charindex,
         selection.focusNode?.dataset?.charindex,
       ].filter(e => !!e).map(e => parseInt(e)));
+
       if (start === end || start === Infinity) {
         this.closeContextMenuForNewAnnotation();
         this.clearMouseSelection();
@@ -615,7 +621,7 @@ export default {
     KeyboardObserver.subscribe(this.handleKeyboardEvents);
 
     // MouseEvent Abbonieren
-    document.getElementById('annotation_container').onmouseup = this.mouseUpHandling;
+    document.onmouseup = this.mouseUpHandling;
 
     this.InitAnnotationVue();
     AnnotationService.Changes.subscribe(() => {

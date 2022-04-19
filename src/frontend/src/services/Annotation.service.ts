@@ -111,9 +111,7 @@ export class AnnotationService {
             body: JSON.stringify(requestBody)
         })
             .then(response => {
-                return next ? this.GetDocumentForAnnotation().then(data => {
-                    return data;
-                }) : response.json();
+                return next ? window.location.reload() : response.json();
             })
             .catch(error => {
                 console.error(error);
