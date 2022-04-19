@@ -541,17 +541,18 @@ export default {
       let start = Math.min(...[
         selection.anchorNode?.parentNode?.dataset?.charindex,
         selection.baseNode?.parentNode?.dataset?.charindex,
-        selection.extentNode?.parentNode?.dataset?.charindex,
-        selection.focusNode?.parentNode?.dataset?.charindex,
+        selection.anchorNode?.dataset?.charindex,
+        selection.baseNode?.dataset?.charindex,
       ].filter(e => !!e).map(e => parseInt(e)));
       let end = Math.max(...[
-        selection.anchorNode?.parentNode?.dataset?.charindex,
-        selection.baseNode?.parentNode?.dataset?.charindex,
         selection.extentNode?.parentNode?.dataset?.charindex,
         selection.focusNode?.parentNode?.dataset?.charindex,
+        selection.extentNode?.dataset?.charindex,
+        selection.focusNode?.dataset?.charindex,
       ].filter(e => !!e).map(e => parseInt(e)));
       if (start === end || start === Infinity) {
         this.closeContextMenuForNewAnnotation();
+        this.clearMouseSelection();
         return;
       }
       this.unselectAllAnnotationElements();
@@ -562,12 +563,20 @@ export default {
 
       end++;
       while (this.chars[start].char === ' ') { start++; }
-      while (this.chars[end].char === ' ') { end--; }
+      while (this.chars[end - 1].char === ' ') { end--; }
       for(let i = start; i < end; i++) {
         document.querySelector(`[data-charindex="${i}"`).classList.add('selected');
       }
 
-      this.newAnnotation = { surface_form: AnnotationService.Document.substr(start, end), start: start, end: end, status: enAnnotationStatus.PROVISORY, index: Math.max(...this.annotations.map(a => a.index)) + 1, selected: true, created: true };
+      this.newAnnotation = {
+        surface_form: AnnotationService.Document.substring(start, end),
+        start: start,
+        end: end,
+        status: enAnnotationStatus.PROVISORY,
+        index: Math.max(...this.annotations.map(a => a.index)) + 1,
+        selected: true,
+        created: true
+      };
 
       this.clearMouseSelection();
     },
