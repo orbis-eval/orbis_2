@@ -571,8 +571,8 @@ export default {
       }
 
       end++;
-      while (this.chars[start].char === ' ') { start++; }
-      while (this.chars[end - 1].char === ' ') { end--; }
+      while (this.chars[start].char === ' ' || this.chars[start].char === '\n') { start++; }
+      while (this.chars[end - 1].char === ' ' || this.chars[end - 1].char === '\n') { end--; }
       for(let i = start; i < end; i++) {
         document.querySelector(`[data-charindex="${i}"`).classList.add('selected');
       }
