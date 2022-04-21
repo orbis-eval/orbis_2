@@ -545,18 +545,19 @@ export default {
       const selection = window.getSelection();
       if (!selection) { return; }
 
-      let start = Math.min(...[
+      const selectionIndexes = [
         selection.anchorNode?.parentNode?.dataset?.charindex,
         selection.baseNode?.parentNode?.dataset?.charindex,
         selection.anchorNode?.dataset?.charindex,
         selection.baseNode?.dataset?.charindex,
-      ].filter(e => !!e).map(e => parseInt(e)));
-      let end = Math.max(...[
         selection.extentNode?.parentNode?.dataset?.charindex,
         selection.focusNode?.parentNode?.dataset?.charindex,
         selection.extentNode?.dataset?.charindex,
         selection.focusNode?.dataset?.charindex,
-      ].filter(e => !!e).map(e => parseInt(e)));
+      ].filter(e => !!e).map(e => parseInt(e))
+
+      let start = Math.min(...selectionIndexes);
+      let end = Math.max(...selectionIndexes);
 
       if (start === end || start === Infinity) {
         this.closeContextMenuForNewAnnotation();
@@ -570,8 +571,8 @@ export default {
       }
 
       end++;
-      while (this.chars[start].char === ' ') { start++; }
-      while (this.chars[end - 1].char === ' ') { end--; }
+      while (this.chars[start].char === ' ' || this.chars[start].char === '\n') { start++; }
+      while (this.chars[end - 1].char === ' ' || this.chars[end - 1].char === '\n') { end--; }
       for(let i = start; i < end; i++) {
         document.querySelector(`[data-charindex="${i}"`).classList.add('selected');
       }

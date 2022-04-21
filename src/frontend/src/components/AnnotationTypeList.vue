@@ -73,7 +73,7 @@ import {AnnotationService} from "../services/Annotation.service";
     >
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
-        <i class="fa-solid fa-stack-1x" :class="[ 'fa-' + keyList[index] ]"></i>
+        <i class="fa-solid fa-stack-1x fa-inverse" :class="[ 'fa-' + keyList[index] ]"></i>
       </span>
       {{ type.caption }}
     </li>
@@ -150,6 +150,15 @@ li.marked {
   user-focus: none;
   box-shadow: none;
   border-bottom: 1px solid #181818;
+}
+
+li.marked .svg-inline--fa {
+  height: 1em;
+  width: 1em;
+}
+
+li.marked .fa-stack-2x {
+  color: var(--vt-c-divider-dark-1);
 }
 
 li.types {
