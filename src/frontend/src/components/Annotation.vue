@@ -545,18 +545,19 @@ export default {
       const selection = window.getSelection();
       if (!selection) { return; }
 
-      let start = Math.min(...[
+      const selectionIndexes = [
         selection.anchorNode?.parentNode?.dataset?.charindex,
         selection.baseNode?.parentNode?.dataset?.charindex,
         selection.anchorNode?.dataset?.charindex,
         selection.baseNode?.dataset?.charindex,
-      ].filter(e => !!e).map(e => parseInt(e)));
-      let end = Math.max(...[
         selection.extentNode?.parentNode?.dataset?.charindex,
         selection.focusNode?.parentNode?.dataset?.charindex,
         selection.extentNode?.dataset?.charindex,
         selection.focusNode?.dataset?.charindex,
-      ].filter(e => !!e).map(e => parseInt(e)));
+      ].filter(e => !!e).map(e => parseInt(e))
+
+      let start = Math.min(...selectionIndexes);
+      let end = Math.max(...selectionIndexes);
 
       if (start === end || start === Infinity) {
         this.closeContextMenuForNewAnnotation();
