@@ -520,10 +520,14 @@ export default {
         let viewRect = annotationContainerElement.parentElement.getBoundingClientRect();
         let elemRect = newSelectedElement.getBoundingClientRect();
         if (elemRect.bottom > viewRect.bottom - (viewRect.height / 3)) {
-          annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          setTimeout(() => {
+            annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          });
         }
         if (elemRect.top < viewRect.top + (viewRect.height / 3)) {
-          annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          setTimeout(() => {
+            annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          });
         }
       }
     },
