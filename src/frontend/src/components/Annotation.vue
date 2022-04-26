@@ -6,7 +6,7 @@ import AnnotationChar from "./AnnotationChar.vue";
     <template v-for="char in chars">
       <span :class="[char.char === '\n' ? 'spacer' : '']"
             :data-charindex="char.index"
-            :style="getBorders(char.annotations)"
+            :style="getBordersByIndex(char.index)"
       >
         {{char.char === ' ' || char.char === '\n' ? '&nbsp;' : char.char}}
       </span>
@@ -24,17 +24,6 @@ import AnnotationChar from "./AnnotationChar.vue";
 </style>
 
 <style scoped>
-[data-annotations="1"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6;
-}
-[data-annotations="1"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6, 0 4px 0 #ddd, 0 6px 0 #6f6;
-}
-[data-annotations="2"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6, 0 4px 0 #ddd, 0 6px 0 #6f6, 0 7px 0 #ddd, 0 9px 0 #6f6;
-  background-color: #9f9;
-}
-
 #annotation_container {
   display: flex;
   flex-wrap: wrap;
@@ -125,6 +114,19 @@ export default {
       },
     /**
      * gibt den Style für die Unterstreichungen zurück
+     * @param index
+     * @returns {string|string}
+     */
+    getBordersByIndex(index) {
+      const annotations = this.annotations.filter(f =>
+          f.start <= index
+          && f.end > index
+          && [enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY, enAnnotationStatus.APPROVED, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(f.status) >= 0
+      );
+      return this.getBorders(annotations);
+    },
+    /**
+     * gibt den Style für die Unterstreichungen zurück
      * @param annotations
      * @returns {string|string}
      */
@@ -148,11 +150,7 @@ export default {
      */
     setBordersForSelectedElements() {
       document.querySelectorAll('.selected').forEach(e => {
-        e.style = this.getBorders(this.annotations.filter(f =>
-            f.start <= e.getAttribute('data-charindex')
-            && f.end > e.getAttribute('data-charindex')
-            && [enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY, enAnnotationStatus.APPROVED, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(f.status) >= 0
-        ));
+        e.style = this.getBordersByIndex(e.getAttribute('data-charindex'));
       });
     },
     /**
@@ -165,6 +163,9 @@ export default {
         const el  =document.querySelector(`[data-charindex="${i}"]`);
         const spacer = el.classList.contains('spacer');
         el.className = cssclass;
+        if (annotation.status !== cssclass) {
+          el.classList.add(annotation.status);
+        }
         if (spacer) {
           el.classList.add('spacer');
         }
@@ -352,6 +353,13 @@ export default {
         this.setClassOnChars(original, 'selected');
         this.setBordersForSelectedElements();
         this.annotations.splice(this.annotations.indexOf(selected), 1);
+        if (selected.status === enAnnotationStatus.NEW) {
+          for (let i = selected.start; i < selected.end; i++) {
+            if (this.chars[i].annotations.indexOf(selected) > 0) {
+              this.chars[i].annotations.splice(this.chars[i].annotations.indexOf(selected), 1);
+            }
+          }
+        }
       } else {
         selected.status = enAnnotationStatus.DELETED;
         this.setClassOnChars(selected);
@@ -368,6 +376,9 @@ export default {
       prevAnnotations.sort((a, b) => a.start > b.start ? 1 : -1);
       this.annotations.splice(this.annotations.indexOf(prevAnnotations[prevAnnotations.length - 1]) + 1, 0, selected);
       this.newAnnotation = null;
+      for (let i = selected.start; i < selected.end; i++) {
+        this.chars[i].annotations.push(selected);
+      }
       return selected;
     },
     /**
@@ -449,6 +460,7 @@ export default {
         selected.selected = true;
         this.annotations.splice(this.annotations.indexOf(selected), 0, newSelected);
       }
+      this.setClassOnChars(selected, 'selected');
     },
     /**
      * setzt einen neuen AnnotationType und springt weiter
