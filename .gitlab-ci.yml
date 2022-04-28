@@ -31,7 +31,7 @@ pytest:
   image: "python:3.8"
   stage: Test
   services:
-    - name: mongodb
+    - name: mongo:latest
       alias: 'db'
   variables:
     MONGO_HOST: 'db'
