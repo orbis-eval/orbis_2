@@ -14,7 +14,6 @@ class DB:
     def __init__(self, mongo_url=None, db_name='orbis'):
         self.__mongo_url = mongo_url
         self.__db_name = db_name
-        print('helo')
 
     async def open(self):
         # check for database params:
@@ -32,9 +31,9 @@ class DB:
         self.__client = AsyncIOMotorClient(mongo_url)
         print(f'using url "{mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
-        self.__db['corpus'].create_index('corpus_name', unique=True)
-        self.__db['document'].create_index([('id', pymongo.ASCENDING),
-                                            ('corpus_name', pymongo.ASCENDING)], unique=True)
+        await self.__db['corpus'].create_index('corpus_name', unique=True)
+        await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+                                                  ('corpus_name', pymongo.ASCENDING)], unique=True)
 
     def close(self):
         self.__client.close()
@@ -133,7 +132,7 @@ class DB:
             document_filter = {'id': source_id,
                                'corpus_name': corpus_name}
             d_id = await self.__get_record_id('document', document_filter, '_id')
-            annotation_filter = {'d_id': d_id}
+            annotation_filter = {'d_id': ObjectId(d_id)}
             da_id = await self.__get_record_id('annotation', annotation_filter, 'da_id')
             annotation_id = await self.__get_record_id('annotation', annotation_filter, '_id')
             document_exists = True

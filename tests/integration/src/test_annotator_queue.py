@@ -13,6 +13,7 @@ def load_test_file(fn='test_document.json'):
         data = json.loads(file.read())
     return data
 
+
 async def get_db_instance():
     db = DB()
     await db.open()

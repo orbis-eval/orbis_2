@@ -30,6 +30,12 @@ pep8:
 pytest:
   image: "python:3.8"
   stage: Test
+  services:
+    - name: mongodb
+      alias: 'db'
+  variables:
+    MONGO_HOST: 'db'
+    MONGO_PORT: '27017'
   script:
     - pip install tox
     - pip install tox-pip-version
