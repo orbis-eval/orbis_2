@@ -1,5 +1,5 @@
 # Import required for eval operation (_id of type ObjectId will be queried)
-# from bson.objectid import ObjectId
+from bson.objectid import ObjectId
 
 from src.db import DB
 
@@ -10,6 +10,11 @@ class AnnotatorQueue:
         self.__db = db
         self.__da_ids = set()
         self.__queue = []
+
+    async def add_document_annotations(self, document_annotations: List):
+        if document_annotations:
+            for da in document_annotations:
+                await self.add_document_annotation(da)
 
     async def add_document_annotation(self, document_annotation):
         if (da_id := document_annotation.get('da_id')) not in self.__da_ids:

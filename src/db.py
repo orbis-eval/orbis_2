@@ -14,6 +14,7 @@ class DB:
     def __init__(self, mongo_url=None, db_name='orbis'):
         self.__mongo_url = mongo_url
         self.__db_name = db_name
+        print('helo')
 
     async def open(self):
         # check for database params:
@@ -35,11 +36,11 @@ class DB:
         self.__db['document'].create_index([('id', pymongo.ASCENDING),
                                             ('corpus_name', pymongo.ASCENDING)], unique=True)
 
-    async def close(self):
-        self.__db.close()
+    def close(self):
+        self.__client.close()
 
     async def _delete(self):
-        self.__client.drop_database(self.__db_name)
+        await self.__client.drop_database(self.__db_name)
 
     async def __insert_record(self, table_name, record):
         '''
@@ -108,9 +109,12 @@ class DB:
     async def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
                   'description': description}
+        print(record)
         if not (corpus_id := await self.__insert_record('corpus', record)):
+            print('Hello world')
             corpus_filter = {'corpus_name': corpus_name}
             corpus_id = await self.__get_record_attr('corpus', corpus_filter, '_id')
+            corpus_id = str(corpus_id)
         return corpus_id
 
     async def add_document(self, source_id, corpus_name, text, annotator, data):

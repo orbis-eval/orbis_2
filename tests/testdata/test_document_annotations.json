@@ -1,12 +1,13 @@
 {
   "da_id": "some_da_id",
-  "meta": {
-    "some": "more",
-    "key": "values"
-  },
+  "annotator": "gold",
   "data": {
     "d_id": "some_document_id",
     "annotator": "some_annotator",
+    "meta": {
+      "some": "more",
+      "key": "values"
+    },
     "annotations": [
       {
         "key": "#somekey",

@@ -13,55 +13,60 @@ def load_test_file(fn='test_document.json'):
     return data
 
 
-def get_db_instance():
-    return DB(host='localhost',
-              port=27017,
-              db_name='test')
+async def get_db_instance():
+    db = DB()
+    await db.open()
+    return db
 
 
-def delete_db(db):
-    db._delete()
+async def delete_db(db):
+    await db._delete()
+    db.close()
 
 
-def test_get_document_content():
+@pytest.mark.asyncio
+async def test_get_document_content():
     document = load_test_file('test_document.json')
     document_content_expected = document['text']
-    db = get_db_instance()
+    db = await get_db_instance()
 
-    d_insert_id, da_insert_id, annotation_insert_id = db.add_document(**document)
-    document_content_actual = db.get_document_content(da_insert_id)
+    d_insert_id, da_insert_id, annotation_insert_id, document_exists = await db.add_document(**document)
+    document_content_actual = await db.get_document_content(da_insert_id)
 
-    delete_db(db)
+    await delete_db(db)
 
     assert document_content_expected == document_content_actual
 
 
-def test_get_document_annotations():
+@pytest.mark.asyncio
+async def test_get_document_annotations():
     document = load_test_file('test_document.json')
     document_annotations_expected = document['data']
-    db = get_db_instance()
+    db = await get_db_instance()
 
-    d_insert_id, da_insert_id, annotation_insert_id = db.add_document(**document)
-    document_annotations_actual = db.get_document_annotations(da_insert_id)
+    d_insert_id, da_insert_id, annotation_insert_id, document_exists = await db.add_document(**document)
+    document_annotations_actual = await db.get_document_annotations(da_insert_id)
 
-    delete_db(db)
+    await delete_db(db)
 
     assert document_annotations_expected == document_annotations_actual
 
 
-def test_save_document_annotations():
+@pytest.mark.asyncio
+async def test_save_document_annotations():
     document = load_test_file('test_document.json')
     document_annotations = load_test_file('test_document_annotations.json')
-    db = get_db_instance()
+    db = await get_db_instance()
 
-    d_insert_id, da_insert_id, annotation_insert_id = db.add_document(**document)
+    d_insert_id, da_insert_id, annotation_insert_id, document_exists = await db.add_document(**document)
     document_annotations['da_id'] = da_insert_id
     document_annotations['data']['d_id'] = d_insert_id
 
-    new_da_id = db.save_document_annotations(**document_annotations)
+    new_da_id = await db.save_document_annotations(**document_annotations)
     record_filter = {'_id': ObjectId(new_da_id)}
-    precessor = db._get_record('document_annotation', record_filter).get('precessor')
+    result = await db._get_record('document_annotation', record_filter)
+    precessor = result.get('precessor')
 
-    delete_db(db)
+    await delete_db(db)
 
     assert da_insert_id == precessor
