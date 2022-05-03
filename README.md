@@ -26,3 +26,7 @@ or (2. - 4. together) `docker build -t orbis2:latest . && docker-compose up`
 - `curl -X POST -H "Content-Type: application/json" -d @test_corpus.json localhost:63010/createCorpus`
 - `curl -X POST -H "Content-Type: application/json" -d @test_document.json localhost:63010/addDocument`
 - `curl -X PUT localhost:63010/addDocumentToAnnotationQueue/<<da_id>`
+
+## Endpoints
+
+https://gitlab.semanticlab.net/fhgr/future-of-work/orbis_2_webservice/-/blob/main/openapi.json
