@@ -25,7 +25,6 @@ pep8:
   tags:
     - docker
   allow_failure: true
-  when: manual
 
 
 pytest:
@@ -43,18 +42,6 @@ pytest:
     paths:
       - $coverage_path
   allow_failure: true
-
-
-pytest-integration:
-  image: "python:3.8"
-  stage: Test
-  script:
-    - pip install tox
-    - pip install tox-pip-version
-    - tox -e coverage
-  tags:
-    - docker
-  when: manual
 
 
 sonar:
