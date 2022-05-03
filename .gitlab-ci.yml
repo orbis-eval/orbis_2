@@ -25,6 +25,7 @@ pep8:
   tags:
     - docker
   allow_failure: true
+  when: manual
 
 
 pytest:
@@ -37,6 +38,7 @@ pytest:
     MONGO_HOST: 'db'
     MONGO_PORT: '27017'
   script:
+    - printenv
     - pip install tox
     - pip install tox-pip-version
     - tox -e coverage
