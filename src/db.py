@@ -158,6 +158,8 @@ class DB:
     async def get_annotator_queue_entries(self):
         if entries := await self.__get_records('annotator_queue', {}):
             da_ids = {entry.get('da_id') for entry in entries}
+            for entry in entries:
+                entry['_id'] = str(entry['_id'])
             return entries, da_ids
         return [], set()
 

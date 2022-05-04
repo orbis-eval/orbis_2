@@ -20,6 +20,7 @@ class AnnotatorQueue:
     async def add_document_annotation(self, document_annotation):
         if (da_id := document_annotation.get('da_id')) not in self.__da_ids:
             if success := await self.__db.add_annotator_queue_entry(document_annotation):
+                document_annotation['_id'] = str(document_annotation['_id'])
                 self.__queue.append(document_annotation)
                 self.__da_ids.add(da_id)
                 return True
