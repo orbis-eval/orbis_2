@@ -32,14 +32,25 @@ class AnnotatorQueue:
                             f'{self.__queue})')
         return list(queue_filter)
 
+    def get_filtered_queue(self, corpus_name=None, annotator=None):
+        if annotator == 'undefined':
+            annotator = None
+
+        if not corpus_name and not annotator:
+            return self.__queue
+        elif corpus_name and annotator:
+            return self.__filter_queue(corpus_name, annotator, 'and')
+        else:
+            return self.__filter_queue(corpus_name, annotator, 'or')
+
     async def get_id_for_annotation(self, corpus_name=None, annotator=None):
+        if annotator == 'undefined':
+            annotator = None
         da_id = None
 
         if not self.__queue:
             return {}
-        da_id = self.__queue[0].get('da_id')
 
-        # TODO: eval lambda expression throws errors, deactivated temporarily:
         if not corpus_name and not annotator:
             da_id = self.__queue[0].get('da_id')
         elif corpus_name and annotator:

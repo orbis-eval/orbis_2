@@ -15,7 +15,7 @@ class DB:
         self.__mongo_url = mongo_url
         self.__db_name = db_name
 
-    async def open(self):
+    async def open_(self):
         # check for database params:
         if not self.__mongo_url:
             if os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):

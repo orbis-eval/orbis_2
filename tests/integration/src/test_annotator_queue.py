@@ -103,3 +103,59 @@ async def test_remove_document_status():
 
     assert expected_da == actual_da
     assert first_da_id == first_da_id_expected
+
+
+@pytest.mark.asyncio
+async def test_get_filtered_queue_all():
+    db = await get_db_instance()
+    document_annotations = load_test_file('test_annotator_queue.json')
+    annotator_queue = AnnotatorQueue(db)
+    await annotator_queue.add_document_annotations(document_annotations)
+
+    queue = annotator_queue.get_filtered_queue()
+    actual_no_entries = len(queue)
+    expected_no_entries = 4
+
+    assert actual_no_entries == expected_no_entries
+
+
+@pytest.mark.asyncio
+async def test_get_filtered_queue_by_corpus_name():
+    db = await get_db_instance()
+    document_annotations = load_test_file('test_annotator_queue.json')
+    annotator_queue = AnnotatorQueue(db)
+    await annotator_queue.add_document_annotations(document_annotations)
+
+    queue = annotator_queue.get_filtered_queue(corpus_name='fhgr')
+    actual_no_entries = len(queue)
+    expected_no_entries = 2
+
+    assert actual_no_entries == expected_no_entries
+
+
+@pytest.mark.asyncio
+async def test_get_filtered_queue_by_annotator():
+    db = await get_db_instance()
+    document_annotations = load_test_file('test_annotator_queue.json')
+    annotator_queue = AnnotatorQueue(db)
+    await annotator_queue.add_document_annotations(document_annotations)
+
+    queue = annotator_queue.get_filtered_queue(annotator='gold')
+    actual_no_entries = len(queue)
+    expected_no_entries = 2
+
+    assert actual_no_entries == expected_no_entries
+
+
+@pytest.mark.asyncio
+async def test_get_filtered_queue_by_corpus_name_and_annotator():
+    db = await get_db_instance()
+    document_annotations = load_test_file('test_annotator_queue.json')
+    annotator_queue = AnnotatorQueue(db)
+    await annotator_queue.add_document_annotations(document_annotations)
+
+    queue = annotator_queue.get_filtered_queue(corpus_name='fhgr', annotator='gold')
+    actual_no_entries = len(queue)
+    expected_no_entries = 1
+
+    assert actual_no_entries == expected_no_entries

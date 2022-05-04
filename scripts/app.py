@@ -1,5 +1,3 @@
-from math import comb
-
 from fastapi import FastAPI
 import uvicorn
 import sys
@@ -25,7 +23,7 @@ db = DB()
 
 app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
-app.add_event_handler('startup', db.open)
+app.add_event_handler('startup', db.open_)
 app.add_event_handler('shutdown', db.close)
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
@@ -62,9 +60,9 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
     print(f'get_document_for_annotation with corpus "{corpus_name}" and annotator "{annotator}"')
 
     if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
-        print(f'check for document content')
+        print('check for document content')
         response_content = await get_document_content(da_id)
-        print(f'check for document annotation')
+        print('check for document annotation')
         response_annotations = await get_document_annotations(da_id)
 
         if response_content and response_annotations:
@@ -108,6 +106,20 @@ async def get_document_annotations(da_id=None):
     else:
         response = Response(status_code=400,
                             message=f'{da_id} not found in DB.')
+    return response.as_json()
+
+
+@app.get('/getAnnotatorQueue', response_model=ResponseModel)
+def get_annotator_queue(corpus_name=None, annotator=None):
+    if queue := annotator_queue.get_filtered_queue(corpus_name, annotator):
+        response = Response(status_code=200,
+                            content={'text': f'Success. Found {len(queue)} result for corpus name {corpus_name} '
+                                             f'and annotator {annotator}.',
+                                     'queue': queue})
+    else:
+        response = Response(status_code=400,
+                            message='Empty annotator queue for request.',
+                            content={'corpus_name': corpus_name, 'annotator': annotator})
     return response.as_json()
 
 

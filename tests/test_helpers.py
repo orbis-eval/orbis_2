@@ -18,7 +18,7 @@ async def get_db_instance():
     db = DB("mongodb://mongo:27017/?retryWrites=true&w=majority")
     # Local URL
     # db = DB()
-    await db.open()
+    await db.open_()
     return db
 
 
