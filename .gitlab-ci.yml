@@ -109,7 +109,7 @@ fhgr-deploy-production-release:
     kubernetes:
       namespace: $KUBE_PROD_NAMESPACE_FHGR
   only:
-    - master
+    - main
   tags:
     - mavendocker
   when: manual
@@ -127,7 +127,7 @@ fhgr-delete-production-release:
     name: production
     action: stop
   only:
-    - master
+    - main
   tags:
     - docker
   when: manual
@@ -153,7 +153,7 @@ fhgr-deploy-production-release-db:
     kubernetes:
       namespace: $KUBE_PROD_NAMESPACE_FHGR
   only:
-    - master
+    - main
   tags:
     - mavendocker
   when: manual
@@ -171,7 +171,7 @@ fhgr-delete-production-release-db:
     name: production
     action: stop
   only:
-    - master
+    - main
   tags:
     - docker
   when: manual
@@ -197,8 +197,8 @@ fhgr-deploy-test-release:
     on_stop: fhgr-delete-production-release
     kubernetes:
       namespace: $KUBE_TEST_NAMESPACE_FHGR
-  only:
-    - master
+  except:
+    - main
   tags:
     - mavendocker
   when: manual
@@ -215,8 +215,8 @@ fhgr-delete-test-release:
   environment:
     name: production
     action: stop
-  only:
-    - master
+  except:
+    - main
   tags:
     - docker
   when: manual
@@ -241,8 +241,8 @@ fhgr-deploy-test-release-db:
     on_stop: fhgr-delete-test-release
     kubernetes:
       namespace: $KUBE_TEST_NAMESPACE_FHGR
-  only:
-    - master
+  except:
+    - main
   tags:
     - mavendocker
   when: manual
@@ -259,8 +259,8 @@ fhgr-delete-test-release-db:
   environment:
     name: production
     action: stop
-  only:
-    - master
+  except:
+    - main
   tags:
     - docker
   when: manual
