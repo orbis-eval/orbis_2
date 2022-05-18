@@ -23,7 +23,7 @@ image:
   repository: registry.gitlab.semanticlab.net/futureofwork
   pullPolicy: IfNotPresent
 
-imagePullSecrets: [name: gitlab-registry]
+imagePullSecrets: [name: regcred]
 nameOverride: ""
 fullnameOverride: ""
 
