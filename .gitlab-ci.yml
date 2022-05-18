@@ -3,7 +3,8 @@ variables:
   APPLICATION_NAME: orbis2
 
   DOCKER_IMAGE: registry.gitlab.semanticlab.net/fhgr/future-of-work/$CI_PROJECT_NAME
-  KUBE_NAMESPACE_FHGR: fow-production
+  KUBE_TEST_NAMESPACE_FHGR: fow-test
+  KUBE_PROD_NAMESPACE_FHGR: fow-production
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
   VERSION: "1.0"
@@ -13,7 +14,8 @@ stages:
     - Test
     - Post Static Analysis
     - Docker Build
-    - Kubernetes Deployment
+    - Kubernetes Deployment Test
+    - Kubernetes Deployment Production
 
 pep8:
   image: "python:3.8"
@@ -86,7 +88,7 @@ docker:
 
 fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment
+  stage: Kubernetes Deployment Production
   script:
     - echo "Deploy to prodction cluster"
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
@@ -96,7 +98,7 @@ fhgr-deploy-production-release:
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
-      --namespace $KUBE_NAMESPACE_FHGR
+      --namespace $KUBE_PROD_NAMESPACE_FHGR
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
     - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
   environment:
@@ -104,14 +106,16 @@ fhgr-deploy-production-release:
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
-      namespace: $KUBE_NAMESPACE_FHGR
+      namespace: $KUBE_PROD_NAMESPACE_FHGR
+  only:
+    - master
   tags:
     - mavendocker
   when: manual
 
 fhgr-delete-production-release:
   image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment
+  stage: Kubernetes Deployment Production
   variables:
     GIT_STRATEGY: none
   script:
@@ -129,7 +133,7 @@ fhgr-delete-production-release:
 
 fhgr-deploy-production-release-db:
   image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment
+  stage: Kubernetes Deployment Production
   script:
     - echo "Deploy db to prodction cluster"
     - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
@@ -138,7 +142,7 @@ fhgr-deploy-production-release-db:
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
-      --namespace $KUBE_NAMESPACE_FHGR
+      --namespace $KUBE_PROD_NAMESPACE_FHGR
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
     - kubectl rollout restart deployment $APPLICATION_NAME_DB-template
   environment:
@@ -146,14 +150,105 @@ fhgr-deploy-production-release-db:
     url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
-      namespace: $KUBE_NAMESPACE_FHGR
+      namespace: $KUBE_PROD_NAMESPACE_FHGR
+  only:
+    - master
   tags:
     - mavendocker
   when: manual
 
 fhgr-delete-production-release-db:
   image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment
+  stage: Kubernetes Deployment Production
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
+    - echo "removing db production deployment $APPLICATION_NAME_DB-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
+  environment:
+    name: production
+    action: stop
+  only:
+    - master
+  tags:
+    - docker
+  when: manual
+
+fhgr-deploy-test-release:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment Test
+  script:
+    - echo "Deploy to prodction cluster"
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - helm upgrade --install $APPLICATION_NAME_APP
+      --kubeconfig $KUBECONFIG 
+      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
+      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+      --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --namespace $KUBE_TEST_NAMESPACE_FHGR
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
+    - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
+  environment:
+    name: production
+    url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
+    on_stop: fhgr-delete-production-release
+    kubernetes:
+      namespace: $KUBE_TEST_NAMESPACE_FHGR
+  only:
+    - master
+  tags:
+    - mavendocker
+  when: manual
+
+fhgr-delete-test-release:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment Test
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
+    - echo "removing production deployment $APPLICATION_NAME_APP-template from cluster..."
+    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
+  environment:
+    name: production
+    action: stop
+  only:
+    - master
+  tags:
+    - docker
+  when: manual
+
+fhgr-deploy-test-release-db:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment Test
+  script:
+    - echo "Deploy db to prodction cluster"
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
+    - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
+    - helm upgrade --install $APPLICATION_NAME_DB
+      --kubeconfig $KUBECONFIG 
+      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
+      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+      --namespace $KUBE_TEST_NAMESPACE_FHGR
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
+    - kubectl rollout restart deployment $APPLICATION_NAME_DB-template
+  environment:
+    name: production
+    url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
+    on_stop: fhgr-delete-production-release
+    kubernetes:
+      namespace: $KUBE_TEST_NAMESPACE_FHGR
+  only:
+    - master
+  tags:
+    - mavendocker
+  when: manual
+
+fhgr-delete-test-release-db:
+  image: dtzar/helm-kubectl:latest
+  stage: Kubernetes Deployment Test
   variables:
     GIT_STRATEGY: none
   script:
