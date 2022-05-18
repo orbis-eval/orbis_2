@@ -6,6 +6,7 @@ variables:
   KUBE_TEST_NAMESPACE_FHGR: fow-test
   KUBE_PROD_NAMESPACE_FHGR: fow-production
   HELM_CHART_NAME_FHGR: chart
+  TEST_URL_FHGR: preview.semanticlab.net
   URL_FHGR: prod.semanticlab.net
   VERSION: "1.0"
 
@@ -180,7 +181,7 @@ fhgr-deploy-test-release:
   stage: Kubernetes Deployment Test
   script:
     - echo "Deploy to prodction cluster"
-    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
+    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
       --kubeconfig $KUBECONFIG 
@@ -192,7 +193,7 @@ fhgr-deploy-test-release:
     - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
   environment:
     name: production
-    url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
+    url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
       namespace: $KUBE_TEST_NAMESPACE_FHGR
@@ -208,7 +209,7 @@ fhgr-delete-test-release:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
+    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
     - echo "removing production deployment $APPLICATION_NAME_APP-template from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
   environment:
@@ -225,7 +226,7 @@ fhgr-deploy-test-release-db:
   stage: Kubernetes Deployment Test
   script:
     - echo "Deploy db to prodction cluster"
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_DB
       --kubeconfig $KUBECONFIG 
@@ -236,8 +237,8 @@ fhgr-deploy-test-release-db:
     - kubectl rollout restart deployment $APPLICATION_NAME_DB-template
   environment:
     name: production
-    url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
+    on_stop: fhgr-delete-test-release
     kubernetes:
       namespace: $KUBE_TEST_NAMESPACE_FHGR
   only:
@@ -252,7 +253,7 @@ fhgr-delete-test-release-db:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
     - echo "removing db production deployment $APPLICATION_NAME_DB-template from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
   environment:
