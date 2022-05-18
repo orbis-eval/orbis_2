@@ -91,9 +91,6 @@ fhgr-deploy-production-release:
     - echo "Deploy to prodction cluster"
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
-     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
-     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
     - helm upgrade --install $APPLICATION_NAME_APP
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
@@ -137,9 +134,6 @@ fhgr-deploy-production-release-db:
     - echo "Deploy db to prodction cluster"
     - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - kubectl create secret -n $KUBE_NAMESPACE_FHGR docker-registry gitlab-registry --docker-server="$CI_REGISTRY"
-     --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml 
-     --dry-run=client | kubectl apply -n $KUBE_NAMESPACE_FHGR -f -
     - helm upgrade --install $APPLICATION_NAME_DB
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
