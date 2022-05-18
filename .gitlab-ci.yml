@@ -3,7 +3,7 @@ variables:
   APPLICATION_NAME: orbis2
 
   DOCKER_IMAGE: registry.gitlab.semanticlab.net/fhgr/future-of-work/$CI_PROJECT_NAME
-  KUBE_NAMESPACE_FHGR: default
+  KUBE_NAMESPACE_FHGR: fow-production
   HELM_CHART_NAME_FHGR: chart
   URL_FHGR: prod.semanticlab.net
   VERSION: "1.0"
