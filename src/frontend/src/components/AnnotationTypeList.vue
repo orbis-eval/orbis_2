@@ -3,8 +3,8 @@ import {AnnotationService} from "../services/Annotation.service";
 </script>
 
 <template>
-  <h2 v-locale="'annotation-types'" @click="annotationTypesCollapsed = !annotationTypesCollapsed"></h2>
-  <ul v-if="!annotationTypesCollapsed">
+  <h2 v-locale="'annotation-types'" @click="toggleCollapse(annotationTypesCollapsed)"></h2>
+  <ul v-if="annotationTypesCollapsed.value === false">
     <li v-for="(type, index) of annotationTypes"
         class="marked types click"
         :class="['type_' + type.index]"
@@ -18,8 +18,8 @@ import {AnnotationService} from "../services/Annotation.service";
     </li>
   </ul>
 
-  <h2 v-locale="'keyboardlegend-title'" @click="keyboardlegendCollapsed = !keyboardlegendCollapsed"></h2>
-  <ul v-if="!keyboardlegendCollapsed">
+  <h2 v-locale="'keyboardlegend-title'" @click="toggleCollapse(keyboardlegendCollapsed)"></h2>
+  <ul v-if="keyboardlegendCollapsed.value === false">
     <li class="marked type_x click" @click="simulateKey('Enter')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
@@ -113,8 +113,8 @@ import {AnnotationService} from "../services/Annotation.service";
     </li>
   </ul>
 
-  <h2 v-locale="'mouselegend-title'" @click="mouselegendCollapsed = !mouselegendCollapsed"></h2>
-  <ul v-if="!mouselegendCollapsed">
+  <h2 v-locale="'mouselegend-title'" @click="toggleCollapse(mouselegendCollapsed)"></h2>
+  <ul v-if="mouselegendCollapsed.value === false">
     <li class="marked type_x" v-locale="'mouselegend-click'"></li>
     <li class="marked type_x" v-locale="'mouselegend-drag'"></li>
     <li class="marked type_x" v-locale="'mouselegend-dblclick'"></li>
@@ -134,9 +134,9 @@ export default {
   data() {
     return {
       keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
-      annotationTypesCollapsed: false,
-      keyboardlegendCollapsed: false,
-      mouselegendCollapsed: false,
+      annotationTypesCollapsed: {key: 'annotationTypesCollapsed', value: false},
+      keyboardlegendCollapsed: {key: 'keyboardlegendCollapsed', value: false},
+      mouselegendCollapsed: {key: 'mouselegendCollapsed', value: false},
     }
   },
   props: {
@@ -150,6 +150,14 @@ export default {
    */
   emits: ['clicker'],
   methods: {
+    /**
+     * toggle collapse status
+     * @param element Legende
+     */
+    toggleCollapse(element) {
+      element.value = !element.value;
+      localStorage.setItem(element.key, element.value);
+    },
     /**
      * Simuliert einen Tastenanschlag, um eine Aktion auszuführen
      * @param key Taste
@@ -176,11 +184,22 @@ export default {
     save(next = false) {
       AnnotationService.SaveDocumentAnnotations(next);
     }
+  },
+  mounted() {
+    this.annotationTypesCollapsed.value = localStorage.getItem('annotationTypesCollapsed') === 'true';
+    this.keyboardlegendCollapsed.value = localStorage.getItem('keyboardlegendCollapsed') === 'true';
+    this.mouselegendCollapsed.value = localStorage.getItem('mouselegendCollapsed') === 'true';
+
+    console.log(typeof this.annotationTypesCollapsed.value, this.keyboardlegendCollapsed.value, this.mouselegendCollapsed.value);
   }
 }
 </script>
 
 <style scoped>
+h2 {
+  cursor: pointer;
+}
+
 h2, ul {
   padding: 0 .5em 0;
 }
