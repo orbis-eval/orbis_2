@@ -3,8 +3,23 @@ import {AnnotationService} from "../services/Annotation.service";
 </script>
 
 <template>
-  <h2 v-locale="'keyboardlegend-title'"></h2>
-  <ul>
+  <h2 v-locale="'annotation-types'" @click="annotationTypesCollapsed = !annotationTypesCollapsed"></h2>
+  <ul v-if="!annotationTypesCollapsed">
+    <li v-for="(type, index) of annotationTypes"
+        class="marked types click"
+        :class="['type_' + type.index]"
+        @click="simulateKey(type.key, getKeyCode(keyList[index]))"
+    >
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-stack-1x fa-inverse" :class="[ 'fa-' + keyList[index] ]"></i>
+      </span>
+      {{ type.caption }}
+    </li>
+  </ul>
+
+  <h2 v-locale="'keyboardlegend-title'" @click="keyboardlegendCollapsed = !keyboardlegendCollapsed"></h2>
+  <ul v-if="!keyboardlegendCollapsed">
     <li class="marked type_x click" @click="simulateKey('Enter')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
@@ -98,28 +113,12 @@ import {AnnotationService} from "../services/Annotation.service";
     </li>
   </ul>
 
-  <h2 v-locale="'annotation-types'"></h2>
-  <ul>
-    <li v-for="(type, index) of annotationTypes"
-        class="marked types click"
-        :class="['type_' + type.index]"
-        @click="simulateKey(type.key, getKeyCode(keyList[index]))"
-    >
-      <span class="fa-stack fa-1x">
-        <i class="fa-solid fa-square fa-stack-2x"></i>
-        <i class="fa-solid fa-stack-1x fa-inverse" :class="[ 'fa-' + keyList[index] ]"></i>
-      </span>
-      {{ type.caption }}
-    </li>
-  </ul>
-
-  <h2 v-locale="'mouselegend-title'"></h2>
-  <ul>
+  <h2 v-locale="'mouselegend-title'" @click="mouselegendCollapsed = !mouselegendCollapsed"></h2>
+  <ul v-if="!mouselegendCollapsed">
     <li class="marked type_x" v-locale="'mouselegend-click'"></li>
     <li class="marked type_x" v-locale="'mouselegend-drag'"></li>
     <li class="marked type_x" v-locale="'mouselegend-dblclick'"></li>
     <li class="marked type_x" v-locale="'mouselegend-dblclickshift'"></li>
-    <li class="">&nbsp;</li>
   </ul>
 
   <h2 v-locale="'documentlegend-title'"></h2>
@@ -134,7 +133,10 @@ export default {
   name: "AnnotationTypeList",
   data() {
     return {
-      keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p']
+      keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
+      annotationTypesCollapsed: false,
+      keyboardlegendCollapsed: false,
+      mouselegendCollapsed: false,
     }
   },
   props: {
