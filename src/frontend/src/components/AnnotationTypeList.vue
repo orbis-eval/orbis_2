@@ -43,7 +43,7 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-unshift'"></span>
     </li>
-    <li class="marked type_x click" @click="simulateKey('KeyA')">
+    <li class="marked type_x click" @click="simulateKey('KeyA', 'KeyA', 'Shift')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-a fa-stack-1x fa-inverse"></i>
@@ -58,7 +58,7 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-shift'"></span>
     </li>
-    <li class="marked type_x click" @click="simulateKey('KeyS')">
+    <li class="marked type_x click" @click="simulateKey('KeyS', 'KeyS', 'Shift')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-s fa-stack-1x fa-inverse"></i>
@@ -73,7 +73,7 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-pop'"></span>
     </li>
-    <li class="marked type_x click" @click="simulateKey('KeyX')">
+    <li class="marked type_x click" @click="simulateKey('KeyX', 'KeyX', 'Shift')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-x fa-stack-1x fa-inverse"></i>
@@ -88,7 +88,7 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-push'"></span>
     </li>
-    <li class="marked type_x click" @click="simulateKey('KeyC')">
+    <li class="marked type_x click" @click="simulateKey('KeyC', 'KeyC', 'Shift')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-c fa-stack-1x fa-inverse"></i>
@@ -96,8 +96,10 @@ import {AnnotationService} from "../services/Annotation.service";
       + <span class="shift">Shift</span>
       <span v-locale="'keyboardlegend-push-word'"></span>
     </li>
+  </ul>
 
-    <li class="">&nbsp;</li>
+  <h2 v-locale="'annotation-types'"></h2>
+  <ul>
     <li v-for="(type, index) of annotationTypes"
         class="marked types click"
         :class="['type_' + type.index]"
@@ -109,8 +111,7 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       {{ type.caption }}
     </li>
-    <li class="">&nbsp;</li>
-    </ul>
+  </ul>
 
   <h2 v-locale="'mouselegend-title'"></h2>
   <ul>
@@ -151,9 +152,16 @@ export default {
      * Simuliert einen Tastenanschlag, um eine Aktion auszuführen
      * @param key Taste
      * @param code Tastencode
+     * @param specialKey Shift, Ctrl oder Alt
      */
-    simulateKey(key, code = key) {
-      document.dispatchEvent(new KeyboardEvent("keydown", {key, code}));
+    simulateKey(key, code = key, specialKey = null) {
+      const keyboardEvent = new KeyboardEvent("keydown", {key, code});
+      switch (specialKey.toLowerCase()) {
+        case 'shift': keyboardEvent.shiftKey = true; break;
+        case 'alt': keyboardEvent.altKey = true; break;
+        case 'ctrl': keyboardEvent.ctrlKey = true; break;
+      }
+      document.dispatchEvent(keyboardEvent);
     },
     /**
      * gibt den Tastencode anhand der Taste zurück
