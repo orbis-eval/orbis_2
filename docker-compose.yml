@@ -5,15 +5,13 @@ services:
     env_file:
       - .env
     restart: always
-    ports:
-      - "63010:63010"
     depends_on:
       - mongo
+    network_mode: host
 
   mongo:
     image: mongo:latest
     restart: always
     env_file:
       - .env
-    ports:
-      - "27017:27017"
+    network_mode: host

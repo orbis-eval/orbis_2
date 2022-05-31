@@ -15,31 +15,30 @@ class DB:
         self.__mongo_url = mongo_url
         self.__db_name = db_name
 
-    async def open(self):
+    async def open_(self):
         # check for database params:
-        if self.__mongo_url:
-            self.__client = AsyncIOMotorClient(self.__mongo_url)
-        elif os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
-            mongo_url = f"mongodb://" \
-                        f"{os.environ.get('MONGO_HOST')}:" \
-                        f"{os.environ.get('MONGO_PORT')}/" \
-                        f"?retryWrites=true&w=majority"
-        else:
-            mongo_url = MONGO_DEFAULT_URL
+        if not self.__mongo_url:
+            if os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
+                self.__mongo_url = f"mongodb://" \
+                                   f"{os.environ.get('MONGO_HOST')}:" \
+                                   f"{os.environ.get('MONGO_PORT')}/" \
+                                   f"?retryWrites=true&w=majority"
+            else:
+                self.__mongo_url = MONGO_DEFAULT_URL
 
         # init database:
-        self.__client = AsyncIOMotorClient(mongo_url)
-        print(f'using url "{mongo_url}" for database')
+        self.__client = AsyncIOMotorClient(self.__mongo_url)
+        print(f'using url "{self.__mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
-        self.__db['corpus'].create_index('corpus_name', unique=True)
-        self.__db['document'].create_index([('id', pymongo.ASCENDING),
-                                            ('corpus_name', pymongo.ASCENDING)], unique=True)
+        await self.__db['corpus'].create_index('corpus_name', unique=True)
+        await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+                                                  ('corpus_name', pymongo.ASCENDING)], unique=True)
 
-    async def close(self):
-        self.__db.close()
+    def close(self):
+        self.__client.close()
 
     async def _delete(self):
-        self.__client.drop_database(self.__db_name)
+        await self.__client.drop_database(self.__db_name)
 
     async def __insert_record(self, table_name, record):
         '''
@@ -108,9 +107,12 @@ class DB:
     async def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
                   'description': description}
+        print(record)
         if not (corpus_id := await self.__insert_record('corpus', record)):
+            print('Hello world')
             corpus_filter = {'corpus_name': corpus_name}
             corpus_id = await self.__get_record_attr('corpus', corpus_filter, '_id')
+            corpus_id = str(corpus_id)
         return corpus_id
 
     async def add_document(self, source_id, corpus_name, text, annotator, data):
@@ -129,7 +131,7 @@ class DB:
             document_filter = {'id': source_id,
                                'corpus_name': corpus_name}
             d_id = await self.__get_record_id('document', document_filter, '_id')
-            annotation_filter = {'d_id': d_id}
+            annotation_filter = {'d_id': ObjectId(d_id)}
             da_id = await self.__get_record_id('annotation', annotation_filter, 'da_id')
             annotation_id = await self.__get_record_id('annotation', annotation_filter, '_id')
             document_exists = True
@@ -156,6 +158,8 @@ class DB:
     async def get_annotator_queue_entries(self):
         if entries := await self.__get_records('annotator_queue', {}):
             da_ids = {entry.get('da_id') for entry in entries}
+            for entry in entries:
+                entry['_id'] = str(entry['_id'])
             return entries, da_ids
         return [], set()
 

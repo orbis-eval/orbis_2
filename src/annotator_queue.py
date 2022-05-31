@@ -1,5 +1,6 @@
 # Import required for eval operation (_id of type ObjectId will be queried)
-# from bson.objectid import ObjectId
+from bson.objectid import ObjectId
+from typing import List
 
 from src.db import DB
 
@@ -11,9 +12,15 @@ class AnnotatorQueue:
         self.__da_ids = set()
         self.__queue = []
 
+    async def add_document_annotations(self, document_annotations: List):
+        if document_annotations:
+            for da in document_annotations:
+                await self.add_document_annotation(da)
+
     async def add_document_annotation(self, document_annotation):
         if (da_id := document_annotation.get('da_id')) not in self.__da_ids:
             if success := await self.__db.add_annotator_queue_entry(document_annotation):
+                document_annotation['_id'] = str(document_annotation['_id'])
                 self.__queue.append(document_annotation)
                 self.__da_ids.add(da_id)
                 return True
@@ -26,22 +33,33 @@ class AnnotatorQueue:
                             f'{self.__queue})')
         return list(queue_filter)
 
+    def get_filtered_queue(self, corpus_name=None, annotator=None):
+        if annotator == 'undefined':
+            annotator = None
+
+        if not corpus_name and not annotator:
+            return self.__queue
+        elif corpus_name and annotator:
+            return self.__filter_queue(corpus_name, annotator, 'and')
+        else:
+            return self.__filter_queue(corpus_name, annotator, 'or')
+
     async def get_id_for_annotation(self, corpus_name=None, annotator=None):
+        if annotator == 'undefined':
+            annotator = None
         da_id = None
 
         if not self.__queue:
             return {}
-        da_id = self.__queue[0].get('da_id')
 
-        # TODO: eval lambda expression throws errors, deactivated temporarily:
-        # if not corpus_name and not annotator:
-        #     da_id = self.__queue[0].get('da_id')
-        # elif corpus_name and annotator:
-        #     if filtered_list := self.__filter_queue(corpus_name, annotator, 'and'):
-        #         da_id = filtered_list[0].get('da_id')
-        # else:
-        #     if filtered_list := self.__filter_queue(corpus_name, annotator, 'or'):
-        #         da_id = filtered_list[0].get('da_id')
+        if not corpus_name and not annotator:
+            da_id = self.__queue[0].get('da_id')
+        elif corpus_name and annotator:
+            if filtered_list := self.__filter_queue(corpus_name, annotator, 'and'):
+                da_id = filtered_list[0].get('da_id')
+        else:
+            if filtered_list := self.__filter_queue(corpus_name, annotator, 'or'):
+                da_id = filtered_list[0].get('da_id')
 
         if da_id:
             if success := await self.__remove_document_annotation(da_id):
