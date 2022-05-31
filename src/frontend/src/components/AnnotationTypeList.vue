@@ -43,12 +43,28 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-unshift'"></span>
     </li>
+    <li class="marked type_x click" @click="simulateKey('KeyA')">
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-a fa-stack-1x fa-inverse"></i>
+      </span>
+      + <span class="shift">Shift</span>
+      <span v-locale="'keyboardlegend-unshift-word'"></span>
+    </li>
     <li class="marked type_x click" @click="simulateKey('KeyS')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-s fa-stack-1x fa-inverse"></i>
       </span>
       <span v-locale="'keyboardlegend-shift'"></span>
+    </li>
+    <li class="marked type_x click" @click="simulateKey('KeyS')">
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-s fa-stack-1x fa-inverse"></i>
+      </span>
+      + <span class="shift">Shift</span>
+      <span v-locale="'keyboardlegend-shift-word'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyX')">
       <span class="fa-stack fa-1x">
@@ -57,12 +73,28 @@ import {AnnotationService} from "../services/Annotation.service";
       </span>
       <span v-locale="'keyboardlegend-pop'"></span>
     </li>
+    <li class="marked type_x click" @click="simulateKey('KeyX')">
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-x fa-stack-1x fa-inverse"></i>
+      </span>
+      + <span class="shift">Shift</span>
+      <span v-locale="'keyboardlegend-pop-word'"></span>
+    </li>
     <li class="marked type_x click" @click="simulateKey('KeyC')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-c fa-stack-1x fa-inverse"></i>
       </span>
       <span v-locale="'keyboardlegend-push'"></span>
+    </li>
+    <li class="marked type_x click" @click="simulateKey('KeyC')">
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-c fa-stack-1x fa-inverse"></i>
+      </span>
+      + <span class="shift">Shift</span>
+      <span v-locale="'keyboardlegend-push-word'"></span>
     </li>
 
     <li class="">&nbsp;</li>
@@ -174,4 +206,13 @@ li.click {
   color: var(--color-text);
   font-size: .9em;
 }
+
+.shift {
+  background-color: var(--color-border);
+  margin: 0 .4em;
+  padding: .5em;
+  border-radius: 4px;
+  font-size: .75em;
+}
+
 </style>
