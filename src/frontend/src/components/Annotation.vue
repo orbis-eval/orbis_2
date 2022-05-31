@@ -6,12 +6,11 @@ import AnnotationChar from "./AnnotationChar.vue";
     <template v-for="char in chars">
       <span :class="[char.char === '\n' ? 'spacer' : '']"
             :data-charindex="char.index"
-            :style="getBorders(char.annotations)"
+            :style="getBordersByIndex(char.index)"
       >
         {{char.char === ' ' || char.char === '\n' ? '&nbsp;' : char.char}}
       </span>
     </template>
-<!--    <AnnotationChar v-for="char in chars" :char="char" @clicker="click($event)"></AnnotationChar>-->
   </div>
   <div id="context_menu_new" @click="approveAnnotation()" :class="[ selectedString ? 'active' : '' ]">
     <i class="fa fa-add"></i>
@@ -24,17 +23,6 @@ import AnnotationChar from "./AnnotationChar.vue";
 </style>
 
 <style scoped>
-[data-annotations="1"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6;
-}
-[data-annotations="1"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6, 0 4px 0 #ddd, 0 6px 0 #6f6;
-}
-[data-annotations="2"] {
-  box-shadow: 0 1px 0 #ddd, 0 3px 0 #6f6, 0 4px 0 #ddd, 0 6px 0 #6f6, 0 7px 0 #ddd, 0 9px 0 #6f6;
-  background-color: #9f9;
-}
-
 #annotation_container {
   display: flex;
   flex-wrap: wrap;
@@ -125,6 +113,19 @@ export default {
       },
     /**
      * gibt den Style für die Unterstreichungen zurück
+     * @param index
+     * @returns {string|string}
+     */
+    getBordersByIndex(index) {
+      const annotations = this.annotations.filter(f =>
+          f.start <= index
+          && f.end > index
+          && [enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY, enAnnotationStatus.APPROVED, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(f.status) >= 0
+      );
+      return this.getBorders(annotations);
+    },
+    /**
+     * gibt den Style für die Unterstreichungen zurück
      * @param annotations
      * @returns {string|string}
      */
@@ -139,6 +140,9 @@ export default {
      * @returns {string}
      */
     getAnnotationBorder(annotation, index) {
+      if (!annotation.type) {
+        return '';
+      }
       let type = AnnotationService.GetTypeByCaption(annotation.type);
       if (index !== 0) { annotation.layer = index; }
       return annotation.layer ? `0 ${(annotation.layer * 3) - 2}px 0 var(--color-background), 0 ${(annotation.layer * 3)}px 0 var(--type-color-${type.index})` : `0 -2px 0 var(--type-color-${type.index}) inset`;
@@ -148,11 +152,7 @@ export default {
      */
     setBordersForSelectedElements() {
       document.querySelectorAll('.selected').forEach(e => {
-        e.style = this.getBorders(this.annotations.filter(f =>
-            f.start <= e.getAttribute('data-charindex')
-            && f.end > e.getAttribute('data-charindex')
-            && [enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY, enAnnotationStatus.APPROVED, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(f.status) >= 0
-        ));
+        e.style = this.getBordersByIndex(e.getAttribute('data-charindex'));
       });
     },
     /**
@@ -161,13 +161,29 @@ export default {
      * @param cssclass
      */
     setClassOnChars(annotation, cssclass = annotation.status) {
-      for (let i = annotation.start; i < annotation.end; i++) {
-        const el  =document.querySelector(`[data-charindex="${i}"]`);
+      this.setClassNameOnChars(
+          annotation.start,
+          annotation.end,
+          [cssclass, annotation.status]
+              .filter((e,i,a) => a.indexOf(e) === i)
+              .join(' ')
+      );
+    },
+    /**
+     * Setzt eine KlassenListe auf alle Chars
+     * @param start
+     * @param end
+     * @param className
+     */
+    setClassNameOnChars(start, end, className = '') {
+      for (let i = start; i < end; i++) {
+        const el = document.querySelector(`[data-charindex="${i}"]`);
         const spacer = el.classList.contains('spacer');
-        el.className = cssclass;
+        el.className = className;
         if (spacer) {
           el.classList.add('spacer');
         }
+        this.getBordersByIndex(i);
       }
     },
     /**
@@ -236,16 +252,16 @@ export default {
           this.selectNextAnnotation(true);
           break;
         case 'KeyA':
-          this.editAnnotation('start', 1);
+          this.editAnnotation('start', 1, event.shiftKey);
           break;
         case 'KeyS':
-          this.editAnnotation('start', -1);
+          this.editAnnotation('start', -1, event.shiftKey);
           break;
         case 'KeyX':
-          this.editAnnotation('end', -1);
+          this.editAnnotation('end', -1, event.shiftKey);
           break;
         case 'KeyC':
-          this.editAnnotation('end', 1);
+          this.editAnnotation('end', 1, event.shiftKey);
           break;
         case 'Digit1': case 'Digit2': case 'Digit3': case 'Digit4': case 'Digit5': case 'Digit6': case 'Digit7': case 'Digit8': case 'Digit9': case 'Digit0':
         case 'Numpad1': case 'Numpad2': case 'Numpad3': case 'Numpad4': case 'Numpad5': case 'Numpad6': case 'Numpad7': case 'Numpad8': case 'Numpad9': case 'Numpad0':
@@ -352,6 +368,13 @@ export default {
         this.setClassOnChars(original, 'selected');
         this.setBordersForSelectedElements();
         this.annotations.splice(this.annotations.indexOf(selected), 1);
+        if (selected.status === enAnnotationStatus.NEW) {
+          for (let i = selected.start; i < selected.end; i++) {
+            if (this.chars[i].annotations.indexOf(selected) > 0) {
+              this.chars[i].annotations.splice(this.chars[i].annotations.indexOf(selected), 1);
+            }
+          }
+        }
       } else {
         selected.status = enAnnotationStatus.DELETED;
         this.setClassOnChars(selected);
@@ -368,6 +391,9 @@ export default {
       prevAnnotations.sort((a, b) => a.start > b.start ? 1 : -1);
       this.annotations.splice(this.annotations.indexOf(prevAnnotations[prevAnnotations.length - 1]) + 1, 0, selected);
       this.newAnnotation = null;
+      for (let i = selected.start; i < selected.end; i++) {
+        this.chars[i].annotations.push(selected);
+      }
       return selected;
     },
     /**
@@ -375,7 +401,7 @@ export default {
      * @param dir Richtung
      * @param amount Anzahl (+1 / -1)
      */
-    editAnnotation(dir, amount = 1) {
+    editAnnotation(dir, amount = 1, shiftKey = false) {
       let selected = this.newAnnotation ?? this.annotations.find(e => e.selected
           && [enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY, enAnnotationStatus.APPROVED, enAnnotationStatus.EDITED, enAnnotationStatus.NEW].indexOf(e.status) >= 0);
       if (!selected) {
@@ -391,29 +417,40 @@ export default {
         selected.status = enAnnotationStatus.PROVISORY;
       }
 
-      const indexes = [];
-      document.querySelectorAll('.selected').forEach(e => indexes.push(+e.getAttribute('data-charindex')));
-      let index = dir === 'start' ? Math.min(...indexes) : Math.max(...indexes);
-      if (amount > 0) {
-        let element = document.querySelector(`[data-charindex="${index + amount * (dir === 'start' ? -1 : 1)}"]`);
-        element.classList.add('selected');
-        if (dir === 'start') {
-          selected.start--;
+
+      let index = Number((dir === 'start') ? selected.start : selected.end);
+      let factor = (dir === 'start') ? -1 : 1;
+      amount = Number(amount);
+
+      if (dir === 'start') {
+        selected.start = index + Number(amount * factor);
+        if (shiftKey) {
+          let shift = amount;
+          while (AnnotationService.Document[selected.start + factor] !== ' ') {
+            shift += amount;
+            selected.start = index + shift * factor;
+          }
+        }
+        if (amount > 0) {
+          this.setClassNameOnChars(selected.start, index, [selected.status, 'selected'].join(' '));
         } else {
-          selected.end++;
+          this.setClassNameOnChars(index, selected.start, '');
         }
       } else {
-        let element = document.querySelector(`[data-charindex="${index}"]`);
-        element.classList.remove('selected');
-        element.style.boxShadow = '';
-        if (dir === 'start') {
-          selected.start++;
+        selected.end = index + amount * factor;
+        if (shiftKey) {
+          let shift = amount;
+          while (AnnotationService.Document[selected.end] !== ' ') {
+            shift += amount;
+            selected.end = index + shift * factor;
+          }
+        }
+        if (amount > 0) {
+          this.setClassNameOnChars(index, selected.end, [selected.status, 'selected'].join(' '));
         } else {
-          selected.end--;
+          this.setClassNameOnChars(selected.end, index, '');
         }
       }
-
-      this.setBordersForSelectedElements();
     },
     /**
      * Einem Char-Objekt eine Annotation (oder null) zuweisen (bei ändern/erweitern/reduzieren der Annotation)
@@ -449,6 +486,7 @@ export default {
         selected.selected = true;
         this.annotations.splice(this.annotations.indexOf(selected), 0, newSelected);
       }
+      this.setClassOnChars(selected, 'selected');
     },
     /**
      * setzt einen neuen AnnotationType und springt weiter
@@ -508,10 +546,14 @@ export default {
         let viewRect = annotationContainerElement.parentElement.getBoundingClientRect();
         let elemRect = newSelectedElement.getBoundingClientRect();
         if (elemRect.bottom > viewRect.bottom - (viewRect.height / 3)) {
-          annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          setTimeout(() => {
+            annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          });
         }
         if (elemRect.top < viewRect.top + (viewRect.height / 3)) {
-          annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          setTimeout(() => {
+            annotationContainerElement.parentElement.scrollTop = newSelectedElement.offsetTop - (viewRect.height / 2);
+          });
         }
       }
     },
