@@ -79,7 +79,7 @@ resources:
   #   cpu: 100m
 
 env:
-  mongo_host: "test-orbis2-db-template"
+  mongo_host: "orbis2-db-template"
   mongo_port: "63011"
 
 nodeSelector: {}
