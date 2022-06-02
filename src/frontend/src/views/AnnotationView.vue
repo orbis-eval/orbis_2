@@ -8,6 +8,7 @@ import AnnotationControls from '../components/AnnotationControls.vue';
   <aside>
     <AnnotationTypeList
         :annotation-types="annotationTypes"
+        :annotation-meta="annotationMeta"
         @clicker="click($event)"
     ></AnnotationTypeList>
   </aside>
@@ -30,6 +31,7 @@ export default {
     return {
       annotations: [],
       annotationTypes: [],
+      annotationMeta: []
     }
   },
   methods: {
@@ -65,16 +67,18 @@ export default {
         //       console.log(data);
         //     });
       }
+    },
+    init() {
+      this.annotations = AnnotationService.Annotations;
+      this.annotationTypes = AnnotationService.AnnotationTypes;
+      this.annotationMeta = AnnotationService.DocumentMeta;
     }
   },
   mounted() {
-    this.annotations = AnnotationService.Annotations;
-    this.annotationTypes = AnnotationService.AnnotationTypes;
+    this.init();
     if (!AnnotationService.Document) {
-      AnnotationService.GetDocumentForAnnotation().then(data => {
-        // console.log(data);
-        this.annotations = AnnotationService.Annotations;
-        this.annotationTypes = AnnotationService.AnnotationTypes;
+      AnnotationService.GetDocumentForAnnotation().then(() => {
+        this.init();
       });
     }
   }

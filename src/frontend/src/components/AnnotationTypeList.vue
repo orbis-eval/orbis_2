@@ -3,6 +3,18 @@ import {AnnotationService} from "../services/Annotation.service";
 </script>
 
 <template>
+  <h2 v-locale="'metadata-title'"
+      v-if="annotationMeta && annotationMeta.display"
+      @click="toggleCollapse(annotationMetaCollapsed)"
+      :class="annotationMetaCollapsed.value ? 'collapsed' : ''"
+  ></h2>
+  <div v-if="annotationMetaCollapsed.value === false && annotationMeta.display">
+    <fieldset v-for="(value, key, index) in annotationMeta.display" :key="`${ key }-${ index }`">
+      <legend>{{key}}</legend>
+      <div>{{value}}</div>
+    </fieldset>
+  </div>
+
   <h2 v-locale="'annotation-types'"
       @click="toggleCollapse(annotationTypesCollapsed)"
       :class="annotationTypesCollapsed.value ? 'collapsed' : ''"
@@ -138,6 +150,7 @@ export default {
   data() {
     return {
       keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
+      annotationMetaCollapsed: {key: 'annotationMetaCollapsed', value: false},
       annotationTypesCollapsed: {key: 'annotationTypesCollapsed', value: false},
       keyboardlegendCollapsed: {key: 'keyboardlegendCollapsed', value: false},
       mouselegendCollapsed: {key: 'mouselegendCollapsed', value: false},
@@ -147,6 +160,10 @@ export default {
     annotationTypes: {
       type: Array,
       default: []
+    },
+    annotationMeta: {
+      type: Object,
+      default: {}
     }
   },
   /**
@@ -187,9 +204,11 @@ export default {
     }
   },
   mounted() {
+    this.annotationMetaCollapsed.value = localStorage.getItem('annotationMetaCollapsed') === 'true';
     this.annotationTypesCollapsed.value = localStorage.getItem('annotationTypesCollapsed') === 'true';
     this.keyboardlegendCollapsed.value = localStorage.getItem('keyboardlegendCollapsed') === 'true';
     this.mouselegendCollapsed.value = localStorage.getItem('mouselegendCollapsed') === 'true';
+    console.log(this.annotationMeta);
   }
 }
 </script>
@@ -216,6 +235,11 @@ h2.collapsed::before {
 
 h2, ul {
   padding: 0 .5em 0;
+}
+
+fieldset {
+  margin: 0 0.5em 0.5em;
+  padding: 0em .75em;
 }
 
 ul {

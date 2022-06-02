@@ -39,8 +39,9 @@ li.marked {
   user-select: none;
   user-focus: none;
   box-shadow: none;
-  background-color: #009900;
+  background-color: var(--color-success);
   border-bottom: 1px solid var(--color-border);
+  color: var(--vt-c-text-light-1);
 }
 
 li.marked:hover {

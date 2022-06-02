@@ -6,6 +6,7 @@
   "corpusname": "Corpus Name",
   "documentid": "DocumentId",
   "bugreport": "bug report",
+  "metadata-title": "Meta Data",
   "annotation-types": "Types",
   "keyboardlegend-title": "Shortcuts",
   "keyboardlegend-enter": "accept",
