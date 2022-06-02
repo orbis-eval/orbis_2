@@ -12,7 +12,7 @@ import AnnotationChar from "./AnnotationChar.vue";
       </span>
     </template>
   </div>
-  <div id="context_menu_new" :class="[ selectedString ? 'active' : '' ]">
+  <div id="context_menu_new" :class="[{ active: selectedString, below: contextMenuBelow }, contextMenuStatus ]">
     <button @click="approveAnnotation()" class="approve"><i class="fa fa-check"></i></button>
     <button @click="deleteAnnotation()" class="reject"><i class="fa fa-times"></i></button>
 <!--    <span> {{selectedString}}</span>-->
@@ -54,6 +54,11 @@ import AnnotationChar from "./AnnotationChar.vue";
   border-right: 1px solid var(--color-text);
   border-bottom: 1px solid var(--color-text);
   transform: rotate(45deg);
+}
+#context_menu_new.below::before {
+  top: -.3em;
+  bottom: auto;
+  transform: rotate(225deg);
 }
 #context_menu_new.active {
   display: block;
@@ -103,7 +108,9 @@ export default {
       newAnnotation: null,
       selectedString: '',
       keyboardObserver: KeyboardObserver,
-      popover: null
+      popover: null,
+      contextMenuBelow: true,
+      contextMenuStatus: ''
     };
   },
   methods: {
@@ -674,20 +681,18 @@ export default {
      */
     openContextMenuForNewAnnotation(annotation) {
       this.selectedString = annotation.type || 'unset';
-
       let firstchar = document.querySelector(`span[data-charindex="${annotation.start}"]`);
-      this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px + 2em)`;
+
+      if (firstchar.offsetTop < 100) {
+        this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px - 3em)`;
+        this.contextMenuBelow = true;
+      } else {
+        this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px + 2em)`;
+        this.contextMenuBelow = false;
+      }
       this.popover.style.left = firstchar.offsetLeft + 'px';
 
-      this.popover.classList.remove(enAnnotationStatus.NEW);
-      this.popover.classList.remove(enAnnotationStatus.PENDING);
-      this.popover.classList.remove(enAnnotationStatus.EDITED);
-      this.popover.classList.remove(enAnnotationStatus.DELETED);
-      this.popover.classList.remove(enAnnotationStatus.APPROVED);
-      this.popover.classList.remove(enAnnotationStatus.REPLACED);
-      this.popover.classList.remove(enAnnotationStatus.PROVISORY);
-
-      this.popover.classList.add(annotation.status);
+      this.contextMenuStatus = annotation.status;
     },
     /**
      * Kontextmenü für neue Annotation schliessen
