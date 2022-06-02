@@ -3,8 +3,7 @@ variables:
   APPLICATION_NAME: orbis2
 
   DOCKER_IMAGE: registry.gitlab.semanticlab.net/fhgr/future-of-work/$CI_PROJECT_NAME
-  KUBE_TEST_NAMESPACE_FHGR: fow-test
-  KUBE_PROD_NAMESPACE_FHGR: fow-production
+  KUBE_NAMESPACE: futureofwork
   HELM_CHART_NAME_FHGR: chart
   TEST_URL_FHGR: preview.semanticlab.net
   URL_FHGR: prod.semanticlab.net
@@ -99,7 +98,7 @@ fhgr-deploy-production-release:
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
-      --namespace $KUBE_PROD_NAMESPACE_FHGR
+      --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
     - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
   environment:
@@ -107,7 +106,7 @@ fhgr-deploy-production-release:
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
-      namespace: $KUBE_PROD_NAMESPACE_FHGR
+      namespace: $KUBE_NAMESPACE
   only:
     - main
   tags:
@@ -143,7 +142,7 @@ fhgr-deploy-production-release-db:
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
-      --namespace $KUBE_PROD_NAMESPACE_FHGR
+      --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
     - kubectl rollout restart deployment $APPLICATION_NAME_DB-template
   environment:
@@ -151,7 +150,7 @@ fhgr-deploy-production-release-db:
     url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
-      namespace: $KUBE_PROD_NAMESPACE_FHGR
+      namespace: $KUBE_NAMESPACE
   only:
     - main
   tags:
@@ -188,7 +187,7 @@ fhgr-deploy-test-release:
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
-      --namespace $KUBE_TEST_NAMESPACE_FHGR
+      --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
     - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
   environment:
@@ -196,7 +195,7 @@ fhgr-deploy-test-release:
     url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-release
     kubernetes:
-      namespace: $KUBE_TEST_NAMESPACE_FHGR
+      namespace: $KUBE_NAMESPACE
   except:
     - main
   tags:
@@ -232,7 +231,7 @@ fhgr-deploy-test-release-db:
       --kubeconfig $KUBECONFIG 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
-      --namespace $KUBE_TEST_NAMESPACE_FHGR
+      --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
     - kubectl rollout restart deployment $APPLICATION_NAME_DB-template
   environment:
@@ -240,7 +239,7 @@ fhgr-deploy-test-release-db:
     url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
     on_stop: fhgr-delete-test-release
     kubernetes:
-      namespace: $KUBE_TEST_NAMESPACE_FHGR
+      namespace: $KUBE_NAMESPACE
   except:
     - main
   tags:
