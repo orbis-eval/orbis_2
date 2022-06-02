@@ -12,9 +12,10 @@ import AnnotationChar from "./AnnotationChar.vue";
       </span>
     </template>
   </div>
-  <div id="context_menu_new" @click="approveAnnotation()" :class="[ selectedString ? 'active' : '' ]">
-    <i class="fa fa-add"></i>
-    <span> {{selectedString}}</span>
+  <div id="context_menu_new" :class="[ selectedString ? 'active' : '' ]">
+    <button @click="approveAnnotation()" class="approve"><i class="fa fa-check"></i></button>
+    <button @click="deleteAnnotation()" class="reject"><i class="fa fa-times"></i></button>
+<!--    <span> {{selectedString}}</span>-->
   </div>
 </template>
 
@@ -32,9 +33,9 @@ import AnnotationChar from "./AnnotationChar.vue";
 #context_menu_new {
   display: none;
   position: absolute;
-  top: 110px;
+  bottom: 100px;
   left: 100px;
-  padding: .4em 1em;
+  padding: .4em .6em .4em .2em;
   background-color: var(--color-background-soft);
   color: var(--color-text);
   border: 1px solid var(--color-text);
@@ -45,20 +46,44 @@ import AnnotationChar from "./AnnotationChar.vue";
 #context_menu_new::before {
   content: "";
   position: absolute;
-  top: -.3em;
+  bottom: -.3em;
   left: 1.5ch;
   width: .5em;
   height: .5em;
   background-color: var(--color-background-soft);
-  border-top: 1px solid var(--color-text);
-  border-left: 1px solid var(--color-text);
+  border-right: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
   transform: rotate(45deg);
 }
 #context_menu_new.active {
   display: block;
 }
-#context_menu_new span {
+#context_menu_new span, #context_menu_new button {
   margin-left: 1ch;
+}
+#context_menu_new.new, #context_menu_new.new::before,
+#context_menu_new.edited, #context_menu_new.edited::before,
+#context_menu_new.replaced, #context_menu_new.replaced::before,
+#context_menu_new.approved, #context_menu_new.approved::before {
+  border-color: var(--color-success);
+}
+#context_menu_new.deleted,
+#context_menu_new.deleted::before {
+  border-color: var(--color-error);
+}
+#context_menu_new button {
+  color: var(--color-text);
+  border: 1px solid var(--color-text);
+  background-color: var(--color-background-soft);
+  border-radius: .25em;
+  width: 4ch;
+  cursor: pointer;
+}
+#context_menu_new button.approve:hover {
+  background-color: var(--color-success);
+}
+#context_menu_new button.reject:hover {
+  background-color: var(--color-error);
 }
 </style>
 
@@ -78,6 +103,7 @@ export default {
       newAnnotation: null,
       selectedString: '',
       keyboardObserver: KeyboardObserver,
+      popover: null
     };
   },
   methods: {
@@ -198,6 +224,7 @@ export default {
           this.annotations.filter(f => f.selected).forEach(e => e.selected = false);
           annotations[0].selected = true;
           this.setClassOnChars(annotations[0], 'selected');
+          this.openContextMenuForNewAnnotation(annotations[0]);
         }
       }
     },
@@ -219,6 +246,7 @@ export default {
           document.querySelector(`[data-charindex="${i}"]`).classList.add('selected');
         }
         this.newAnnotation = { surface_form: selection.text, start: selection.start, end: selection.end, status: enAnnotationStatus.PROVISORY, index: Math.max(...this.annotations.map(a => a.index)) + 1, selected: true, created: true };
+        this.openContextMenuForNewAnnotation(this.newAnnotation);
         this.clearMouseSelection();
       }
     },
@@ -539,6 +567,9 @@ export default {
         newSelected.selected = true;
         this.setClassOnChars(newSelected, 'selected');
 
+        //popover anzeigen
+        this.openContextMenuForNewAnnotation(newSelected);
+
         // View anpassen, damit das selektierte Wort immer im mittleren Drittel ist
         let annotationContainerElement = document.getElementById('annotation_container');
         let newSelectedElement = annotationContainerElement
@@ -628,6 +659,7 @@ export default {
         selected: true,
         created: true
       };
+      this.openContextMenuForNewAnnotation(this.newAnnotation);
 
       this.clearMouseSelection();
     },
@@ -640,11 +672,22 @@ export default {
      * Kontextmenü für neue Annotation öffnen
      * @param start StartIndex des Characters
      */
-    openContextMenuForNewAnnotation(start) {
-      let popover = document.getElementById('context_menu_new');
-      let firstchar = document.querySelector(`span[data-charindex="${start}"]`);
-      popover.style.top = firstchar.offsetTop + 'px';
-      popover.style.left = firstchar.offsetLeft + 'px';
+    openContextMenuForNewAnnotation(annotation) {
+      this.selectedString = annotation.type || 'unset';
+
+      let firstchar = document.querySelector(`span[data-charindex="${annotation.start}"]`);
+      this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px + 2em)`;
+      this.popover.style.left = firstchar.offsetLeft + 'px';
+
+      this.popover.classList.remove(enAnnotationStatus.NEW);
+      this.popover.classList.remove(enAnnotationStatus.PENDING);
+      this.popover.classList.remove(enAnnotationStatus.EDITED);
+      this.popover.classList.remove(enAnnotationStatus.DELETED);
+      this.popover.classList.remove(enAnnotationStatus.APPROVED);
+      this.popover.classList.remove(enAnnotationStatus.REPLACED);
+      this.popover.classList.remove(enAnnotationStatus.PROVISORY);
+
+      this.popover.classList.add(annotation.status);
     },
     /**
      * Kontextmenü für neue Annotation schliessen
@@ -670,6 +713,8 @@ export default {
     AnnotationService.Changes.subscribe(() => {
       this.InitAnnotationVue();
     });
+
+    this.popover = document.getElementById('context_menu_new');
   }
 }
 </script>

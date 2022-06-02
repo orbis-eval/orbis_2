@@ -3,7 +3,10 @@ import {AnnotationService} from "../services/Annotation.service";
 </script>
 
 <template>
-  <h2 v-locale="'annotation-types'" @click="toggleCollapse(annotationTypesCollapsed)"></h2>
+  <h2 v-locale="'annotation-types'"
+      @click="toggleCollapse(annotationTypesCollapsed)"
+      :class="annotationTypesCollapsed.value ? 'collapsed' : ''"
+  ></h2>
   <ul v-if="annotationTypesCollapsed.value === false">
     <li v-for="(type, index) of annotationTypes"
         class="marked types click"
@@ -18,7 +21,10 @@ import {AnnotationService} from "../services/Annotation.service";
     </li>
   </ul>
 
-  <h2 v-locale="'keyboardlegend-title'" @click="toggleCollapse(keyboardlegendCollapsed)"></h2>
+  <h2 v-locale="'keyboardlegend-title'"
+      @click="toggleCollapse(keyboardlegendCollapsed)"
+      :class="keyboardlegendCollapsed.value ? 'collapsed' : ''"
+  ></h2>
   <ul v-if="keyboardlegendCollapsed.value === false">
     <li class="marked type_x click" @click="simulateKey('Enter')">
       <span class="fa-stack fa-1x">
@@ -59,11 +65,11 @@ import {AnnotationService} from "../services/Annotation.service";
       <span v-locale="'keyboardlegend-unshift'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyA', 'KeyA', 'Shift')">
+      <span class="shift">Shift</span> +
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-a fa-stack-1x fa-inverse"></i>
       </span>
-      + <span class="shift">Shift</span>
       <span v-locale="'keyboardlegend-unshift-word'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyS')">
@@ -74,11 +80,11 @@ import {AnnotationService} from "../services/Annotation.service";
       <span v-locale="'keyboardlegend-shift'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyS', 'KeyS', 'Shift')">
+      <span class="shift">Shift</span> +
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-s fa-stack-1x fa-inverse"></i>
       </span>
-      + <span class="shift">Shift</span>
       <span v-locale="'keyboardlegend-shift-word'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyX')">
@@ -89,11 +95,11 @@ import {AnnotationService} from "../services/Annotation.service";
       <span v-locale="'keyboardlegend-pop'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyX', 'KeyX', 'Shift')">
+      <span class="shift">Shift</span> +
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-x fa-stack-1x fa-inverse"></i>
       </span>
-      + <span class="shift">Shift</span>
       <span v-locale="'keyboardlegend-pop-word'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyC')">
@@ -104,16 +110,19 @@ import {AnnotationService} from "../services/Annotation.service";
       <span v-locale="'keyboardlegend-push'"></span>
     </li>
     <li class="marked type_x click" @click="simulateKey('KeyC', 'KeyC', 'Shift')">
+      <span class="shift">Shift</span> +
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
         <i class="fa-solid fa-c fa-stack-1x fa-inverse"></i>
       </span>
-      + <span class="shift">Shift</span>
       <span v-locale="'keyboardlegend-push-word'"></span>
     </li>
   </ul>
 
-  <h2 v-locale="'mouselegend-title'" @click="toggleCollapse(mouselegendCollapsed)"></h2>
+  <h2 v-locale="'mouselegend-title'"
+      @click="toggleCollapse(mouselegendCollapsed)"
+      :class="mouselegendCollapsed.value ? 'collapsed' : ''"
+  ></h2>
   <ul v-if="mouselegendCollapsed.value === false">
     <li class="marked type_x" v-locale="'mouselegend-click'"></li>
     <li class="marked type_x" v-locale="'mouselegend-drag'"></li>
@@ -121,11 +130,6 @@ import {AnnotationService} from "../services/Annotation.service";
     <li class="marked type_x" v-locale="'mouselegend-dblclickshift'"></li>
   </ul>
 
-  <h2 v-locale="'documentlegend-title'"></h2>
-  <ul>
-    <li class="marked type_x click" @click="save()"><span v-locale="'documentlegend-save'"></span></li>
-    <li class="marked type_x click" @click="save(true)" v-locale="'documentlegend-savenext'"></li>
-  </ul>
 </template>
 
 <script>
@@ -180,17 +184,12 @@ export default {
      */
     getKeyCode(key) {
       return key <= 9 ? 'Digit' + key : 'Key' + key.toUpperCase()
-    },
-    save(next = false) {
-      AnnotationService.SaveDocumentAnnotations(next);
     }
   },
   mounted() {
     this.annotationTypesCollapsed.value = localStorage.getItem('annotationTypesCollapsed') === 'true';
     this.keyboardlegendCollapsed.value = localStorage.getItem('keyboardlegendCollapsed') === 'true';
     this.mouselegendCollapsed.value = localStorage.getItem('mouselegendCollapsed') === 'true';
-
-    console.log(typeof this.annotationTypesCollapsed.value, this.keyboardlegendCollapsed.value, this.mouselegendCollapsed.value);
   }
 }
 </script>
@@ -200,8 +199,27 @@ h2 {
   cursor: pointer;
 }
 
+h2:hover {
+  opacity: 0.8;
+}
+
+h2::before {
+  content: "\f146";
+  font-family: "Font Awesome 6 Free";
+  font-size: .75em;
+  margin-right: .5em;
+}
+
+h2.collapsed::before {
+  content: "\f150";
+}
+
 h2, ul {
   padding: 0 .5em 0;
+}
+
+ul {
+  margin-bottom: 1em;
 }
 
 li.marked {
@@ -210,7 +228,7 @@ li.marked {
   user-select: none;
   user-focus: none;
   box-shadow: none;
-  border-bottom: 1px solid #181818;
+  border-bottom: 1px solid var(--color-border);
 }
 
 li.marked .svg-inline--fa {

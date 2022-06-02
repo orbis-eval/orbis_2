@@ -1,6 +1,7 @@
 <script setup>
 import Annotation from '../components/Annotation.vue'
 import AnnotationTypeList from '../components/AnnotationTypeList.vue'
+import AnnotationControls from '../components/AnnotationControls.vue';
 </script>
 
 <template>
@@ -10,6 +11,9 @@ import AnnotationTypeList from '../components/AnnotationTypeList.vue'
         @clicker="click($event)"
     ></AnnotationTypeList>
   </aside>
+  <section>
+    <AnnotationControls></AnnotationControls>
+  </section>
   <main>
     <Annotation
         v-if="annotations.length"
