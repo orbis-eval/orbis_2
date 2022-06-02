@@ -117,4 +117,9 @@ export class AnnotationService {
                 console.error(error);
             });
     }
+
+    static AddAnnotationType(annotationType: AnnotationType) {
+        this.AnnotationTypes.push(annotationType);
+        this.changes();
+    }
 }

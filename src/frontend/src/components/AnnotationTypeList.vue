@@ -1,5 +1,5 @@
 <script setup>
-import {AnnotationService} from "../services/Annotation.service";
+import {AnnotationType} from '@/models/annotation-type';
 </script>
 
 <template>
@@ -10,8 +10,8 @@ import {AnnotationService} from "../services/Annotation.service";
   ></h2>
   <div v-if="annotationMetaCollapsed.value === false && annotationMeta.display">
     <fieldset v-for="(value, key, index) in annotationMeta.display" :key="`${ key }-${ index }`">
-      <legend>{{key}}</legend>
-      <div>{{value}}</div>
+      <legend>{{ key }}</legend>
+      <div>{{ value }}</div>
     </fieldset>
   </div>
 
@@ -21,6 +21,7 @@ import {AnnotationService} from "../services/Annotation.service";
   ></h2>
   <ul v-if="annotationTypesCollapsed.value === false">
     <li v-for="(type, index) of annotationTypes"
+        :key="`${ type }-${ index }`"
         class="marked types click"
         :class="['type_' + type.index]"
         @click="simulateKey(type.key, getKeyCode(keyList[index]))"
@@ -30,6 +31,17 @@ import {AnnotationService} from "../services/Annotation.service";
         <i class="fa-solid fa-stack-1x fa-inverse" :class="[ 'fa-' + keyList[index] ]"></i>
       </span>
       {{ type.caption }}
+    </li>
+    <li
+        class="marked types click addtype"
+        :class="['type_' + annotationTypes.length]"
+        v-if="annotationTypes.length <= keyList.length"
+    >
+      <span class="fa-stack fa-1x">
+        <i class="fa-solid fa-square fa-stack-2x"></i>
+        <i class="fa-solid fa-stack-1x fa-inverse" :class="[ 'fa-' + keyList[annotationTypes.length] ]"></i>
+      </span>
+      <span v-locale="'add-new-type'" @click="addNewType()"></span>
     </li>
   </ul>
 
@@ -145,25 +157,19 @@ import {AnnotationService} from "../services/Annotation.service";
 </template>
 
 <script>
+import {AnnotationService} from "@/services/Annotation.service";
+
 export default {
   name: "AnnotationTypeList",
   data() {
     return {
-      keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'],
+      annotationTypes: [],
+      keyList: [],
+      annotationMeta: {},
       annotationMetaCollapsed: {key: 'annotationMetaCollapsed', value: false},
       annotationTypesCollapsed: {key: 'annotationTypesCollapsed', value: false},
       keyboardlegendCollapsed: {key: 'keyboardlegendCollapsed', value: false},
       mouselegendCollapsed: {key: 'mouselegendCollapsed', value: false},
-    }
-  },
-  props: {
-    annotationTypes: {
-      type: Array,
-      default: []
-    },
-    annotationMeta: {
-      type: Object,
-      default: {}
     }
   },
   /**
@@ -171,6 +177,18 @@ export default {
    */
   emits: ['clicker'],
   methods: {
+    /**
+     * Initialisiert alle Daten vom Service
+     */
+    init() {
+      this.annotationTypes = AnnotationService.AnnotationTypes;
+      this.annotationMeta = AnnotationService.DocumentMeta;
+      this.keyList = AnnotationService.TypeKeyList;
+      this.annotationTypesCollapsed.value = !this.annotationTypesCollapsed.value;
+      setTimeout(() => {
+        this.annotationTypesCollapsed.value = !this.annotationTypesCollapsed.value;
+      });
+    },
     /**
      * toggle collapse status
      * @param element Legende
@@ -187,10 +205,18 @@ export default {
      */
     simulateKey(key, code = key, specialKey = null) {
       const keyboardEvent = new KeyboardEvent("keydown", {key, code});
-      switch (specialKey.toLowerCase()) {
-        case 'shift': keyboardEvent.shiftKey = true; break;
-        case 'alt': keyboardEvent.altKey = true; break;
-        case 'ctrl': keyboardEvent.ctrlKey = true; break;
+      if (specialKey) {
+        switch (specialKey.toLowerCase()) {
+          case 'shift':
+            keyboardEvent.shiftKey = true;
+            break;
+          case 'alt':
+            keyboardEvent.altKey = true;
+            break;
+          case 'ctrl':
+            keyboardEvent.ctrlKey = true;
+            break;
+        }
       }
       document.dispatchEvent(keyboardEvent);
     },
@@ -201,6 +227,18 @@ export default {
      */
     getKeyCode(key) {
       return key <= 9 ? 'Digit' + key : 'Key' + key.toUpperCase()
+    },
+    /**
+     * Prompt für neuen Type anzeigen und dem Service übergeben
+     */
+    addNewType() {
+      let caption = prompt('Wie soll der Typ heissen?');
+      if (!caption) {
+        return;
+      }
+      let index = this.annotationTypes.length;
+      let newType = new AnnotationType({ index, key: this.keyList[index], caption});
+      AnnotationService.AddAnnotationType(newType);
     }
   },
   mounted() {
@@ -208,7 +246,11 @@ export default {
     this.annotationTypesCollapsed.value = localStorage.getItem('annotationTypesCollapsed') === 'true';
     this.keyboardlegendCollapsed.value = localStorage.getItem('keyboardlegendCollapsed') === 'true';
     this.mouselegendCollapsed.value = localStorage.getItem('mouselegendCollapsed') === 'true';
-    console.log(this.annotationMeta);
+
+    this.init();
+    AnnotationService.Changes.subscribe(() => {
+      this.init();
+    });
   }
 }
 </script>
@@ -266,6 +308,10 @@ li.marked .fa-stack-2x {
 
 li.types {
   color: #181818;
+}
+
+li.addtype {
+  font-style: italic;
 }
 
 li.click {
