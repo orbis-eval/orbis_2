@@ -189,7 +189,7 @@ fhgr-deploy-test-release:
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_TEST_NAMESPACE_FHGR
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app-preview/
     - kubectl rollout restart deployment $APPLICATION_NAME_APP-template
   environment:
     name: production
