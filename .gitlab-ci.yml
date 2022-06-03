@@ -100,7 +100,7 @@ fhgr-deploy-production-release:
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
-    - kubectl rollout restart deployment $APPLICATION_NAME_APP
+    - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_APP
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
@@ -144,7 +144,7 @@ fhgr-deploy-production-release-db:
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
-    - kubectl rollout restart deployment $APPLICATION_NAME_DB
+    - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_DB
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
@@ -189,7 +189,7 @@ fhgr-deploy-test-release:
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
-    - kubectl rollout restart deployment $APPLICATION_NAME_APP
+    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_APP
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
@@ -233,7 +233,7 @@ fhgr-deploy-test-release-db:
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
-    - kubectl rollout restart deployment $APPLICATION_NAME_DB
+    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_DB
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
