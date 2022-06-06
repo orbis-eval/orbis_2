@@ -1,15 +1,18 @@
 <script setup>
 import Annotation from '../components/Annotation.vue'
 import AnnotationTypeList from '../components/AnnotationTypeList.vue'
+import AnnotationControls from '../components/AnnotationControls.vue';
 </script>
 
 <template>
   <aside>
     <AnnotationTypeList
-        :annotation-types="annotationTypes"
         @clicker="click($event)"
     ></AnnotationTypeList>
   </aside>
+  <section>
+    <AnnotationControls></AnnotationControls>
+  </section>
   <main>
     <Annotation
         v-if="annotations.length"
@@ -25,7 +28,7 @@ export default {
   data() {
     return {
       annotations: [],
-      annotationTypes: [],
+      annotationMeta: []
     }
   },
   methods: {
@@ -61,17 +64,19 @@ export default {
         //       console.log(data);
         //     });
       }
+    },
+    init() {
+      this.annotations = AnnotationService.Annotations;
+      this.annotationMeta = AnnotationService.DocumentMeta;
     }
   },
   mounted() {
-    this.annotations = AnnotationService.Annotations;
-    this.annotationTypes = AnnotationService.AnnotationTypes;
+    this.init();
+    AnnotationService.Changes.subscribe(() => {
+      this.init();
+    });
     if (!AnnotationService.Document) {
-      AnnotationService.GetDocumentForAnnotation().then(data => {
-        // console.log(data);
-        this.annotations = AnnotationService.Annotations;
-        this.annotationTypes = AnnotationService.AnnotationTypes;
-      });
+      AnnotationService.GetDocumentForAnnotation();
     }
   }
 }

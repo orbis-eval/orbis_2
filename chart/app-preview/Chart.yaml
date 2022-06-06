@@ -1,5 +1,5 @@
 apiVersion: v2
-name: orbis2
+name: orbis2-preview
 description: A Helm chart for Kubernetes, including orbis2_app deployment, service and ingress
 
 # A chart can be either an 'application' or a 'library' chart.
