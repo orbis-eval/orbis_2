@@ -92,18 +92,13 @@ class DB:
     async def _add_annotations(self, da_id, d_id, record):
         # check if d_id is equal, replace d_id in record with param.
 
-        print(f'_add_annotations debug record da: {da_id}, d: {d_id}, record: {record}')
-
         if record.get("d_id") != d_id:
             print(f'conflicting d_id detected: {d_id}, overwriting..')
             record["d_id"] = d_id
 
-        print(f'building annotation record')
-
         annotation_record = {'da_id': ObjectId(da_id),
                              'd_id': ObjectId(d_id),
                              'annotations': record}
-        print(f'Now inserting new annotation da_id: {da_id}')
         return await self.__insert_record('annotation', annotation_record)
 
     async def _get_d_id_from_da_id(self, da_id):
@@ -213,8 +208,5 @@ class DB:
                                                         annotator=annotator,
                                                         iteration_id=data['meta'].get('iteration', None),
                                                         precessor=da_id)
-        print(f'Now adding new annotation da_id: {da_id}')
-        print(f'save_document_annotations debug record da: {new_da_id}, d: {d_id}, record: {data}')
         annotation_id = await self._add_annotations(new_da_id, d_id, data)
-        print(f'adding complete: {annotation_id}')
         return new_da_id
