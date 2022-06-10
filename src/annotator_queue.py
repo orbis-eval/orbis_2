@@ -34,13 +34,14 @@ class AnnotatorQueue:
         return list(queue_filter)
 
     def get_filtered_queue(self, corpus_name=None, annotator=None):
-        if annotator == 'undefined':
-            annotator = None
+        # if annotator == 'undefined':
+        #     annotator = None
+        annotator = 'fow-pipeline'
 
         if not corpus_name and not annotator:
             return self.__queue
-        elif corpus_name:
-            return self.__filter_queue(corpus_name, annotator, 'or')
+        elif corpus_name and annotator:
+            return self.__filter_queue(corpus_name, annotator, 'and')
         else:
             return self.__filter_queue(corpus_name, annotator, 'or')
 
