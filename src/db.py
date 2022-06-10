@@ -31,8 +31,8 @@ class DB:
         print(f'using url "{self.__mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
         await self.__db['corpus'].create_index('corpus_name', unique=True)
-        await self.__db['document'].create_index([('id', pymongo.ASCENDING),
-                                                  ('corpus_name', pymongo.ASCENDING)], unique=True)
+        # await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+        #                                          ('corpus_name', pymongo.ASCENDING)], unique=True)
 
     def close(self):
         self.__client.close()
