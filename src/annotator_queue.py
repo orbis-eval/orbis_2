@@ -36,7 +36,7 @@ class AnnotatorQueue:
     def get_filtered_queue(self, corpus_name=None, annotator=None):
         # if annotator == 'undefined':
         #     annotator = None
-        annotator = 'fow-pipeline'
+        return self.__queue
 
         if not corpus_name and not annotator:
             return self.__queue
