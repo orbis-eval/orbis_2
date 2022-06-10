@@ -40,7 +40,7 @@ class AnnotatorQueue:
         if not corpus_name and not annotator:
             return self.__queue
         elif corpus_name:
-            return self.__filter_queue(corpus_name, annotator, 'and')
+            return self.__filter_queue(corpus_name, annotator, 'or')
         else:
             return self.__filter_queue(corpus_name, annotator, 'or')
 
