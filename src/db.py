@@ -98,6 +98,7 @@ class DB:
         annotation_record = {'da_id': ObjectId(da_id),
                              'd_id': ObjectId(d_id),
                              'annotations': record}
+        print(f'Now inserting new annotation da_id: {da_id}')
         return await self.__insert_record('annotation', annotation_record)
 
     async def _get_d_id_from_da_id(self, da_id):
@@ -207,5 +208,6 @@ class DB:
                                                         annotator=annotator,
                                                         iteration_id=data['meta'].get('iteration', None),
                                                         precessor=da_id)
+        print(f'Now adding new annotation da_id: {da_id}')                                                
         annotation_id = self._add_annotations(new_da_id, d_id, data.get("annotations", []))
         return new_da_id
