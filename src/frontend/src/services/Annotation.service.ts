@@ -39,7 +39,7 @@ export class AnnotationService {
         this.Annotations = [];
         this.AnnotationTypes = [];
 
-        return fetch(`/getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.AnnotatorId}`)
+        return fetch(`/getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
             .then(response => {
               return response.json();
             })
@@ -85,7 +85,7 @@ export class AnnotationService {
         }
         const requestBody = {
             "da_id": SettingsService.DocumentId,
-            "annotator": SettingsService.AnnotatorId,
+            "annotator": SettingsService.Annotator || '',
             "data": {
                 "d_id": this.DocumentId,
                 "meta": this.DocumentMeta,
@@ -95,11 +95,11 @@ export class AnnotationService {
                     })
                     .map(e => ({
                     "key": e.key,
-                    "type": e.type,
+                    "type": e.type || '',
                     "surface_form": this.Document.substring(e.start, e.end),
                     "start": e.start,
                     "end": e.end,
-                    "scope": e.scope,
+                    "scope": e.scope || '',
                     "meta": e.meta
                 }))
             }
