@@ -34,10 +34,11 @@ class AnnotatorQueue:
         return list(queue_filter)
 
     def get_filtered_queue(self, corpus_name=None, annotator=None):
-        # if annotator == 'undefined':
-        #     annotator = None
-        return self.__queue
-
+        if annotator == 'undefined':
+           annotator = None
+        
+        annotator = 'fow-pipeline'
+    
         if not corpus_name and not annotator:
             return self.__queue
         elif corpus_name and annotator:
@@ -48,6 +49,9 @@ class AnnotatorQueue:
     async def get_id_for_annotation(self, corpus_name=None, annotator=None):
         if annotator == 'undefined':
             annotator = None
+
+        annotator = 'fow-pipeline'
+
         da_id = None
 
         if not self.__queue:
