@@ -215,4 +215,5 @@ class DB:
                                                         precessor=da_id)
         print(f'Now adding new annotation da_id: {da_id}')
         annotation_id = self._add_annotations(new_da_id, d_id, data)
+        print(f'adding complete: {annotation_id}')
         return new_da_id
