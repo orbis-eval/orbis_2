@@ -94,13 +94,13 @@ export class AnnotationService {
                         return [enAnnotationStatus.APPROVED, enAnnotationStatus.NEW, enAnnotationStatus.EDITED].indexOf(e.status) >= 0
                     })
                     .map(e => ({
-                    "key": e.key,
+                    "key": e.key || Date.now(),
                     "type": e.type || '',
-                    "surface_form": this.Document.substring(e.start, e.end),
+                    "surface_form": this.Document.substring(e.start, e.end) || '',
                     "start": e.start,
                     "end": e.end,
                     "scope": e.scope || '',
-                    "meta": e.meta
+                    "meta": e.meta || {}
                 }))
             }
         };
