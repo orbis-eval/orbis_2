@@ -39,7 +39,7 @@ export class AnnotationService {
         this.Annotations = [];
         this.AnnotationTypes = [];
 
-        return fetch(`/getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
+        return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
             .then(response => {
               return response.json();
             })

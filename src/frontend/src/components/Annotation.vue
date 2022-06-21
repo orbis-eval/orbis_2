@@ -3,14 +3,6 @@ import AnnotationChar from "./AnnotationChar.vue";
 </script>
 <template>
   <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)" :key="documentId">
-    <template v-for="char in chars">
-      <span :class="[char.char === '\n' ? 'spacer' : '']"
-            :data-charindex="char.index"
-            :style="getBordersByIndex(char.index)"
-      >
-        {{char.char === ' ' || char.char === '\n' ? '&nbsp;' : char.char}}
-      </span>
-    </template>
   </div>
   <div id="context_menu_new" :class="[{ active: selectedString, below: contextMenuBelow }, contextMenuStatus ]">
     <button @click="approveAnnotation()" class="approve"><i class="fa fa-check"></i></button>
@@ -138,6 +130,7 @@ export default {
             return char;
           });
       setTimeout(() => {
+        this.renderChars();
         this.annotations
             .filter(e => [enAnnotationStatus.REPLACED, enAnnotationStatus.PENDING, enAnnotationStatus.PROVISORY].indexOf(e.status) === -1)
             .forEach(e => this.setClassOnChars(e));
@@ -681,16 +674,17 @@ export default {
      */
     openContextMenuForNewAnnotation(annotation) {
       this.selectedString = annotation.type || 'unset';
-      let firstchar = document.querySelector(`span[data-charindex="${annotation.start}"]`);
+      const firstchar = document.querySelector(`span[data-charindex="${annotation.start}"]`);
+      const popover = document.getElementById('context_menu_new');
 
       if (firstchar.offsetTop < 100) {
-        this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px - 3em)`;
+        popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px - 3em)`;
         this.contextMenuBelow = true;
       } else {
-        this.popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px + 2em)`;
+        popover.style.bottom = `calc(100% - ${firstchar.offsetTop}px + 2em)`;
         this.contextMenuBelow = false;
       }
-      this.popover.style.left = firstchar.offsetLeft + 'px';
+      popover.style.left = firstchar.offsetLeft + 'px';
 
       this.contextMenuStatus = annotation.status;
     },
@@ -699,6 +693,23 @@ export default {
      */
     closeContextMenuForNewAnnotation() {
       this.selectedString = null;
+    },
+    /**
+     * Rendert die Character nach dem neu laden des Dokuments
+     */
+    renderChars() {
+      const annotationContainer = document.getElementById('annotation_container');
+
+      this.chars.forEach((c) => {
+        const span = document.createElement('span');
+        if (c.char === '\n') {
+          span.classList.add('spacer');
+        }
+        span.dataset.charindex = c.index;
+        span.style = this.getBordersByIndex(c.index);
+        span.innerHTML = c.char === ' ' || c.char === '\n' ? '&nbsp;' : c.char;
+        annotationContainer.append(span);
+      });
     }
   },
   /**
@@ -718,8 +729,6 @@ export default {
     AnnotationService.Changes.subscribe(() => {
       this.InitAnnotationVue();
     });
-
-    this.popover = document.getElementById('context_menu_new');
   }
 }
 </script>
