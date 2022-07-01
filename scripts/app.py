@@ -1,3 +1,5 @@
+import time
+
 from fastapi import FastAPI
 import uvicorn
 import sys
@@ -101,6 +103,7 @@ async def get_document_annotations(da_id=None):
         response = Response(status_code=400,
                             message='Missing da_id in request.')
     elif annotations := await db.get_document_annotations(da_id):
+        annotations['meta']['request_time'] = time.time()
         response = Response(status_code=200,
                             content={'annotations': annotations})
     else:
