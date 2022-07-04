@@ -108,7 +108,7 @@ export class AnnotationService {
             }
         };
 
-        return fetch('/saveDocumentAnnotations', {
+        return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}/saveDocumentAnnotations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
