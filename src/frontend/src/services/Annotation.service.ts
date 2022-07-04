@@ -6,7 +6,8 @@ import {Subject} from 'rxjs';
 export class AnnotationService {
     static Document = '';
     static DocumentId = '';
-    static DocumentMeta = {};
+    static DocumentMeta: any = {};
+    static DocumentLoadTimeStamp: number;
     static Annotations: Annotation[] = [];
     static AnnotationTypes: AnnotationType[] = [];
     static TypeKeyList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'];
@@ -27,8 +28,9 @@ export class AnnotationService {
             Document: this.Document,
             DocumentId: this.DocumentId,
             DocumentMeta: this.DocumentMeta,
+            DocumentLoadDate: this.DocumentLoadTimeStamp,
             Annotations: this.Annotations,
-            AnnotationTypes: this.AnnotationTypes
+            AnnotationTypes: this.AnnotationTypes,
         });
     }
 
@@ -52,7 +54,7 @@ export class AnnotationService {
                 AnnotationService.DocumentId = data.content.annotations.d_id;
                 AnnotationService.DocumentMeta = data.content.annotations.meta;
                 AnnotationService.Annotations = data.content.annotations.annotations
-                    .map(e => new Annotation(e))
+                    .map((e: any) => new Annotation(e))
                     .sort((a: Annotation, b: Annotation) => a.start > b.start ? 1 : -1);
                 AnnotationService.Annotations.forEach((e, i) => {
                     e.status = enAnnotationStatus.PENDING;
@@ -67,6 +69,7 @@ export class AnnotationService {
 
                 SettingsService.SetCorpusName(data.content.corpus_name);
                 SettingsService.SetDocumentId(data.content.da_id);
+                this.DocumentLoadTimeStamp = new Date().getTime();
                 this.changes();
 
                 return AnnotationService.Annotations;
@@ -116,6 +119,15 @@ export class AnnotationService {
             .catch(error => {
                 console.error(error);
             });
+    }
+
+    /**
+     * gibt den TimeStamp zurück, basierend auf der Request Time in den Metadaten und dem Delta dazu
+     * @constructor
+     */
+    static GetDocumentMetaTimeStamp(): number {
+        const delta_in_seconds = (new Date().getTime() - this.DocumentLoadTimeStamp) / 1000;
+        return Number(this.DocumentMeta['request_time']) + delta_in_seconds;
     }
 
     static AddAnnotationType(annotationType: AnnotationType) {
