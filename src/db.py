@@ -188,6 +188,8 @@ class DB:
         # Linked collections is a key with value of a list of one element
         d_result = da_result.get('linked_collections')[0]
 
+        da_result['annotator'] = "ALLOW_ALL_ANNOTATORS" # TODO: get_annotator_from_config_map(da_result)
+
         result = {'da_id': da_id,
                   'corpus_name': d_result.get('corpus_name'),
                   'annotator': da_result.get('annotator'),
