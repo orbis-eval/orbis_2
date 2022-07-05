@@ -5,7 +5,7 @@
   "annotator": "Annotator",
   "corpusname": "Corpus Name",
   "documentid": "DocumentId",
-  "problematic_document": "Data problematic",
+  "problematic_document": "Faulty Document",
   "problematic_document_prompt": "Please enter a description of the problem in this document:",
   "bugreport": "bug report",
   "metadata-title": "Meta Data",

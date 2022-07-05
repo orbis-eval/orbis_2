@@ -66,7 +66,7 @@ import {AnnotationService} from '@/services/Annotation.service';
 #language-switcher span, #annotator span, #document span, #problematic span, #bugreport span {
   display: block;
   padding-left: .5em;
-  max-width: 10em;
+  max-width: 10.2em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
