@@ -39,10 +39,6 @@ spec:
           volumeMounts:
             - name: mongo-persistence
               mountPath: /data/db
-            - name: etc-weblyzard
-              mountPath: /etc/weblyzard/
-            - name: logs-weblyzard
-              mountPath: /var/log/weblyzard/
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
@@ -66,18 +62,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-      - name : mongo-persistence
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: {{ .Values.dbPersistencePath }}
-      - name: etc-weblyzard
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/weblyzard/etc/
-      - name: logs-weblyzard
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/var/log/weblyzard/
+      - name: mongo-persistence
+        persistentVolumeClaim:
+          claimName: mongodb-pvc
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
