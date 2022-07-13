@@ -81,7 +81,7 @@ resources:
   #   cpu: 100m
 
 env:
-  MONGO_URL="changeme"
+  MONGO_URL: "changeme"
 
 nodeSelector: {}
 
