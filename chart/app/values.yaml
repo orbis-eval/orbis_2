@@ -5,8 +5,6 @@
 
 replicaCount: 1
 
-# nfs kube-volume mount address
-nfsServer: joshua
 probePath: /rest/status
 
 deployment: 
@@ -79,8 +77,8 @@ resources:
   #   cpu: 100m
 
 env:
-  mongo_host: "orbis2-db"
-  mongo_port: "63011"
+  mongo_host: "mongodb-orbis2.orbis2"
+  mongo_port: "27017"
 
 nodeSelector: {}
 
