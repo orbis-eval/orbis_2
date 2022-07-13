@@ -18,7 +18,7 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "autodeployment.labels" . | nindent 4 }}
-  {{- with .Values.ingress }}
+  {{- with .Values.ingress.annotations }}
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-issuer"
     # type of authentication
