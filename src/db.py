@@ -18,6 +18,7 @@ class DB:
     async def open_(self):
         # check for database params:
         if not self.__mongo_url:
+            # TODO: add user friendly authentication mechanism.
             if os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
                 self.__mongo_url = f"mongodb://" \
                                    f"{os.environ.get('MONGO_HOST')}:" \

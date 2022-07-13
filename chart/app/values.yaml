@@ -80,8 +80,7 @@ resources:
   #   cpu: 100m
 
 env:
-  mongo_host: "mongodb-orbis2.orbis2"
-  mongo_port: "27017"
+  MONGO_URL="changeme"
 
 nodeSelector: {}
 
