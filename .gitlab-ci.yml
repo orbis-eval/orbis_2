@@ -90,7 +90,9 @@ fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy to prodction cluster for namespace '$KUBE_NAMESPACE'"
+    - echo "Deploy to prodction cluster for namespace ${KUBE_NAMESPACE}"
+    - echo $KUBE_NAMESPACE
+    - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
