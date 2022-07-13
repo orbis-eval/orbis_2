@@ -59,10 +59,10 @@ ingress:
   hosts:
     - host: orbis2.prod.semanticlab.net
       paths: [/]
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - hosts:
+      - orbis2.prod.semanticlab.net
+      secretName: orbis2.prod-secret
 
 resources: 
   # We usually recommend not to specify default resources and to leave this as a conscious
