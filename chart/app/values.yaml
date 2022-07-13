@@ -13,6 +13,10 @@ deployment:
     maxSurge: 2
     maxUnavailable: 1
 
+gitlab:
+  env: default-environment
+  app: default-app
+
 image:
   repository: registry.gitlab.semanticlab.net/futureofwork
   pullPolicy: IfNotPresent
