@@ -74,8 +74,6 @@ docker:
   image:
     name: docker:latest
   script:
-    - echo $KUBE_NAMESPACE
-    - echo $MONGO_URL
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - echo building image $DOCKER_IMAGE
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
@@ -92,7 +90,7 @@ fhgr-deploy-production-release:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy to prodction cluster for namespace ${KUBE_NAMESPACE}"
+    - echo "Deploy to production cluster for namespace ${KUBE_NAMESPACE}"
     - echo $KUBE_NAMESPACE
     - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
