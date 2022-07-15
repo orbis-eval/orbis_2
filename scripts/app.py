@@ -21,7 +21,7 @@ from scripts.models import (DataExchangeModel,
                             CorpusModel)
 from src.models.response import Response
 
-print(os.environ.get('MONGO_URL'))
+print(os.environ.get('test'))
 db = DB(mongo_url=os.environ.get('MONGO_URL'))
 
 app = FastAPI(title='Orbis 2 Webservice',

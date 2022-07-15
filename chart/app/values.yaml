@@ -82,6 +82,7 @@ resources:
 
 env:
   MONGO_URL: changeme
+  test: "Hello world"
 
 nodeSelector: {}
 
