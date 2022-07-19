@@ -224,19 +224,19 @@ fhgr-delete-test-release:
     - docker
   when: manual
 
-fhgr-deploy-test-release-db:
+fhgr-deploy-test-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
-    - echo "Deploy db to prodction cluster"
+    - echo "Deploy test db to prodction cluster"
     - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - helm upgrade --install $APPLICATION_NAME_DB
-      --kubeconfig $KUBECONFIG 
-      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
-      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+    - helm upgrade --install 
+      -f ./$HELM_CHART_NAME_FHGR/test-db/mongo_values.yaml
       --namespace $KUBE_NAMESPACE
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
+      --kubeconfig $KUBECONFIG
+      --set appVersion=$CI_COMMIT_SHA 
+      $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
     - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_DB
   environment:
     name: production
@@ -250,6 +250,17 @@ fhgr-deploy-test-release-db:
     - mavendocker
   when: manual
 
+add-documents-to-test-db:
+  image: "python:3.8"
+  stage: Kubernetes Deployment Test
+  script:
+    - echo "Adding documents do test db"
+  environment:
+    name: "add-test-documents"
+  except:
+    - main
+  when: manual
+
 fhgr-delete-test-release-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
@@ -257,7 +268,7 @@ fhgr-delete-test-release-db:
     GIT_STRATEGY: none
   script:
     - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
-    - echo "removing db production deployment $APPLICATION_NAME_DB from cluster..."
+    - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
   environment:
     name: production

@@ -141,6 +141,7 @@ async def save_document_annotations(data: DataExchangeModel):
 @app.post('/addDocument', response_model=ResponseModel)
 async def add_document(document: DocumentPostModel):
     document = document.dict()
+    # if not document['corpus_name'] in db.get_corpora():
     d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
     if document_exists:
         response = Response(status_code=400,
