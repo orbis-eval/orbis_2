@@ -1,5 +1,3 @@
-fullnameOverride: orbis2-mongodb
-
 persistence:
   storageClass: "aaron-block-noreclaim"
   size: "10Gi"
