@@ -259,6 +259,8 @@ add-documents-to-test-db:
     name: "add-test-documents"
   except:
     - main
+  tags:
+    - docker
   when: manual
 
 fhgr-delete-test-db:
