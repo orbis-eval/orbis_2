@@ -107,6 +107,7 @@ class DocumentPostModel(BaseModel):
                              "meta": {"some": "annotator",
                                       "and": "iteration",
                                       "or": "creation_date"},
+                             "annotator": 'gold',
                              "annotations": [{
                                  "key": "#somekey",
                                  "type": "topic",

@@ -21,7 +21,7 @@ def import_into_db(gold_dir, service_url, max_files=5, prod=False):
 
 
 if __name__ == '__main__':
-    LIVE_SERVICE_URL = 'https://orbis2.prod.semanticlab.net/addDocument'
+    # LIVE_SERVICE_URL = 'https://orbis2.prod.semanticlab.net/addDocument'
     # LOCAL_SERVICE_URL = 'http://0.0.0.0:63010/addDocument'
     GOLD_DIR = Path(__file__).parent / 'goldDocuments' / 'orbis'
-    import_into_db(GOLD_DIR, LIVE_SERVICE_URL, 1000, True)
+    import_into_db(GOLD_DIR, os.environ['SERVICE_URL'], 1000, True)
