@@ -254,6 +254,7 @@ add-documents-to-test-db:
   stage: Kubernetes Deployment Test
   script:
     - echo "Adding documents do test db"
+    - python3 corpus/document_loader.py
   environment:
     name: "add-test-documents"
   except:
