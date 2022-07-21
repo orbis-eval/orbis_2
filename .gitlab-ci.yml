@@ -138,7 +138,7 @@ fhgr-deploy-production-db:
   script:
     - echo "Deploy db to production cluster"
     - export KUBE_NAMESPACE=orbis2
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install 
       -f ./$HELM_CHART_NAME_FHGR/db/mongo_values.yaml
