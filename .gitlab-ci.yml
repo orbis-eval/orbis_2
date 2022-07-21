@@ -134,7 +134,7 @@ fhgr-delete-production-release:
 
 fhgr-deploy-production-db:
   image: dtzar/helm-kubectl:latest
-  stage: Kubernetes Deployment Test
+  stage: Kubernetes Deployment Production
   script:
     - echo "Deploy test db to prodction cluster"
     - export KUBE_NAMESPACE=orbis2
