@@ -164,7 +164,7 @@ fhgr-delete-production-db:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-mongodb
     - echo "removing db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
   environment:
@@ -260,13 +260,13 @@ add-documents-to-test-db:
     - main
   when: manual
 
-fhgr-delete-test-release-db:
+fhgr-delete-test-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-mongodb
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
   environment:
