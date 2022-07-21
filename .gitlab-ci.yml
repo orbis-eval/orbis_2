@@ -191,7 +191,7 @@ fhgr-deploy-test-release:
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
       --set env.MONGO_URL=${MONGO_TEST_URL}
       --namespace $KUBE_NAMESPACE
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/test-app/
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app-preview/
     - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_APP
   environment:
     name: production
