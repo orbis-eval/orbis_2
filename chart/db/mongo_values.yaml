@@ -3,4 +3,6 @@ persistence:
   size: "10Gi"
 
 metrics:
-  enabled: true
+  enabled: false
+
+replicaCount: 1
