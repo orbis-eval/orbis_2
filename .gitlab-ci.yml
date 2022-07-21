@@ -146,7 +146,7 @@ fhgr-deploy-production-db:
       --kubeconfig $KUBECONFIG
       --set appVersion=$CI_COMMIT_SHA 
       $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_DB
+    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  ${APPLICATION_NAME_DB}-mongodb
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
