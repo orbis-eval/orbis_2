@@ -136,9 +136,9 @@ fhgr-deploy-production-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy db to prodction cluster"
+    - echo "Deploy db to production cluster"
     - export KUBE_NAMESPACE=orbis2
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}-mongodb
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install 
       -f ./$HELM_CHART_NAME_FHGR/db/mongo_values.yaml
