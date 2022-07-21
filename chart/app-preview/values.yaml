@@ -5,11 +5,9 @@
 
 replicaCount: 1
 
-# nfs kube-volume mount address
-nfsServer: joshua
 probePath: /rest/status
 
-deployment: 
+deployment:
   restartPolicy: Always
   rollingUpdate:
     maxSurge: 2
@@ -60,13 +58,17 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   hosts:
     - host: orbis2.preview.semanticlab.net
-      paths: [/]
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
 
-resources: 
+  tls:
+    - hosts:
+      - orbis2.preview.semanticlab.net
+      secretName: orbis2.preview-secret
+  authsecret: orbis2-basic-auth
+
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -79,8 +81,7 @@ resources:
   #   cpu: 100m
 
 env:
-  mongo_host: "orbis2-db"
-  mongo_port: "63011"
+  MONGO_URL: changeme
 
 nodeSelector: {}
 

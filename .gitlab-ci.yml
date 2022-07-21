@@ -136,7 +136,7 @@ fhgr-deploy-production-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy test db to prodction cluster"
+    - echo "Deploy db to prodction cluster"
     - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_DB=${APPLICATION_NAME}
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
