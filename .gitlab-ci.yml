@@ -254,10 +254,14 @@ add-documents-to-test-db:
   stage: Kubernetes Deployment Test
   script:
     - echo "Adding documents do test db"
+    - pip install requests
+    - python3 corpus/document_loader.py
   environment:
     name: "add-test-documents"
   except:
     - main
+  tags:
+    - docker
   when: manual
 
 fhgr-delete-test-db:
