@@ -27,7 +27,7 @@ app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
 app.add_event_handler('startup', db.open_)
 app.add_event_handler('shutdown', db.close)
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+app.mount('assets', StaticFiles(directory="assets"), name="assets")
 
 annotator_queue = AnnotatorQueue(db)
 
@@ -141,7 +141,12 @@ async def save_document_annotations(data: DataExchangeModel):
 @app.post('/addDocument', response_model=ResponseModel)
 async def add_document(document: DocumentPostModel):
     document = document.dict()
-    # if not document['corpus_name'] in db.get_corpora():
+    corporas = await db.get_corporas()
+    if not document['corpus_name'] in corporas:
+        corpus_id = await db.create_corpus(
+                    corpus_name=document['corpus_name'],
+                    description=f'Auto generated description for corpus {document["corpus_name"]}'
+        )
     d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
     if document_exists:
         response = Response(status_code=400,

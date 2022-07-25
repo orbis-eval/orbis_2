@@ -69,9 +69,7 @@ class AnnotatorQueue:
         if annotator == "ALLOW_ALL_ANNOTATORS":
             return None
 
-        return await get_id_for_annotation(corpus, "ALLOW_ALL_ANNOTATORS")
-
-        
+        return await self.get_id_for_annotation(corpus_name, "ALLOW_ALL_ANNOTATORS")
 
     def get_document_annotation_status(self, da_id):
         if da_id in self.__da_ids:
