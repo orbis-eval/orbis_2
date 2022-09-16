@@ -82,7 +82,7 @@ docker:
     - docker push $DOCKER_IMAGE:latest
     - docker push $DOCKER_IMAGE:$CI_VERSION
   tags:
-    - dind
+    - nlp-runner
   when: manual
 
 fhgr-deploy-production-release:
