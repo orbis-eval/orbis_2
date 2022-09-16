@@ -27,7 +27,7 @@ app = FastAPI(title='Orbis 2 Webservice',
               version='1.0')
 app.add_event_handler('startup', db.open_)
 app.add_event_handler('shutdown', db.close)
-app.mount('assets', StaticFiles(directory="assets"), name="assets")
+app.mount('/assets', StaticFiles(directory="assets"), name="assets")
 
 annotator_queue = AnnotatorQueue(db)
 
