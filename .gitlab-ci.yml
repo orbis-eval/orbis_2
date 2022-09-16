@@ -179,7 +179,7 @@ fhgr-deploy-test-release:
     - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
-      --kubeconfig $KUBECONFIG 
+      --kubeconfig "$KUBECONFIG" 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
