@@ -108,6 +108,8 @@ fhgr-deploy-production-release:
       namespace: $KUBE_NAMESPACE
   only:
     - main
+  tags:
+    - nlp-runner
   when: manual
 
 fhgr-delete-production-release:
@@ -125,7 +127,7 @@ fhgr-delete-production-release:
   only:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
 fhgr-deploy-production-db:
@@ -150,6 +152,8 @@ fhgr-deploy-production-db:
       namespace: $KUBE_NAMESPACE
   only:
     - main
+  tags:
+    - nlp-runner
   when: manual
 
 fhgr-delete-production-db:
@@ -167,7 +171,7 @@ fhgr-delete-production-db:
   only:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
 fhgr-deploy-test-release:
@@ -194,6 +198,8 @@ fhgr-deploy-test-release:
       namespace: $KUBE_NAMESPACE
   except:
     - main
+  tags:
+    - nlp-runner
   when: manual
 
 fhgr-delete-test-release:
@@ -211,7 +217,7 @@ fhgr-delete-test-release:
   except:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
 fhgr-deploy-test-db:
@@ -250,7 +256,7 @@ add-documents-to-test-db:
   except:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
 fhgr-delete-test-db:
@@ -268,6 +274,6 @@ fhgr-delete-test-db:
   except:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
