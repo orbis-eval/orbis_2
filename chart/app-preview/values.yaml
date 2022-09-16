@@ -18,7 +18,7 @@ gitlab:
   app: default-app
 
 image:
-  repository: davos.fhgr.ch:443/nlp/project/future-of-work
+  repository: davos.fhgr.ch/nlp/project/future-of-work
   pullPolicy: IfNotPresent
 
 imagePullSecrets: [name: regcred]
