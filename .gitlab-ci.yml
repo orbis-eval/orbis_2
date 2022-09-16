@@ -81,8 +81,6 @@ docker:
     - docker tag $DOCKER_IMAGE $DOCKER_IMAGE:$CI_VERSION
     - docker push $DOCKER_IMAGE:latest
     - docker push $DOCKER_IMAGE:$CI_VERSION
-  tags:
-  - mavendocker
   when: manual
 
 fhgr-deploy-production-release:
@@ -110,8 +108,6 @@ fhgr-deploy-production-release:
       namespace: $KUBE_NAMESPACE
   only:
     - main
-  tags:
-    - mavendocker
   when: manual
 
 fhgr-delete-production-release:
@@ -154,8 +150,6 @@ fhgr-deploy-production-db:
       namespace: $KUBE_NAMESPACE
   only:
     - main
-  tags:
-    - mavendocker
   when: manual
 
 fhgr-delete-production-db:
@@ -201,8 +195,6 @@ fhgr-deploy-test-release:
       namespace: $KUBE_NAMESPACE
   except:
     - main
-  tags:
-    - mavendocker
   when: manual
 
 fhgr-delete-test-release:
@@ -245,8 +237,6 @@ fhgr-deploy-test-db:
       namespace: $KUBE_NAMESPACE
   except:
     - main
-  tags:
-    - mavendocker
   when: manual
 
 add-documents-to-test-db:
