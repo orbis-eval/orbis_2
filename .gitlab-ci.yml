@@ -24,7 +24,7 @@ pep8:
     - pip install tox-pip-version
     - tox -e pep8
   tags:
-    - docker
+    - python
   allow_failure: true
 
 
@@ -38,7 +38,7 @@ pytest:
     - pip install tox-pip-version
     - tox -e coverage
   tags:
-    - docker
+    - python
   artifacts:
     paths:
       - $coverage_path
@@ -64,7 +64,7 @@ sonar:
                     -D sonar.exclusions='src/frontend/**'
     
   tags:
-    - docker
+    - python
   when: manual
 
 
@@ -81,6 +81,8 @@ docker:
     - docker tag $DOCKER_IMAGE $DOCKER_IMAGE:$CI_VERSION
     - docker push $DOCKER_IMAGE:latest
     - docker push $DOCKER_IMAGE:$CI_VERSION
+  tags:
+    - dind
   when: manual
 
 fhgr-deploy-production-release:
