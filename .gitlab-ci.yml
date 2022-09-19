@@ -77,7 +77,6 @@ docker:
     - echo building image $DOCKER_IMAGE
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 -w 0)\"}}}" > /kaniko/.docker/config.json
-
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_VERSION
   tags:
     - nlp-runner
@@ -99,7 +98,6 @@ fhgr-deploy-production-release:
       --set env.MONGO_URL=${MONGO_URL}
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_APP
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
