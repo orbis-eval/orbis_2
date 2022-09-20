@@ -82,7 +82,7 @@ docker:
     - nlp-runner
   when: manual
 
-fhgr-deploy-production-release:
+fhgr-deploy-production-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
@@ -101,7 +101,7 @@ fhgr-deploy-production-release:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-production-app
     kubernetes:
       namespace: $KUBE_NAMESPACE
   only:
@@ -110,7 +110,7 @@ fhgr-deploy-production-release:
     - nlp-runner
   when: manual
 
-fhgr-delete-production-release:
+fhgr-delete-production-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   variables:
@@ -145,7 +145,7 @@ fhgr-deploy-production-db:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-production-db
     kubernetes:
       namespace: $KUBE_NAMESPACE
   only:
@@ -172,7 +172,7 @@ fhgr-delete-production-db:
     - nlp-runner
   when: manual
 
-fhgr-deploy-test-release:
+fhgr-deploy-test-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
@@ -191,7 +191,7 @@ fhgr-deploy-test-release:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-production-app
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
@@ -200,7 +200,7 @@ fhgr-deploy-test-release:
     - nlp-runner
   when: manual
 
-fhgr-delete-test-release:
+fhgr-delete-test-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
@@ -235,7 +235,7 @@ fhgr-deploy-test-db:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-test-release
+    on_stop: fhgr-delete-test-db
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
@@ -263,6 +263,7 @@ fhgr-delete-test-db:
   variables:
     GIT_STRATEGY: none
   script:
+    - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-mongodb
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
