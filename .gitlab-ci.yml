@@ -120,7 +120,7 @@ fhgr-delete-production-app:
   script:
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - echo "removing production deployment $APPLICATION_NAME_APP from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_APP --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
@@ -162,9 +162,9 @@ fhgr-delete-production-db:
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=${APPLICATION_NAME}-mongodb
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - echo "removing db production deployment $APPLICATION_NAME_DB from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
@@ -210,7 +210,7 @@ fhgr-delete-test-app:
   script:
     - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
     - echo "removing production deployment $APPLICATION_NAME_APP from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_APP --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
@@ -226,7 +226,7 @@ fhgr-deploy-test-db:
   script:
     - echo "Deploy test db to prodction cluster"
     - export KUBE_NAMESPACE=orbis2
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}
+    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install 
       -f ./$HELM_CHART_NAME_FHGR/test-db/mongo_values.yaml
@@ -267,7 +267,7 @@ fhgr-delete-test-db:
   script:
     - export KUBE_NAMESPACE=orbis2
     - helm --kubeconfig $KUBECONFIG list --namespace $KUBE_NAMESPACE
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-mongodb
+    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
