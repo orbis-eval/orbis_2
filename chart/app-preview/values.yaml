@@ -18,7 +18,7 @@ gitlab:
   app: default-app
 
 image:
-  repository: registry.gitlab.semanticlab.net/futureofwork
+  repository: davos.fhgr.ch/nlp/project/future-of-work
   pullPolicy: IfNotPresent
 
 imagePullSecrets: [name: regcred]
