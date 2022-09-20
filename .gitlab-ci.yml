@@ -265,7 +265,7 @@ fhgr-delete-test-db:
   script:
     - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-mongodb
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
