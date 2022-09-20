@@ -26,6 +26,7 @@ pep8:
   tags:
     - python
   allow_failure: true
+  when: manual
 
 
 pytest:
@@ -43,6 +44,7 @@ pytest:
     paths:
       - $coverage_path
   allow_failure: true
+  when: manual
 
 
 sonar:
@@ -264,6 +266,7 @@ fhgr-delete-test-db:
     GIT_STRATEGY: none
   script:
     - export KUBE_NAMESPACE=orbis2
+    - helm --kubeconfig $KUBECONFIG list --namespace $KUBE_NAMESPACE
     - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-mongodb
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
