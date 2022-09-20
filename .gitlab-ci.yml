@@ -143,6 +143,7 @@ fhgr-deploy-production-db:
       --namespace $KUBE_NAMESPACE
       --kubeconfig $KUBECONFIG
       --set appVersion=$CI_COMMIT_SHA 
+      --set auth.rootPassword=$MONGODB_ROOT_PASSWORD
       $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
   environment:
     name: production
