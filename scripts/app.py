@@ -175,6 +175,18 @@ async def create_corpus(corpus: CorpusModel):
     return response.as_json()
 
 
+@app.get('/getCorpora', response_model=ResponseModel)
+async def get_corpora():
+    if corpora := await db.get_corpora():
+        response = Response(status_code=200,
+                            content={'corpora': corpora},
+                            message=f'Found {len(corpora)} corpora in db .')
+    else:
+        response = Response(status_code=400,
+                            message='No corpora found.')
+    return response.as_json()
+
+
 def get_app():
     return app
 

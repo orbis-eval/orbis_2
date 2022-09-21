@@ -117,6 +117,13 @@ class DB:
             corpus_id = str(corpus_id)
         return corpus_id
 
+    async def get_corpora(self):
+        corpora = await self.__get_records('corpus', {})
+        print(corpora)
+        if corpora:
+            return [c.get('corpus_name') for c in corpora]
+        return []
+
     async def add_document(self, source_id, corpus_name, text, annotator, data):
         document_exists = False
         document_record = {'id': source_id,
