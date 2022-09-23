@@ -109,19 +109,25 @@ class DB:
     async def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
                   'description': description}
-        print(record)
         if not (corpus_id := await self.__insert_record('corpus', record)):
-            print('Hello world')
             corpus_filter = {'corpus_name': corpus_name}
             corpus_id = await self.__get_record_attr('corpus', corpus_filter, '_id')
             corpus_id = str(corpus_id)
         return corpus_id
 
     async def get_corpora(self):
-        corpora = await self.__get_records('corpus', {})
-        print(corpora)
-        if corpora:
+        if corpora := await self.__get_records('corpus', {}):
             return [c.get('corpus_name') for c in corpora]
+        return []
+
+    async def get_documents_of_corpus(self, corpus_name):
+        if documents := await self.__get_records('document', {'corpus_name': corpus_name}):
+            if documents_with_info := await self.__get_records('document_annotation',
+                                                               {'d_id': {'$in': [ObjectId(d.get('_id')) for d in documents]}}):
+                return [{'da_id': str(d.get('_id')),
+                         'd_id': str(d.get('d_id')),
+                         'annotator': d.get('annotator'),
+                         'last_edited': str(d.get('datetime'))} for d in documents_with_info]
         return []
 
     async def add_document(self, source_id, corpus_name, text, annotator, data):
