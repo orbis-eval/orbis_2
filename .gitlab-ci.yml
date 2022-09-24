@@ -147,7 +147,6 @@ fhgr-deploy-production-db:
       $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
   environment:
     name: production
-    url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
     on_stop: fhgr-delete-production-db
     kubernetes:
       namespace: $KUBE_NAMESPACE
@@ -175,13 +174,13 @@ fhgr-delete-production-db:
     - nlp-runner
   when: manual
 
-fhgr-deploy-test-app:
+fhgr-deploy-app-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
     - echo "Deploy to production cluster for namespace ${KUBE_NAMESPACE}"
     - export KUBE_NAMESPACE=orbis2
-    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app-preview
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
       --kubeconfig "$KUBECONFIG" 
@@ -194,7 +193,7 @@ fhgr-deploy-test-app:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-app
+    on_stop: fhgr-delete-app-preview
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
@@ -203,13 +202,13 @@ fhgr-deploy-test-app:
     - nlp-runner
   when: manual
 
-fhgr-delete-test-app:
+fhgr-delete-app-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app-preview
     - echo "removing production deployment $APPLICATION_NAME_APP from cluster..."
     - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_APP --namespace $KUBE_NAMESPACE
   environment:
@@ -221,13 +220,13 @@ fhgr-delete-test-app:
     - nlp-runner
   when: manual
 
-fhgr-deploy-test-db:
+fhgr-deploy-db-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
     - echo "Deploy test db to prodction cluster"
     - export KUBE_NAMESPACE=orbis2
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db-preview
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install 
       -f ./$HELM_CHART_NAME_FHGR/test-db/mongo_values.yaml
@@ -238,7 +237,7 @@ fhgr-deploy-test-db:
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-test-db
+    on_stop: fhgr-delete-db-preview
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
@@ -260,7 +259,7 @@ add-documents-to-test-db:
     - nlp-runner
   when: manual
 
-fhgr-delete-test-db:
+fhgr-delete-db-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
@@ -268,7 +267,7 @@ fhgr-delete-test-db:
   script:
     - export KUBE_NAMESPACE=orbis2
     - helm --kubeconfig $KUBECONFIG list --namespace $KUBE_NAMESPACE
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db-preview
     - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
     - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
