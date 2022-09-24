@@ -194,7 +194,10 @@ async def get_corpora():
 
 @app.get('/getDocumentsOfCorpus', response_model=ResponseModel)
 async def get_documents_of_corpus(corpus_name=None):
-    if documents := await db.get_documents_of_corpus(corpus_name):
+    if not corpus_name:
+        response = Response(status_code=400,
+                            message='No corpus name provided. Try again with e.g. /getDocumentsOfCorpus?corpus_name=your_corpus_name')
+    elif documents := await db.get_documents_of_corpus(corpus_name):
         response = Response(status_code=200,
                             content={'corpora': documents},
                             message=f'Found {len(documents)} documents in corpus {corpus_name}.')

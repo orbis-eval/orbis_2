@@ -56,6 +56,50 @@ async def test_save_document_annotations():
 
 
 @pytest.mark.asyncio
+async def test_get_documents_of_corpus_empty():
+    db = await get_db_instance()
+    documents = await db.get_documents_of_corpus('test_corpus')
+
+    await delete_db(db)
+
+    assert len(documents) == 0
+
+
+@pytest.mark.asyncio
+async def test_get_documents_of_corpus_multiple_corpora():
+    document_1 = load_test_file('test_document.json')
+    document_2 = load_test_file('test_document_2.json')
+
+    db = await get_db_instance()
+
+    d_insert_id_1, da_insert_id_1, annotation_insert_id_1, document_exists_1 = await db.add_document(**document_1)
+    d_insert_id_2, da_insert_id_2, annotation_insert_id_2, document_exists_2 = await db.add_document(**document_2)
+
+    test_corpus_documents = await db.get_documents_of_corpus('test_corpus')
+    education_extraction_corpus_documents = await db.get_documents_of_corpus('education_extraction_corpus')
+
+    await delete_db(db)
+
+    assert len(test_corpus_documents) == 1
+    assert len(education_extraction_corpus_documents) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_documents_of_corpus_unknown_corpus():
+    document = load_test_file('test_document.json')
+
+    db = await get_db_instance()
+
+    d_insert_id, da_insert_id, annotation_insert_id, document_exists = await db.add_document(**document)
+
+    documents = await db.get_documents_of_corpus('some_magic_name_corpus')
+
+    await delete_db(db)
+
+    assert len(documents) == 0
+
+
+@pytest.mark.asyncio
 async def test_annotator_queue_insert_entry():
     db = await get_db_instance()
     document_annotation = load_test_file('test_annotator_queue.json')[0]
@@ -73,6 +117,7 @@ async def test_annotator_queue_insert_entry():
 
     annotator_queue = AnnotatorQueue(db)
     await annotator_queue.load_queue_from_db()
+    await delete_db(db)
 
     queue_entries = annotator_queue.get_filtered_queue()
     actual_no_entries = len(queue_entries)
