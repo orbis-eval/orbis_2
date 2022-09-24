@@ -1,5 +1,5 @@
 persistence:
-  storageClass: "aaron-block-noreclaim"
+  storageClass: "aaron-block-retainable"
   size: "10Gi"
 
 metrics:
