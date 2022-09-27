@@ -148,10 +148,8 @@ async def add_document(document: DocumentPostModel):
     document = document.dict()
     corporas = await db.get_corporas()
     if not document['corpus_name'] in corporas:
-        corpus_id = await db.create_corpus(
-                    corpus_name=document['corpus_name'],
-                    description=f'Auto generated description for corpus {document["corpus_name"]}'
-        )
+        corpus_id = await db.create_corpus(corpus_name=document['corpus_name'],
+                                           description=f'Generated description for corpus {document["corpus_name"]}')
     d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
     if document_exists:
         response = Response(status_code=400,
@@ -180,9 +178,9 @@ async def create_corpus(corpus: CorpusModel):
     return response.as_json()
 
 
-@app.get('/getCorpora', response_model=ResponseModel)
+@app.post('/getCorpora', response_model=ResponseModel)
 async def get_corpora():
-    if corpora := await db.get_corpora():
+    if corpora := db.get_corpora():
         response = Response(status_code=200,
                             content={'corpora': corpora},
                             message=f'Found {len(corpora)} corpora in db .')
@@ -196,7 +194,8 @@ async def get_corpora():
 async def get_documents_of_corpus(corpus_name=None):
     if not corpus_name:
         response = Response(status_code=400,
-                            message='No corpus name provided. Try again with e.g. /getDocumentsOfCorpus?corpus_name=your_corpus_name')
+                            message='No corpus name provided. Try again with e.g. '
+                                    '/getDocumentsOfCorpus?corpus_name=your_corpus_name')
     elif documents := await db.get_documents_of_corpus(corpus_name):
         response = Response(status_code=200,
                             content={'corpora': documents},

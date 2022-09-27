@@ -123,7 +123,8 @@ class DB:
     async def get_documents_of_corpus(self, corpus_name):
         if documents := await self.__get_records('document', {'corpus_name': corpus_name}):
             if documents_with_info := await self.__get_records('document_annotation',
-                                                               {'d_id': {'$in': [ObjectId(d.get('_id')) for d in documents]}}):
+                                                               {'d_id': {'$in': [ObjectId(d.get('_id'))
+                                                                                 for d in documents]}}):
                 return [{'da_id': str(d.get('_id')),
                          'd_id': str(d.get('d_id')),
                          'annotator': d.get('annotator'),
@@ -132,6 +133,7 @@ class DB:
 
     async def add_document(self, source_id, corpus_name, text, annotator, data):
         document_exists = False
+
         document_record = {'id': source_id,
                            'corpus_name': corpus_name,
                            'content': text}
@@ -202,7 +204,7 @@ class DB:
         # Linked collections is a key with value of a list of one element
         d_result = da_result.get('linked_collections')[0]
 
-        da_result['annotator'] = "ALLOW_ALL_ANNOTATORS" # TODO: get_annotator_from_config_map(da_result)
+        da_result['annotator'] = "ALLOW_ALL_ANNOTATORS"  # TODO: get_annotator_from_config_map(da_result)
 
         result = {'da_id': da_id,
                   'corpus_name': d_result.get('corpus_name'),
