@@ -4,6 +4,7 @@ import {SettingsService} from '@/services/Settings.service';
 import {Subject} from 'rxjs';
 
 export class AnnotationService {
+    private static _spinner: HTMLDivElement;
     static Document = '';
     static DocumentId = '';
     static DocumentMeta: any = {};
@@ -41,6 +42,8 @@ export class AnnotationService {
         this.Annotations = [];
         this.AnnotationTypes = [];
 
+        this._showLoadingSpinner();
+
         return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
             .then(response => {
               return response.json();
@@ -70,9 +73,14 @@ export class AnnotationService {
                 SettingsService.SetCorpusName(data.content.corpus_name);
                 SettingsService.SetDocumentId(data.content.da_id);
                 this.DocumentLoadTimeStamp = new Date().getTime();
+                this._hideLoadingSpinner();
                 this.changes();
 
                 return AnnotationService.Annotations;
+            })
+            .catch(error => {
+                this._hideLoadingSpinner();
+                console.error(error);
             });
     }
 
@@ -133,5 +141,15 @@ export class AnnotationService {
     static AddAnnotationType(annotationType: AnnotationType) {
         this.AnnotationTypes.push(annotationType);
         this.changes();
+    }
+
+    private static _showLoadingSpinner() {
+        this._spinner = document.createElement('div');
+        this._spinner.id = 'loading_spinner';
+        setTimeout(() => { document.body.append(this._spinner); });
+    }
+
+    private static _hideLoadingSpinner() {
+        setTimeout(() => { this._spinner.remove(); });
     }
 }
