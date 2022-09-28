@@ -17,7 +17,7 @@ async def get_db_instance():
     # Pipeline URL
     db = DB("mongodb://mongo:27017/?retryWrites=true&w=majority")
     # Local URL
-    # db = DB()
+    # db = DB("mongodb://localhost:27017/?retryWrites=true&w=majority")
     await db.open_()
     return db
 

@@ -2,8 +2,7 @@ variables:
   coverage_path: "./coverage.xml"
   APPLICATION_NAME: orbis2
 
-  DOCKER_IMAGE: registry.gitlab.semanticlab.net/fhgr/future-of-work/$CI_PROJECT_NAME
-  KUBE_NAMESPACE: futureofwork
+  DOCKER_IMAGE: davos.fhgr.ch/nlp/project/future-of-work/$CI_PROJECT_NAME
   HELM_CHART_NAME_FHGR: chart
   TEST_URL_FHGR: preview.semanticlab.net
   URL_FHGR: prod.semanticlab.net
@@ -25,7 +24,7 @@ pep8:
     - pip install tox-pip-version
     - tox -e pep8
   tags:
-    - docker
+    - python
   allow_failure: true
 
 
@@ -39,7 +38,7 @@ pytest:
     - pip install tox-pip-version
     - tox -e coverage
   tags:
-    - docker
+    - python
   artifacts:
     paths:
       - $coverage_path
@@ -65,32 +64,30 @@ sonar:
                     -D sonar.exclusions='src/frontend/**'
     
   tags:
-    - docker
+    - python
   when: manual
 
 
 docker:
   stage: Docker Build
   image:
-    name: docker:latest
+    name: gcr.io/kaniko-project/executor:debug
   script:
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - echo building image $DOCKER_IMAGE
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build --no-cache -t $DOCKER_IMAGE .
-    - docker tag $DOCKER_IMAGE $DOCKER_IMAGE:latest
-    - docker tag $DOCKER_IMAGE $DOCKER_IMAGE:$CI_VERSION
-    - docker push $DOCKER_IMAGE:latest
-    - docker push $DOCKER_IMAGE:$CI_VERSION
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 -w 0)\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_VERSION
   tags:
-  - mavendocker
+    - nlp-runner
   when: manual
 
-fhgr-deploy-production-release:
+fhgr-deploy-production-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy to prodction cluster"
+    - echo "Deploy to production cluster for namespace ${KUBE_NAMESPACE}"
+    - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
@@ -98,22 +95,22 @@ fhgr-deploy-production-release:
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --set env.MONGO_URL=${MONGO_URL}
       --namespace $KUBE_NAMESPACE
       --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_APP
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-production-app
     kubernetes:
       namespace: $KUBE_NAMESPACE
   only:
     - main
   tags:
-    - mavendocker
+    - nlp-runner
   when: manual
 
-fhgr-delete-production-release:
+fhgr-delete-production-app:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   variables:
@@ -121,43 +118,43 @@ fhgr-delete-production-release:
   script:
     - APPLICATION_NAME_APP=${APPLICATION_NAME}-app
     - echo "removing production deployment $APPLICATION_NAME_APP from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_APP --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
   only:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
-fhgr-deploy-production-release-db:
+fhgr-deploy-production-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   script:
-    - echo "Deploy db to prodction cluster"
+    - echo "Deploy db to production cluster"
+    - export KUBE_NAMESPACE=orbis2
     - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - helm upgrade --install $APPLICATION_NAME_DB
-      --kubeconfig $KUBECONFIG 
-      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
-      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+    - helm upgrade --install 
+      -f ./$HELM_CHART_NAME_FHGR/db/mongo_values.yaml
       --namespace $KUBE_NAMESPACE
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE $APPLICATION_NAME_DB
+      --kubeconfig $KUBECONFIG
+      --set appVersion=$CI_COMMIT_SHA 
+      --set auth.rootPassword=$MONGODB_ROOT_PASSWORD
+      $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
   environment:
     name: production
-    url:  https://${APPLICATION_NAME_DB}.${URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-production-db
     kubernetes:
       namespace: $KUBE_NAMESPACE
   only:
     - main
   tags:
-    - mavendocker
+    - nlp-runner
   when: manual
 
-fhgr-delete-production-release-db:
+fhgr-delete-production-db:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Production
   variables:
@@ -165,102 +162,118 @@ fhgr-delete-production-release-db:
   script:
     - APPLICATION_NAME_DB=${APPLICATION_NAME}-db
     - echo "removing db production deployment $APPLICATION_NAME_DB from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
   only:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
-fhgr-deploy-test-release:
+fhgr-deploy-app-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
-    - echo "Deploy to prodction cluster"
-    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
+    - echo "Deploy to production cluster for namespace ${KUBE_NAMESPACE}"
+    - export KUBE_NAMESPACE=orbis2
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app-preview
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
     - helm upgrade --install $APPLICATION_NAME_APP
-      --kubeconfig $KUBECONFIG 
+      --kubeconfig "$KUBECONFIG" 
       --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
       --set gitlab.app=$CI_PROJECT_PATH_SLUG 
       --set image.repository=$DOCKER_IMAGE:$CI_VERSION
+      --set env.MONGO_URL=${MONGO_TEST_URL}
       --namespace $KUBE_NAMESPACE
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app/
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_APP
+      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/app-preview/
   environment:
     name: production
     url:  https://${APPLICATION_NAME_APP}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-production-release
+    on_stop: fhgr-delete-app-preview
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
     - main
   tags:
-    - mavendocker
+    - nlp-runner
   when: manual
 
-fhgr-delete-test-release:
+fhgr-delete-app-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_APP=test-${APPLICATION_NAME}-app
+    - APPLICATION_NAME_APP=${APPLICATION_NAME}-app-preview
     - echo "removing production deployment $APPLICATION_NAME_APP from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_APP
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_APP --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
   except:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 
-fhgr-deploy-test-release-db:
+fhgr-deploy-db-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   script:
-    - echo "Deploy db to prodction cluster"
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
+    - echo "Deploy test db to prodction cluster"
+    - export KUBE_NAMESPACE=orbis2
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db-preview
     - CI_VERSION="${VERSION}.${CI_PIPELINE_ID}"
-    - helm upgrade --install $APPLICATION_NAME_DB
-      --kubeconfig $KUBECONFIG 
-      --set gitlab.env=review/${CI_ENVIRONMENT_SLUG}
-      --set gitlab.app=$CI_PROJECT_PATH_SLUG 
+    - helm upgrade --install 
+      -f ./$HELM_CHART_NAME_FHGR/test-db/mongo_values.yaml
       --namespace $KUBE_NAMESPACE
-      --set appVersion=$CI_COMMIT_SHA ./$HELM_CHART_NAME_FHGR/db/
-    - kubectl rollout restart deployment -n $KUBE_NAMESPACE  $APPLICATION_NAME_DB
+      --kubeconfig $KUBECONFIG
+      --set appVersion=$CI_COMMIT_SHA 
+      $APPLICATION_NAME_DB https://charts.bitnami.com/bitnami/mongodb-12.1.26.tgz
   environment:
     name: production
     url:  https://${APPLICATION_NAME_DB}.${TEST_URL_FHGR}/rest/status
-    on_stop: fhgr-delete-test-release
+    on_stop: fhgr-delete-db-preview
     kubernetes:
       namespace: $KUBE_NAMESPACE
   except:
     - main
-  tags:
-    - mavendocker
   when: manual
 
-fhgr-delete-test-release-db:
+add-documents-to-test-db:
+  image: "python:3.8"
+  stage: Kubernetes Deployment Test
+  script:
+    - echo "Adding documents do test db"
+    - pip install requests
+    - python3 corpus/document_loader.py
+  environment:
+    name: "add-test-documents"
+  except:
+    - main
+  tags:
+    - nlp-runner
+  when: manual
+
+fhgr-delete-db-preview:
   image: dtzar/helm-kubectl:latest
   stage: Kubernetes Deployment Test
   variables:
     GIT_STRATEGY: none
   script:
-    - APPLICATION_NAME_DB=test-${APPLICATION_NAME}-db
-    - echo "removing db production deployment $APPLICATION_NAME_DB from cluster..."
-    - helm --kubeconfig $KUBECONFIG delete $APPLICATION_NAME_DB
+    - export KUBE_NAMESPACE=orbis2
+    - helm --kubeconfig $KUBECONFIG list --namespace $KUBE_NAMESPACE
+    - APPLICATION_NAME_DB=${APPLICATION_NAME}-db-preview
+    - echo "removing test db production deployment $APPLICATION_NAME_DB from cluster..."
+    - helm --kubeconfig $KUBECONFIG uninstall $APPLICATION_NAME_DB --namespace $KUBE_NAMESPACE
   environment:
     name: production
     action: stop
   except:
     - main
   tags:
-    - docker
+    - nlp-runner
   when: manual
 

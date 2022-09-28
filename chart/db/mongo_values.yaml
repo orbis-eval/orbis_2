@@ -1,0 +1,8 @@
+persistence:
+  storageClass: "aaron-block-noreclaim"
+  size: "10Gi"
+
+metrics:
+  enabled: false
+
+replicaCount: 1

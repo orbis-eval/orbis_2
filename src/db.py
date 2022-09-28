@@ -18,6 +18,7 @@ class DB:
     async def open_(self):
         # check for database params:
         if not self.__mongo_url:
+            # TODO: add user friendly authentication mechanism.
             if os.environ.get('MONGO_HOST') and os.environ.get('MONGO_PORT'):
                 self.__mongo_url = f"mongodb://" \
                                    f"{os.environ.get('MONGO_HOST')}:" \
@@ -31,8 +32,8 @@ class DB:
         print(f'using url "{self.__mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
         await self.__db['corpus'].create_index('corpus_name', unique=True)
-        # await self.__db['document'].create_index([('id', pymongo.ASCENDING),
-        #                                          ('corpus_name', pymongo.ASCENDING)], unique=True)
+        await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+                                                 ('corpus_name', pymongo.ASCENDING)], unique=True)
 
     def close(self):
         self.__client.close()
@@ -108,16 +109,31 @@ class DB:
     async def create_corpus(self, corpus_name, description):
         record = {'corpus_name': corpus_name,
                   'description': description}
-        print(record)
         if not (corpus_id := await self.__insert_record('corpus', record)):
-            print('Hello world')
             corpus_filter = {'corpus_name': corpus_name}
             corpus_id = await self.__get_record_attr('corpus', corpus_filter, '_id')
             corpus_id = str(corpus_id)
         return corpus_id
 
+    async def get_corpora(self):
+        if corpora := await self.__get_records('corpus', {}):
+            return [c.get('corpus_name') for c in corpora]
+        return []
+
+    async def get_documents_of_corpus(self, corpus_name):
+        if documents := await self.__get_records('document', {'corpus_name': corpus_name}):
+            if documents_with_info := await self.__get_records('document_annotation',
+                                                               {'d_id': {'$in': [ObjectId(d.get('_id'))
+                                                                                 for d in documents]}}):
+                return [{'da_id': str(d.get('_id')),
+                         'd_id': str(d.get('d_id')),
+                         'annotator': d.get('annotator'),
+                         'last_edited': str(d.get('datetime'))} for d in documents_with_info]
+        return []
+
     async def add_document(self, source_id, corpus_name, text, annotator, data):
         document_exists = False
+
         document_record = {'id': source_id,
                            'corpus_name': corpus_name,
                            'content': text}
@@ -188,6 +204,8 @@ class DB:
         # Linked collections is a key with value of a list of one element
         d_result = da_result.get('linked_collections')[0]
 
+        da_result['annotator'] = "ALLOW_ALL_ANNOTATORS"  # TODO: get_annotator_from_config_map(da_result)
+
         result = {'da_id': da_id,
                   'corpus_name': d_result.get('corpus_name'),
                   'annotator': da_result.get('annotator'),
@@ -200,6 +218,9 @@ class DB:
         record_filter = {'da_id': ObjectId(da_id)}
         if annotations := await self._get_record('annotation', record_filter):
             return annotations.get('annotations', '')
+
+    async def get_corporas(self):
+        return await self.__get_records('corpus', {})
 
     async def save_document_annotations(self, da_id, annotator, data):
         d_id = await self._get_d_id_from_da_id(da_id)

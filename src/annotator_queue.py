@@ -35,10 +35,8 @@ class AnnotatorQueue:
 
     def get_filtered_queue(self, corpus_name=None, annotator=None):
         if annotator == 'undefined':
-           annotator = None
-        
-        annotator = 'fow-pipeline'
-    
+            annotator = None
+
         if not corpus_name and not annotator:
             return self.__queue
         elif corpus_name and annotator:
@@ -49,8 +47,6 @@ class AnnotatorQueue:
     async def get_id_for_annotation(self, corpus_name=None, annotator=None):
         if annotator == 'undefined':
             annotator = None
-
-        annotator = 'fow-pipeline'
 
         da_id = None
 
@@ -69,7 +65,11 @@ class AnnotatorQueue:
         if da_id:
             if success := await self.__remove_document_annotation(da_id):
                 return da_id
-        return None
+
+        if annotator == "ALLOW_ALL_ANNOTATORS":
+            return None
+
+        return await self.get_id_for_annotation(corpus_name, "ALLOW_ALL_ANNOTATORS")
 
     def get_document_annotation_status(self, da_id):
         if da_id in self.__da_ids:

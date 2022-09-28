@@ -39,11 +39,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          volumeMounts:
-            - name: etc-weblyzard
-              mountPath: /etc/weblyzard/
-            - name: logs-weblyzard
-              mountPath: /var/log/weblyzard/
+          # volumeMounts: {}
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
@@ -53,6 +49,10 @@ spec:
               value: "{{- .Values.env.mongo_host}}"
             - name: "MONGO_PORT"
               value: "{{- .Values.env.mongo_port}}"
+            - name: "MONGO_URL"
+              value: "{{- .Values.env.MONGO_URL}}"
+            - name: "test"
+              value: "{{- .Values.env.test}}"
           #livenessProbe:
           #  initialDelaySeconds: 60
           #  periodSeconds: 30
@@ -71,15 +71,7 @@ spec:
           #    port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-      - name: etc-weblyzard
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/weblyzard/etc/
-      - name: logs-weblyzard
-        nfs:
-          server: {{ .Values.nfsServer }}
-          path: /archive/kube-volume/var/log/weblyzard/
+      # volumes: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
