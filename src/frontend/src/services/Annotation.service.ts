@@ -4,7 +4,7 @@ import {SettingsService} from '@/services/Settings.service';
 import {Subject} from 'rxjs';
 
 export class AnnotationService {
-    private static _spinner: HTMLDivElement;
+    private static _spinner = document.getElementById('loading_spinner');
     static Document = '';
     static DocumentId = '';
     static DocumentMeta: any = {};
@@ -46,42 +46,64 @@ export class AnnotationService {
 
         return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
             .then(response => {
-              return response.json();
+                return response.json();
             })
-            .then(data => {
-                if (data.status_code !== 200) {
-                    alert(data.message);
-                    return;
-                }
-                AnnotationService.Document = data.content.text;
-                AnnotationService.DocumentId = data.content.annotations.d_id;
-                AnnotationService.DocumentMeta = data.content.annotations.meta;
-                AnnotationService.Annotations = data.content.annotations.annotations
-                    .map((e: any) => new Annotation(e))
-                    .sort((a: Annotation, b: Annotation) => a.start > b.start ? 1 : -1);
-                AnnotationService.Annotations.forEach((e, i) => {
-                    e.status = enAnnotationStatus.PENDING;
-                    e.index = i;
-                });
-
-                // Annotationstypen extrahieren
-                AnnotationService.AnnotationTypes = AnnotationService.Annotations
-                    .map(e => e.type)
-                    .filter((e, i, a) => a.indexOf(e) === i)
-                    .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
-
-                SettingsService.SetCorpusName(data.content.corpus_name);
-                SettingsService.SetDocumentId(data.content.da_id);
-                this.DocumentLoadTimeStamp = new Date().getTime();
-                this._hideLoadingSpinner();
-                this.changes();
-
-                return AnnotationService.Annotations;
-            })
+            .then(this._handleGetResponse)
             .catch(error => {
                 this._hideLoadingSpinner();
                 console.error(error);
             });
+    }
+
+    static GetDocumentForViewOnly(da_id: string) {
+        this.Document = '';
+        this.DocumentId = '';
+        this.DocumentMeta = {};
+        this.Annotations = [];
+        this.AnnotationTypes = [];
+
+        this._showLoadingSpinner();
+
+        return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocument?da_id=${da_id}`)
+            .then(response => {
+                return response.json();
+            })
+            .then(this._handleGetResponse)
+            .catch(error => {
+                this._hideLoadingSpinner();
+                console.error(error);
+            });
+    }
+
+    private static _handleGetResponse(data: any) {
+        if (data.status_code !== 200) {
+            alert(data.message);
+            return;
+        }
+        AnnotationService.Document = data.content.text;
+        AnnotationService.DocumentId = data.content.annotations.d_id;
+        AnnotationService.DocumentMeta = data.content.annotations.meta;
+        AnnotationService.Annotations = data.content.annotations.annotations
+            .map((e: any) => new Annotation(e))
+            .sort((a: Annotation, b: Annotation) => a.start > b.start ? 1 : -1);
+        AnnotationService.Annotations.forEach((e, i) => {
+            e.status = enAnnotationStatus.PENDING;
+            e.index = i;
+        });
+
+        // Annotationstypen extrahieren
+        AnnotationService.AnnotationTypes = AnnotationService.Annotations
+            .map(e => e.type)
+            .filter((e, i, a) => a.indexOf(e) === i)
+            .map((e, i) => new AnnotationType({ index: i, key: AnnotationService.TypeKeyList[i], caption: e}));
+
+        SettingsService.SetCorpusName(data.content.corpus_name);
+        SettingsService.SetDocumentId(data.content.da_id);
+        AnnotationService._hideLoadingSpinner();
+        AnnotationService.changes();
+        AnnotationService.DocumentLoadTimeStamp = new Date().getTime();
+
+        return AnnotationService.Annotations;
     }
 
     static SaveDocumentAnnotations(next = false) {
@@ -144,12 +166,21 @@ export class AnnotationService {
     }
 
     private static _showLoadingSpinner() {
-        this._spinner = document.createElement('div');
-        this._spinner.id = 'loading_spinner';
-        setTimeout(() => { document.body.append(this._spinner); });
+        if (!AnnotationService._spinner) {
+            AnnotationService._spinner = document.getElementById('loading_spinner');
+        }
+        setTimeout(() => { AnnotationService._spinner?.classList.add('active'); });
     }
 
     private static _hideLoadingSpinner() {
-        setTimeout(() => { this._spinner.remove(); });
+        setTimeout(() => {
+            AnnotationService._spinner?.classList.remove('active');
+        }, 100);
+    }
+
+    static HideLoadingSpinner() {
+        setTimeout(() => {
+            AnnotationService._spinner?.classList.remove('active');
+        }, 100);
     }
 }
