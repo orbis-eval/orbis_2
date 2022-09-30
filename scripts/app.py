@@ -38,6 +38,14 @@ app.add_event_handler('startup', annotator_queue.load_queue_from_db)
 def home():
     return FileResponse('index.html')
 
+@app.get('/corpora', response_class=FileResponse)
+def home():
+    return FileResponse('index.html')
+
+@app.get('/documents', response_class=FileResponse)
+def home():
+    return FileResponse('index.html')
+
 
 @app.get('/annotation', response_class=RedirectResponse)
 def annotation():
