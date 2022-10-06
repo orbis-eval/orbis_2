@@ -273,6 +273,8 @@ export default {
           break;
         case 'Tab':
           event.preventDefault();
+          this.selectNextAnnotation();
+          break;
         case 'ArrowRight':
           this.selectNextAnnotation();
           break;
@@ -609,7 +611,7 @@ export default {
       if (!annotation.meta) {
         annotation.meta = {};
       }
-      annotation.meta.approved = new Date();
+      annotation.meta.approved = AnnotationService.GetDocumentMetaTimeStamp();
     },
     /**
      * Mouse-Selektion behandeln

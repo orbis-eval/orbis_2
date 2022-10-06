@@ -1,18 +1,11 @@
-import {createApp} from 'vue'
-import App from './App.vue'
-import router from './router'
-import locale_de from './assets/locale_de.json'
-import locale_en from './assets/locale_en.json'
+import {createApp} from 'vue';
+import App from './App.vue';
+import router from './router';
 import {SettingsService} from '@/services/Settings.service';
+import LocaleService from '@/services/Locale.service';
 
 const app = createApp(App);
 
-let locale = locale_de;
-if (localStorage && localStorage.getItem('locale')) {
-    switch (localStorage.getItem('locale')) {
-        case 'en': locale = locale_en; break;
-    }
-}
 
 SettingsService.LoadDataFromStorage();
 SettingsService.LoadDataFromQueryString();
@@ -21,11 +14,11 @@ if (!SettingsService.Annotator) {
 }
 
 app.directive('locale', (el, binding) => {
-    el.textContent = locale[binding.value];
+    el.textContent = LocaleService.Get(binding.value);
 });
 
 app.directive('title', (el, binding) => {
-    el.title = locale[binding.value];
+    el.title = LocaleService.Get(binding.value);
 });
 
 app.use(router);

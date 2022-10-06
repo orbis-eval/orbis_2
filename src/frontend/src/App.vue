@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LocaleService from '@/services/Locale.service';
+import {AnnotationService} from '@/services/Annotation.service';
 </script>
 
 <template>
@@ -14,10 +16,14 @@
       </div>
 
       <div class="right">
-        <a id="bugreport" :href="`mailto:philipp.kuntschik@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aannotator:%20${annotator}%0D%0Aprev_da_id:%20${previousdocumentid}%0D%0Ada_id:%20${documentid}%0D%0Acorpus_name:%20${corpusname}%0D%0A-----`">
+        <a id="bugreport" :href="`mailto:norman.suesstrunk@fhgr.ch?subject=orbis%20bug%20report&body=%0D%0A%0D%0A-----%0D%0ABitte%20nicht%20löschen:%0D%0Aannotator:%20${annotator}%0D%0Aprev_da_id:%20${previousdocumentid}%0D%0Ada_id:%20${documentid}%0D%0Acorpus_name:%20${corpusname}%0D%0A-----`">
           <i class="fa fa-bug"></i>
           <span>Bug Report</span>
         </a>
+        <div id="problematic" @click="problematicDocument()">
+          <i class="fa-solid fa-file-circle-exclamation"></i>
+          <span>{{ LocaleService?.Get('problematic_document') }}</span>
+        </div>
         <div id="document" :title="corpusname" @click="resetCorpusName()">
           <i class="fa fa-file"></i>
           <span>{{corpusname}}</span>
@@ -38,6 +44,7 @@
     </nav>
   </header>
   <RouterView :key="documentid" />
+  <div id="loading_spinner"></div>
 </template>
 
 <style>
@@ -45,7 +52,7 @@
 </style>
 
 <style scoped>
-#language-switcher, #annotator, #document, #bugreport {
+#language-switcher, #annotator, #document, #problematic, #bugreport {
   position: relative;
   display: flex;
   align-items: center;
@@ -57,10 +64,10 @@
   border-radius: 2em;
   cursor: pointer;
 }
-#language-switcher span, #annotator span, #document span, #bugreport span {
+#language-switcher span, #annotator span, #document span, #problematic span, #bugreport span {
   display: block;
   padding-left: .5em;
-  max-width: 10em;
+  max-width: 10.2em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,12 +147,12 @@ export default {
       annotator: SettingsService.Annotator,
       corpusname: SettingsService.CorpusName,
       documentid: SettingsService.DocumentId,
-      previousdocumentid: SettingsService.PreviousDocumentId
+      previousdocumentid: SettingsService.PreviousDocumentId,
     };
   },
   methods: {
-    selectLanguage(lang: string) {
-      localStorage.setItem('locale', lang);
+    selectLanguage(lang: 'de'|'en') {
+      LocaleService.SetLocale(lang);
       window.location.reload();
     },
     toggle() {
@@ -163,6 +170,10 @@ export default {
     },
     resetCorpusName() {
       SettingsService.ResetCorpusName();
+    },
+    problematicDocument() {
+      const problem = prompt(LocaleService.Get('problematic_document_prompt'), AnnotationService.DocumentMeta['problematic']);
+      AnnotationService.DocumentMeta['problematic'] = problem;
     }
   },
   mounted() {

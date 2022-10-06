@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AnnotationView from '../views/AnnotationView.vue'
+import CorporaListView from '../views/CorporaListView.vue'
+import CorpusView from '../views/CorpusView.vue'
+import DocumentView from '../views/DocumentView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'annotaion', component: AnnotationView },
-
-    // route level code-splitting
-    // this generates a separate chunk (About.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    // { path: '/about', name: 'about', component: () => import('../views/AboutView.vue') },
+    { path: '/corpora', name: 'corporalist', component: CorporaListView },
+    { path: '/corpora/:corpus_name', name: 'corpus', component: CorpusView },
+    { path: '/documents/:corpus_name/:da_id', name: 'document', component: DocumentView },
 
     { path: '/:pathMatch(.*)*', redirect: '/' }
   ]
