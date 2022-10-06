@@ -38,12 +38,14 @@ app.add_event_handler('startup', annotator_queue.load_queue_from_db)
 def home():
     return FileResponse('index.html')
 
+
 @app.get('/corpora', response_class=FileResponse)
-def home():
+def corpora():
     return FileResponse('index.html')
 
+
 @app.get('/documents', response_class=FileResponse)
-def home():
+def documents():
     return FileResponse('index.html')
 
 
@@ -186,9 +188,9 @@ async def create_corpus(corpus: CorpusModel):
     return response.as_json()
 
 
-@app.post('/getCorpora', response_model=ResponseModel)
+@app.get('/getCorpora', response_model=ResponseModel)
 async def get_corpora():
-    if corpora := db.get_corpora():
+    if corpora := await db.get_corpora():
         response = Response(status_code=200,
                             content={'corpora': corpora},
                             message=f'Found {len(corpora)} corpora in db .')
