@@ -171,7 +171,7 @@ async def add_document(document: DocumentPostModel):
                                      'da_id': da_id,
                                      'annotation_id': annotation_id},
                             message=f'Document {document.get("source_id", "")} added '
-                                    f'to corpus {document.get("corpus_name")}created.')
+                                    f'to corpus {document.get("corpus_name")}.')
     return response.as_json()
 
 
