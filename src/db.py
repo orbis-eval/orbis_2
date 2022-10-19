@@ -31,9 +31,13 @@ class DB:
         self.__client = AsyncIOMotorClient(self.__mongo_url)
         print(f'using url "{self.__mongo_url}" for database')
         self.__db = self.__client[self.__db_name]
-        await self.__db['corpus'].create_index('corpus_name', unique=True)
-        await self.__db['document'].create_index([('id', pymongo.ASCENDING),
-                                                 ('corpus_name', pymongo.ASCENDING)], unique=True)
+        try:
+            await self.__db['corpus'].create_index('corpus_name', unique=True)
+            await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+                                                    ('corpus_name', pymongo.ASCENDING)], unique=True)
+        except DuplicateKeyError:
+            print('Collection already exist.')
+
 
     def close(self):
         self.__client.close()
