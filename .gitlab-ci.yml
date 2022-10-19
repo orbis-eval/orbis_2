@@ -26,7 +26,6 @@ pep8:
   tags:
     - python
   allow_failure: true
-  when: manual
 
 
 pytest:
@@ -44,7 +43,6 @@ pytest:
     paths:
       - $coverage_path
   allow_failure: true
-  when: manual
 
 
 sonar:

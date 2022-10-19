@@ -35,8 +35,8 @@ class AnnotatorQueue:
 
     def get_filtered_queue(self, corpus_name=None, annotator=None):
         if annotator == 'undefined':
-           annotator = None
-    
+            annotator = None
+
         if not corpus_name and not annotator:
             return self.__queue
         elif corpus_name and annotator:
@@ -65,7 +65,7 @@ class AnnotatorQueue:
         if da_id:
             if success := await self.__remove_document_annotation(da_id):
                 return da_id
-        
+
         if annotator == "ALLOW_ALL_ANNOTATORS":
             return None
 

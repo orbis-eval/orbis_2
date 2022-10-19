@@ -31,3 +31,16 @@ async def test_add_document_already_exsisting():
     assert da_insert_id == duplicate_da_insert_id
     assert annotation_insert_id == duplicate_annotation_insert_id
     assert duplicate_document_exists == True
+
+
+@pytest.mark.asyncio
+async def test_create_corpus_already_existing():
+    db = await get_db_instance()
+
+    await db.create_corpus('test', 'text corpus')
+    await db.create_corpus('test', 'text corpus')
+
+    corpora = await db.get_corporas()
+
+    assert len(corpora) == 1
+    assert corpora[0]['corpus_name'] == 'test'

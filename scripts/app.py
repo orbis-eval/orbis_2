@@ -39,6 +39,16 @@ def home():
     return FileResponse('index.html')
 
 
+@app.get('/corpora', response_class=FileResponse)
+def corpora():
+    return FileResponse('index.html')
+
+
+@app.get('/documents', response_class=FileResponse)
+def documents():
+    return FileResponse('index.html')
+
+
 @app.get('/annotation', response_class=RedirectResponse)
 def annotation():
     return RedirectResponse("/")
@@ -62,24 +72,29 @@ async def get_document_for_annotation(corpus_name=None, annotator=None):
     print(f'get_document_for_annotation with corpus "{corpus_name}" and annotator "{annotator}"')
 
     if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
-        print('check for document content')
-        response_content = await get_document_content(da_id)
-        print('check for document annotation')
-        response_annotations = await get_document_annotations(da_id)
-
-        if response_content and response_annotations:
-            response = Response(status_code=200,
-                                content={'da_id': da_id,
-                                         'text': response_content['content']['text'],
-                                         'annotations': response_annotations['content']['annotations']})
-        else:
-            response = Response(status_code=400,
-                                message='Empty annotator queue for request.',
-                                content={'corpus_name': corpus_name, 'annotator': annotator})
+        return await get_document(da_id)
     else:
         response = Response(status_code=400,
                             message='Empty annotator queue for request.',
                             content={'corpus_name': corpus_name, 'annotator': annotator})
+    return response.as_json()
+
+
+@app.get('/getDocument', response_model=ResponseModel)
+async def get_document(da_id=None):
+    print('check for document content')
+    response_content = await get_document_content(da_id)
+    print('check for document annotation')
+    response_annotations = await get_document_annotations(da_id)
+
+    if response_content and response_annotations:
+        response = Response(status_code=200,
+                            content={'da_id': da_id,
+                                     'text': response_content['content']['text'],
+                                     'annotations': response_annotations['content']['annotations']})
+    else:
+        response = Response(status_code=400,
+                            message=f'No document with id {da_id} found.')
     return response.as_json()
 
 
@@ -143,10 +158,8 @@ async def add_document(document: DocumentPostModel):
     document = document.dict()
     corporas = await db.get_corporas()
     if not document['corpus_name'] in corporas:
-        corpus_id = await db.create_corpus(
-                    corpus_name=document['corpus_name'],
-                    description=f'Auto generated description for corpus {document["corpus_name"]}'
-        )
+        corpus_id = await db.create_corpus(corpus_name=document['corpus_name'],
+                                           description=f'Generated description for corpus {document["corpus_name"]}')
     d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
     if document_exists:
         response = Response(status_code=400,
@@ -158,7 +171,7 @@ async def add_document(document: DocumentPostModel):
                                      'da_id': da_id,
                                      'annotation_id': annotation_id},
                             message=f'Document {document.get("source_id", "")} added '
-                                    f'to corpus {document.get("corpus_name")}created.')
+                                    f'to corpus {document.get("corpus_name")}.')
     return response.as_json()
 
 
@@ -172,6 +185,34 @@ async def create_corpus(corpus: CorpusModel):
     else:
         response = Response(status_code=400,
                             message='Corpus not created.')
+    return response.as_json()
+
+
+@app.get('/getCorpora', response_model=ResponseModel)
+async def get_corpora():
+    if corpora := await db.get_corpora():
+        response = Response(status_code=200,
+                            content={'corpora': corpora},
+                            message=f'Found {len(corpora)} corpora in db .')
+    else:
+        response = Response(status_code=400,
+                            message='No corpora found.')
+    return response.as_json()
+
+
+@app.get('/getDocumentsOfCorpus', response_model=ResponseModel)
+async def get_documents_of_corpus(corpus_name=None):
+    if not corpus_name:
+        response = Response(status_code=400,
+                            message='No corpus name provided. Try again with e.g. '
+                                    '/getDocumentsOfCorpus?corpus_name=your_corpus_name')
+    elif documents := await db.get_documents_of_corpus(corpus_name):
+        response = Response(status_code=200,
+                            content={'corpora': documents},
+                            message=f'Found {len(documents)} documents in corpus {corpus_name}.')
+    else:
+        response = Response(status_code=400,
+                            message='No corpora found.')
     return response.as_json()
 
 

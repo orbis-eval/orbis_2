@@ -172,3 +172,17 @@ section {
   grid-row: 3;
   padding: 1em 0;
 }
+
+#loading_spinner {
+  display: none;
+  position: absolute;
+  inset: calc(50% - 1em);
+  aspect-ratio: 1/1;
+  background-image: url("../assets/loading.gif");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+#loading_spinner.active {
+  display: block;
+}

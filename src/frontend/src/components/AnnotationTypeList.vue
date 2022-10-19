@@ -7,8 +7,11 @@ import {AnnotationType} from '@/models/annotation-type';
       v-if="annotationMeta && annotationMeta.display"
       @click="toggleCollapse(annotationMetaCollapsed)"
       :class="annotationMetaCollapsed.value ? 'collapsed' : ''"
+      class="metadata"
   ></h2>
-  <div v-if="annotationMetaCollapsed.value === false && annotationMeta.display">
+  <div v-if="annotationMetaCollapsed.value === false && annotationMeta.display"
+       class="metadata"
+  >
     <fieldset v-for="(value, key, index) in annotationMeta.display" :key="`${ key }-${ index }`">
       <legend>{{ key }}</legend>
       <div>{{ value }}</div>
@@ -18,8 +21,11 @@ import {AnnotationType} from '@/models/annotation-type';
   <h2 v-locale="'annotation-types'"
       @click="toggleCollapse(annotationTypesCollapsed)"
       :class="annotationTypesCollapsed.value ? 'collapsed' : ''"
+      class="types"
   ></h2>
-  <ul v-if="annotationTypesCollapsed.value === false">
+  <ul v-if="annotationTypesCollapsed.value === false"
+      class="types"
+  >
     <li v-for="(type, index) of annotationTypes"
         :key="`${ type }-${ index }`"
         class="marked types click"
