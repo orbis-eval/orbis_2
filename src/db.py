@@ -223,9 +223,6 @@ class DB:
         if annotations := await self._get_record('annotation', record_filter):
             return annotations.get('annotations', '')
 
-    async def get_corporas(self):
-        return await self.__get_records('corpus', {})
-
     async def save_document_annotations(self, da_id, annotator, data):
         d_id = await self._get_d_id_from_da_id(da_id)
 
