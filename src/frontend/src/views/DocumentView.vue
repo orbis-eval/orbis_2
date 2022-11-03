@@ -21,11 +21,6 @@ import AnnotationTypeList from '../components/AnnotationTypeList.vue'
 p {
   margin-bottom: 1em;
 }
-aside h2:not(.types),
-aside ul:not(.types),
-aside ul li.addtype {
-  display: none;
-}
 #annotation_container {
   display: flex;
   flex-wrap: wrap;
