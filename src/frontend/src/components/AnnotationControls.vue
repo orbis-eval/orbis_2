@@ -5,8 +5,10 @@ import {AnnotationService} from "../services/Annotation.service";
 <template>
   <h2 v-locale="'documentlegend-title'"></h2>
   <ul>
-    <li class="marked type_x click" @click="save()"><span v-locale="'documentlegend-save'"></span></li>
-    <li class="marked type_x click" @click="save(true)" v-locale="'documentlegend-savenext'"></li>
+    <li class="marked type_x click" @click="save()" :class="[dirty ? '' : 'disabled']"><span
+        v-locale="'documentlegend-save'"></span></li>
+    <li class="marked type_x click" @click="save(true)" :class="[dirty ? '' : 'disabled']"
+        v-locale="'documentlegend-savenext'"></li>
   </ul>
 </template>
 
@@ -14,12 +16,22 @@ import {AnnotationService} from "../services/Annotation.service";
 export default {
   name: "AnnotationControls",
   data() {
-    return {}
+    return {
+      dirty: false,
+    }
   },
   methods: {
     save(next = false) {
-      AnnotationService.SaveDocumentAnnotations(next);
+      if (this.dirty) {
+        AnnotationService.SaveDocumentAnnotations(next);
+      }
     }
+  },
+  mounted() {
+    this.dirty = AnnotationService.IsDirty;
+    AnnotationService.DirtyChanges.subscribe(d => {
+      this.dirty = d;
+    });
   }
 }
 </script>
@@ -56,6 +68,10 @@ li.click {
   background-color: var(--color-border);
   color: var(--color-text);
   font-size: .9em;
+}
+
+.disabled {
+  opacity: 0.5;
 }
 
 </style>

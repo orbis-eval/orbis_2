@@ -299,9 +299,11 @@ export default {
           this.selectNextAnnotation();
           break;
         case 'ArrowRight':
+          event.preventDefault();
           this.selectNextAnnotation();
           break;
         case 'ArrowLeft':
+          event.preventDefault();
           this.selectNextAnnotation(true);
           break;
         case 'KeyA':
@@ -387,6 +389,7 @@ export default {
       if (selectNextAnnotation) {
         this.selectNextAnnotation();
       }
+      this.setDocumentDirty();
     },
     /**
      * Annotation als «gelöscht» markieren
@@ -406,6 +409,7 @@ export default {
       const index = this.annotations.indexOf(selected);
       this.selectNextAnnotation();
       this.annotations.splice(index, 1);
+      this.setDocumentDirty();
     },
     /**
      * fügt die per Maus hinzugefügte Annotation zur Liste hinzu
@@ -476,6 +480,7 @@ export default {
           this.setClassNameOnChars(selected.end, index, '');
         }
       }
+      this.setDocumentDirty();
     },
     /**
      * Einem Char-Objekt eine Annotation (oder null) zuweisen (bei ändern/erweitern/reduzieren der Annotation)
@@ -536,6 +541,7 @@ export default {
 
       this.setBordersForSelectedElements();
       this.selectNextAnnotation();
+      this.setDocumentDirty();
     },
     /**
      * nächste Annotation auswählen
@@ -706,6 +712,9 @@ export default {
         span.innerHTML = c.char === ' ' || c.char === '\n' ? '&nbsp;' : c.char;
         annotationContainer.append(span);
       });
+    },
+    setDocumentDirty() {
+      AnnotationService.DirtyChanges.next(true);
     }
   },
   /**
