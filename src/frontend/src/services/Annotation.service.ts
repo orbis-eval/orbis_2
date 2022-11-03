@@ -151,6 +151,7 @@ export class AnnotationService {
             })
             .catch(error => {
                 console.error(error);
+                alert('Speichern fehlgeschlagen: ' + error);
             });
     }
 
