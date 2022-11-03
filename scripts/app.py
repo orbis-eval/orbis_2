@@ -75,7 +75,8 @@ async def add_document_to_annotation_queue(da_id: str):
 @app.get('/getDocumentForAnnotation', response_model=ResponseModel)
 async def get_document_for_annotation(corpus_name=None, annotator=None):
     print(f'get_document_for_annotation with corpus "{corpus_name}" and annotator "{annotator}"')
-
+    # nsu: needed if annotation queue is filled directly into mongo-db
+    await annotator_queue.load_queue_from_db()
     if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
         return await get_document(da_id)
     else:
@@ -226,4 +227,4 @@ def get_app():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=5000)
+    uvicorn.run(app, host='127.0.0.1', port=63010)
