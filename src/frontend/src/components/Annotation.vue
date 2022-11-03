@@ -401,38 +401,44 @@ export default {
         this.selectNextAnnotation();
         return;
       }
-      if (selected.created === true) {
-        selected.status = enAnnotationStatus.REPLACED;
-        this.setBordersForSelectedElements();
-        this.setClassOnChars(selected, 'unset');
-        let index = this.annotations.indexOf(selected);
-        this.annotations.splice(index, 1);
-        this.annotations[index - 1].selected = true;
-        this.selectNextAnnotation();
-        return;
-      }
-      if ([enAnnotationStatus.NEW, enAnnotationStatus.PROVISORY].indexOf(selected.status) >= 0) {
-        const original = this.annotations.find(e => e.index === selected.index && e.status === enAnnotationStatus.REPLACED);
-        original.status = enAnnotationStatus.PENDING;
-        original.selected = true;
-        selected.status = enAnnotationStatus.REPLACED;
-        this.setBordersForSelectedElements();
-        this.setClassOnChars(selected, 'unset');
-        this.setClassOnChars(original, 'selected');
-        this.setBordersForSelectedElements();
-        this.annotations.splice(this.annotations.indexOf(selected), 1);
-        if (selected.status === enAnnotationStatus.NEW) {
-          for (let i = selected.start; i < selected.end; i++) {
-            if (this.chars[i].annotations.indexOf(selected) > 0) {
-              this.chars[i].annotations.splice(this.chars[i].annotations.indexOf(selected), 1);
-            }
-          }
-        }
-      } else {
-        selected.status = enAnnotationStatus.DELETED;
-        this.setClassOnChars(selected);
-        this.selectNextAnnotation();
-      }
+      document.querySelectorAll('.selected').forEach(e => { e.style = ''; });
+      this.setClassOnChars(selected, '');
+      const index = this.annotations.indexOf(selected);
+      this.selectNextAnnotation();
+      this.annotations.splice(index, 1);
+
+      // if (selected.created === true) {
+      //   selected.status = enAnnotationStatus.REPLACED;
+      //   this.setBordersForSelectedElements();
+      //   this.setClassOnChars(selected, 'unset');
+      //   let index = this.annotations.indexOf(selected);
+      //   this.annotations.splice(index, 1);
+      //   this.annotations[index - 1].selected = true;
+      //   this.selectNextAnnotation();
+      //   return;
+      // }
+      // if ([enAnnotationStatus.NEW, enAnnotationStatus.PROVISORY].indexOf(selected.status) >= 0) {
+      //   const original = this.annotations.find(e => e.index === selected.index && e.status === enAnnotationStatus.REPLACED);
+      //   original.status = enAnnotationStatus.PENDING;
+      //   original.selected = true;
+      //   selected.status = enAnnotationStatus.REPLACED;
+      //   this.setBordersForSelectedElements();
+      //   this.setClassOnChars(selected, 'unset');
+      //   this.setClassOnChars(original, 'selected');
+      //   this.setBordersForSelectedElements();
+      //   this.annotations.splice(this.annotations.indexOf(selected), 1);
+      //   if (selected.status === enAnnotationStatus.NEW) {
+      //     for (let i = selected.start; i < selected.end; i++) {
+      //       if (this.chars[i].annotations.indexOf(selected) > 0) {
+      //         this.chars[i].annotations.splice(this.chars[i].annotations.indexOf(selected), 1);
+      //       }
+      //     }
+      //   }
+      // } else {
+      //   selected.status = enAnnotationStatus.DELETED;
+      //   this.setClassOnChars(selected);
+      //   this.selectNextAnnotation();
+      // }
     },
     /**
      * fügt die per Maus hinzugefügte Annotation zur Liste hinzu
