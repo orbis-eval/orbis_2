@@ -38,7 +38,6 @@ class DB:
         except DuplicateKeyError:
             print('Collection already exist.')
 
-
     def close(self):
         self.__client.close()
 
