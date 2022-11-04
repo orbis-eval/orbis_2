@@ -5,9 +5,24 @@ import AnnotationChar from "./AnnotationChar.vue";
   <div id="annotation_container" v-if="chars" @click="click($event)" @dblclick="dblclick($event)" :key="documentId">
   </div>
   <div id="context_menu_new" :class="[{ active: selectedString, below: contextMenuBelow }, contextMenuStatus ]">
-    <button @click="approveAnnotation()" class="approve"><i class="fa fa-check"></i></button>
-    <button @click="deleteAnnotation()" class="reject"><i class="fa fa-times"></i></button>
-<!--    <span> {{selectedString}}</span>-->
+
+    <template v-if="newAnnotation">
+      <button v-for="(type, index) of annotationTypes"
+              :key="`${ type }-${ index }`"
+              :class="['type_' + type.index]"
+              @click="setAnnotationType(type.key)"
+              class="approve">
+        <i class="fa-solid" :class="[ 'fa-' + type.key ]"></i>
+      </button>
+    </template>
+    <template v-else>
+      <button @click="approveAnnotation()" class="approve">
+        <i class="fa fa-check"></i>
+      </button>
+    </template>
+    <button @click="deleteAnnotation()" class="reject">
+      <i class="fa fa-times"></i>
+    </button>
   </div>
 </template>
 
@@ -71,10 +86,15 @@ import AnnotationChar from "./AnnotationChar.vue";
 #context_menu_new button {
   color: var(--color-text);
   border: 1px solid var(--color-text);
-  background-color: var(--color-background-soft);
   border-radius: .25em;
   width: 4ch;
   cursor: pointer;
+}
+#context_menu_new button[class*="type_"] {
+  color: var(--color-background);
+}
+#context_menu_new button:not([class*="type_"]) {
+  background-color: var(--color-background-soft);
 }
 #context_menu_new button.approve:hover {
   background-color: var(--color-success);
@@ -97,6 +117,7 @@ export default {
       documentId: '',
       chars: [],
       annotations: [],
+      annotationTypes: [],
       newAnnotation: null,
       selectedString: '',
       keyboardObserver: KeyboardObserver,
@@ -116,6 +137,7 @@ export default {
       }
       this.documentId = AnnotationService.DocumentId;
       this.annotations = AnnotationService.Annotations;
+      this.annotationTypes = AnnotationService.AnnotationTypes;
       // Text in einzelne Zeichen (= Objekte) aufteilen
       console.log('build chars');
       this.chars = AnnotationService.Document
@@ -240,6 +262,7 @@ export default {
           end = Math.max(document.querySelectorAll('.selected')[document.querySelectorAll('.selected').length - 1].getAttribute('data-charindex'), end);
         } else {
           this.unselectAllAnnotationElements();
+          this.annotations.filter(e => e.selected).forEach(e => e.selected = false);
         }
         const selection = this.trimSelection(AnnotationService.Document, start, end);
         for (let i = selection.start; i < selection.end; i++) {
@@ -276,9 +299,11 @@ export default {
           this.selectNextAnnotation();
           break;
         case 'ArrowRight':
+          event.preventDefault();
           this.selectNextAnnotation();
           break;
         case 'ArrowLeft':
+          event.preventDefault();
           this.selectNextAnnotation(true);
           break;
         case 'KeyA':
@@ -347,11 +372,11 @@ export default {
      */
     approveAnnotation() {
       const selectNextAnnotation = !this.newAnnotation;
-      this.closeContextMenuForNewAnnotation();
       let selected = this.newAnnotation ? this.addNewAnnotation() : this.annotations.find(e => e.selected);
-      if (!selected) {
+      if (!selected || !selected.type || selected.type === '') {
         return;
       }
+      this.closeContextMenuForNewAnnotation();
       if (selected.status === enAnnotationStatus.PROVISORY) {
         selected.status = enAnnotationStatus.NEW;
       } else if (selected.status !== enAnnotationStatus.NEW) {
@@ -364,6 +389,7 @@ export default {
       if (selectNextAnnotation) {
         this.selectNextAnnotation();
       }
+      this.setDocumentDirty();
     },
     /**
      * Annotation als «gelöscht» markieren
@@ -378,38 +404,12 @@ export default {
         this.selectNextAnnotation();
         return;
       }
-      if (selected.created === true) {
-        selected.status = enAnnotationStatus.REPLACED;
-        this.setBordersForSelectedElements();
-        this.setClassOnChars(selected, 'unset');
-        let index = this.annotations.indexOf(selected);
-        this.annotations.splice(index, 1);
-        this.annotations[index - 1].selected = true;
-        this.selectNextAnnotation();
-        return;
-      }
-      if ([enAnnotationStatus.NEW, enAnnotationStatus.PROVISORY].indexOf(selected.status) >= 0) {
-        const original = this.annotations.find(e => e.index === selected.index && e.status === enAnnotationStatus.REPLACED);
-        original.status = enAnnotationStatus.PENDING;
-        original.selected = true;
-        selected.status = enAnnotationStatus.REPLACED;
-        this.setBordersForSelectedElements();
-        this.setClassOnChars(selected, 'unset');
-        this.setClassOnChars(original, 'selected');
-        this.setBordersForSelectedElements();
-        this.annotations.splice(this.annotations.indexOf(selected), 1);
-        if (selected.status === enAnnotationStatus.NEW) {
-          for (let i = selected.start; i < selected.end; i++) {
-            if (this.chars[i].annotations.indexOf(selected) > 0) {
-              this.chars[i].annotations.splice(this.chars[i].annotations.indexOf(selected), 1);
-            }
-          }
-        }
-      } else {
-        selected.status = enAnnotationStatus.DELETED;
-        this.setClassOnChars(selected);
-        this.selectNextAnnotation();
-      }
+      document.querySelectorAll('.selected').forEach(e => { e.style = ''; });
+      this.setClassOnChars(selected, '');
+      const index = this.annotations.indexOf(selected);
+      this.selectNextAnnotation();
+      this.annotations.splice(index, 1);
+      this.setDocumentDirty();
     },
     /**
      * fügt die per Maus hinzugefügte Annotation zur Liste hinzu
@@ -417,9 +417,8 @@ export default {
      */
     addNewAnnotation() {
       const selected = Object.assign({}, this.newAnnotation);
-      const prevAnnotations = this.annotations.filter(f => f.start < selected.start);
-      prevAnnotations.sort((a, b) => a.start > b.start ? 1 : -1);
-      this.annotations.splice(this.annotations.indexOf(prevAnnotations[prevAnnotations.length - 1]) + 1, 0, selected);
+      this.annotations.push(selected);
+      this.annotations = this.annotations.sort((a, b) => a.start > b.start ? 1 : -1)
       this.newAnnotation = null;
       for (let i = selected.start; i < selected.end; i++) {
         this.chars[i].annotations.push(selected);
@@ -481,6 +480,7 @@ export default {
           this.setClassNameOnChars(selected.end, index, '');
         }
       }
+      this.setDocumentDirty();
     },
     /**
      * Einem Char-Objekt eine Annotation (oder null) zuweisen (bei ändern/erweitern/reduzieren der Annotation)
@@ -523,7 +523,6 @@ export default {
      * @param key Tastaturtaste
      */
     setAnnotationType(key) {
-      const selectNextAnnotation = !this.newAnnotation;
       const selected = this.newAnnotation ? this.addNewAnnotation() : this.annotations.find(e => e.selected);
       if (!selected) {
         return;
@@ -541,9 +540,8 @@ export default {
       this.setTimeStamp(selected);
 
       this.setBordersForSelectedElements();
-      if (selectNextAnnotation) {
-        this.selectNextAnnotation();
-      }
+      this.selectNextAnnotation();
+      this.setDocumentDirty();
     },
     /**
      * nächste Annotation auswählen
@@ -552,7 +550,9 @@ export default {
     selectNextAnnotation(back = false, specificindex = null) {
       this.unsetNewAnnotation();
       let index = 0;
-      const activeAnnotations = this.annotations.filter(e => e.status !== enAnnotationStatus.REPLACED);
+      const activeAnnotations = this.annotations
+          .filter(e => e.status !== enAnnotationStatus.REPLACED)
+          .sort((a, b) => a.start > b.start ? 1 : -1);
       const selected = activeAnnotations.find(e => e.selected);
       if (selected) {
         index = activeAnnotations.indexOf(selected) + (back ? -1 : 1);
@@ -712,6 +712,9 @@ export default {
         span.innerHTML = c.char === ' ' || c.char === '\n' ? '&nbsp;' : c.char;
         annotationContainer.append(span);
       });
+    },
+    setDocumentDirty() {
+      AnnotationService.DirtyChanges.next(true);
     }
   },
   /**

@@ -41,7 +41,7 @@ import {AnnotationType} from '@/models/annotation-type';
     <li
         class="marked types click addtype"
         :class="['type_' + annotationTypes.length]"
-        v-if="annotationTypes.length <= keyList.length"
+        v-if="annotationTypes.length <= keyList.length && showAllMenus"
     >
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
@@ -54,8 +54,9 @@ import {AnnotationType} from '@/models/annotation-type';
   <h2 v-locale="'keyboardlegend-title'"
       @click="toggleCollapse(keyboardlegendCollapsed)"
       :class="keyboardlegendCollapsed.value ? 'collapsed' : ''"
+      v-if="showAllMenus"
   ></h2>
-  <ul v-if="keyboardlegendCollapsed.value === false">
+  <ul v-if="keyboardlegendCollapsed.value === false && showAllMenus">
     <li class="marked type_x click" @click="simulateKey('Enter')">
       <span class="fa-stack fa-1x">
         <i class="fa-solid fa-square fa-stack-2x"></i>
@@ -152,8 +153,9 @@ import {AnnotationType} from '@/models/annotation-type';
   <h2 v-locale="'mouselegend-title'"
       @click="toggleCollapse(mouselegendCollapsed)"
       :class="mouselegendCollapsed.value ? 'collapsed' : ''"
+      v-if="showAllMenus"
   ></h2>
-  <ul v-if="mouselegendCollapsed.value === false">
+  <ul v-if="mouselegendCollapsed.value === false && showAllMenus">
     <li class="marked type_x" v-locale="'mouselegend-click'"></li>
     <li class="marked type_x" v-locale="'mouselegend-drag'"></li>
     <li class="marked type_x" v-locale="'mouselegend-dblclick'"></li>
@@ -176,12 +178,23 @@ export default {
       annotationTypesCollapsed: {key: 'annotationTypesCollapsed', value: false},
       keyboardlegendCollapsed: {key: 'keyboardlegendCollapsed', value: false},
       mouselegendCollapsed: {key: 'mouselegendCollapsed', value: false},
+      showAllMenus: true
     }
   },
   /**
    * Click-Event nach oben propagieren
    */
   emits: ['clicker'],
+  computed: {
+    currentRouteName() {
+      return this.$route.name
+    }
+  },
+  watch:{
+    $route (){
+      this.showAllMenus = this.currentRouteName === 'annotation';
+    }
+  },
   methods: {
     /**
      * Initialisiert alle Daten vom Service
@@ -257,6 +270,8 @@ export default {
     AnnotationService.Changes.subscribe(() => {
       this.init();
     });
+
+    this.showAllMenus = this.currentRouteName === 'annotation';
   }
 }
 </script>

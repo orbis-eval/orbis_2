@@ -12,6 +12,8 @@ export class AnnotationService {
     static Annotations: Annotation[] = [];
     static AnnotationTypes: AnnotationType[] = [];
     static TypeKeyList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 'q', 'w', 'e', 'r', 't', 'z', 'u', 'i', 'o', 'p'];
+    static IsDirty = false;
+    public static DirtyChanges = new Subject();
     public static Changes = new Subject();
 
     static GetTypeByKey(key: string): AnnotationType|null {
@@ -144,10 +146,12 @@ export class AnnotationService {
             body: JSON.stringify(requestBody)
         })
             .then(response => {
+                this.IsDirty = false;
                 return next ? window.location.reload() : response.json();
             })
             .catch(error => {
                 console.error(error);
+                alert('Speichern fehlgeschlagen: ' + error);
             });
     }
 

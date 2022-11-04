@@ -129,3 +129,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ignore local files when frontend will builded locally and copied to scripts folder
+/scripts/index.html
+/scripts/favicon.ico
+/scripts/assets/
+/scripts/fontawesome/
+/src/frontend/dist/

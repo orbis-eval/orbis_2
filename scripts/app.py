@@ -44,6 +44,11 @@ def corpora():
     return FileResponse('index.html')
 
 
+@app.get('/corpora/{rest_of_path:path}', response_class=FileResponse)
+def corpusdetails():
+    return FileResponse('index.html')
+
+
 @app.get('/documents', response_class=FileResponse)
 def documents():
     return FileResponse('index.html')
@@ -70,7 +75,8 @@ async def add_document_to_annotation_queue(da_id: str):
 @app.get('/getDocumentForAnnotation', response_model=ResponseModel)
 async def get_document_for_annotation(corpus_name=None, annotator=None):
     print(f'get_document_for_annotation with corpus "{corpus_name}" and annotator "{annotator}"')
-
+    # nsu: needed if annotation queue is filled directly into mongo-db
+    await annotator_queue.load_queue_from_db()
     if da_id := await annotator_queue.get_id_for_annotation(corpus_name, annotator):
         return await get_document(da_id)
     else:
@@ -156,8 +162,8 @@ async def save_document_annotations(data: DataExchangeModel):
 @app.post('/addDocument', response_model=ResponseModel)
 async def add_document(document: DocumentPostModel):
     document = document.dict()
-    corporas = await db.get_corporas()
-    if not document['corpus_name'] in corporas:
+    
+    if not document['corpus_name'] in await db.get_corpora():
         corpus_id = await db.create_corpus(corpus_name=document['corpus_name'],
                                            description=f'Generated description for corpus {document["corpus_name"]}')
     d_id, da_id, annotation_id, document_exists = await db.add_document(**document)
@@ -221,4 +227,4 @@ def get_app():
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=5000)
+    uvicorn.run(app, host='127.0.0.1', port=63010)

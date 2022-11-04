@@ -40,7 +40,7 @@ async def test_create_corpus_already_existing():
     await db.create_corpus('test', 'text corpus')
     await db.create_corpus('test', 'text corpus')
 
-    corpora = await db.get_corporas()
+    corpora = await db.get_corpora()
 
     assert len(corpora) == 1
-    assert corpora[0]['corpus_name'] == 'test'
+    assert corpora[0] == 'test'
