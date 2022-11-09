@@ -33,7 +33,8 @@ class DB:
         self.__db = self.__client[self.__db_name]
         try:
             await self.__db['corpus'].create_index('corpus_name', unique=True)
-            await self.__db['document'].create_index([('id', pymongo.ASCENDING), ('corpus_name', pymongo.ASCENDING)], unique=True)
+            await self.__db['document'].create_index([('id', pymongo.ASCENDING),
+            ('corpus_name', pymongo.ASCENDING)], unique=True)
         except DuplicateKeyError:
             print('Collection already exist.')
 
