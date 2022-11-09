@@ -167,7 +167,7 @@ async def save_document_annotations(data: DataExchangeModel):
 @app.post('/addDocument', response_model=ResponseModel)
 async def add_document(document: DocumentPostModel):
     document = document.dict()
-    
+
     if not document['corpus_name'] in await db.get_corpora():
         corpus_id = await db.create_corpus(corpus_name=document['corpus_name'],
                                            description=f'Generated description for corpus {document["corpus_name"]}')
