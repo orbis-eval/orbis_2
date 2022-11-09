@@ -43,14 +43,16 @@ def home():
 def corpora():
     return FileResponse('index.html')
 
-
 @app.get('/corpora/{rest_of_path:path}', response_class=FileResponse)
 def corpusdetails():
     return FileResponse('index.html')
 
-
 @app.get('/documents', response_class=FileResponse)
 def documents():
+    return FileResponse('index.html')
+
+@app.get('/documents/{rest_of_path:path}', response_class=FileResponse)
+def documentsdetails():
     return FileResponse('index.html')
 
 
