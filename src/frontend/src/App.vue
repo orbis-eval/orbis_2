@@ -156,12 +156,12 @@ export default {
       window.location.reload();
     },
     toggle() {
-      if (appElement?.classList.contains('light-mode')) {
-        appElement?.classList.remove('light-mode');
-        appElement?.classList.add('dark-mode');
-      } else {
+      if (appElement?.classList.contains('dark-mode')) {
         appElement?.classList.add('light-mode');
         appElement?.classList.remove('dark-mode');
+      } else {
+        appElement?.classList.remove('light-mode');
+        appElement?.classList.add('dark-mode');
       }
       localStorage.setItem('screen-mode', appElement?.classList.contains('light-mode') ? 'light' : 'dark');
     },
