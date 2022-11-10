@@ -19,6 +19,7 @@
 
 <script>
 import { DocumentService } from "@/services/Document.service";
+import {LoadingSpinnerService} from "@/services/LoadingSpinner.service";
 
 export default {
   data() {
@@ -28,12 +29,16 @@ export default {
     }
   },
   mounted() {
+    const loadingSpinnerID = LoadingSpinnerService.Show();
     DocumentService.getCorpora().then((data) => {
       if (data.status_code === 200) {
         this.corpora = data.content.corpora;
       } else {
         this.error = data.message;
       }
+      LoadingSpinnerService.Close(loadingSpinnerID);
+    }).catch(() => {
+      LoadingSpinnerService.Close(loadingSpinnerID);
     });
   }
 }

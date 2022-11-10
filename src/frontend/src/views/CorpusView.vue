@@ -51,6 +51,7 @@ p {
 
 <script>
 import { DocumentService } from "@/services/Document.service";
+import {LoadingSpinnerService} from "@/services/LoadingSpinner.service";
 
 export default {
   data() {
@@ -61,6 +62,7 @@ export default {
     }
   },
   mounted() {
+    const loadingSpinnerID = LoadingSpinnerService.Show();
     DocumentService.getDocuments(this.$route.params.corpus_name).then((data) => {
       if (data.status_code === 200) {
         this.message = data.message;
@@ -70,6 +72,9 @@ export default {
       } else {
         this.error = data.message;
       }
+      LoadingSpinnerService.Close(loadingSpinnerID);
+    }).catch(() => {
+      LoadingSpinnerService.Close(loadingSpinnerID);
     });
   }
 }

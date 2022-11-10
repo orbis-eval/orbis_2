@@ -2,9 +2,9 @@ import {Annotation, enAnnotationStatus} from '@/models/annotation';
 import {AnnotationType} from '@/models/annotation-type';
 import {SettingsService} from '@/services/Settings.service';
 import {Subject} from 'rxjs';
+import {LoadingSpinnerService} from '@/services/LoadingSpinner.service';
 
 export class AnnotationService {
-    private static _spinner = document.getElementById('loading_spinner');
     static Document = '';
     static DocumentId = '';
     static DocumentMeta: any = {};
@@ -44,15 +44,15 @@ export class AnnotationService {
         this.Annotations = [];
         this.AnnotationTypes = [];
 
-        this._showLoadingSpinner();
+        const loadingSpinnerID = LoadingSpinnerService.Show();
 
         return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocumentForAnnotation?corpus_name=${SettingsService.CorpusName}&annotator=${SettingsService.Annotator}`)
             .then(response => {
                 return response.json();
             })
-            .then(this._handleGetResponse)
+            .then((data) => { this._handleGetResponse(data, loadingSpinnerID); })
             .catch(error => {
-                this._hideLoadingSpinner();
+                LoadingSpinnerService.Close(loadingSpinnerID);
                 console.error(error);
             });
     }
@@ -64,20 +64,20 @@ export class AnnotationService {
         this.Annotations = [];
         this.AnnotationTypes = [];
 
-        this._showLoadingSpinner();
+        const loadingSpinnerID = LoadingSpinnerService.Show();
 
         return fetch(`${import.meta.env.DEV ? 'http://localhost:63010/' : '/'}getDocument?da_id=${da_id}`)
             .then(response => {
                 return response.json();
             })
-            .then(this._handleGetResponse)
+            .then((data) => { this._handleGetResponse(data, loadingSpinnerID); })
             .catch(error => {
-                this._hideLoadingSpinner();
+                LoadingSpinnerService.Close(loadingSpinnerID);
                 console.error(error);
             });
     }
 
-    private static _handleGetResponse(data: any) {
+    private static _handleGetResponse(data: any, loadingSpinnerID: string) {
         if (data.status_code !== 200) {
             alert(data.message);
             return;
@@ -101,7 +101,7 @@ export class AnnotationService {
 
         SettingsService.SetCorpusName(data.content.corpus_name);
         SettingsService.SetDocumentId(data.content.da_id);
-        AnnotationService._hideLoadingSpinner();
+        LoadingSpinnerService.Close(loadingSpinnerID);
         AnnotationService.changes();
         AnnotationService.DocumentLoadTimeStamp = new Date().getTime();
 
@@ -167,24 +167,5 @@ export class AnnotationService {
     static AddAnnotationType(annotationType: AnnotationType) {
         this.AnnotationTypes.push(annotationType);
         this.changes();
-    }
-
-    private static _showLoadingSpinner() {
-        if (!AnnotationService._spinner) {
-            AnnotationService._spinner = document.getElementById('loading_spinner');
-        }
-        setTimeout(() => { AnnotationService._spinner?.classList.add('active'); });
-    }
-
-    private static _hideLoadingSpinner() {
-        setTimeout(() => {
-            AnnotationService._spinner?.classList.remove('active');
-        }, 100);
-    }
-
-    static HideLoadingSpinner() {
-        setTimeout(() => {
-            AnnotationService._spinner?.classList.remove('active');
-        }, 100);
     }
 }
